@@ -1,8 +1,10 @@
 package org.valkyrapp.api.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import org.valkyrapp.api.dto.UserDTO;
 import org.valkyrapp.api.exception.InvalidCredentialsException;
 import org.valkyrapp.api.exception.ResourceNotFoundException;
@@ -27,6 +29,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDTO saveUser(UserDTO userDTO){
+        if (userRepository.existsByUsername(userDTO.getUsername())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario ya esta en uso");
+        }
+        if (userRepository.existsByEmail(userDTO.getEmail())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El correo ya esta en uso");
+        }
         User user = UserMapper.convertToEntity(userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User savedUser = userRepository.save(user);

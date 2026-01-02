@@ -3,7 +3,6 @@ package org.valkyrapp.api.mapper;
 import org.springframework.stereotype.Component;
 import org.valkyrapp.api.dto.UserDTO;
 import org.valkyrapp.api.model.User;
-
 import java.time.LocalDateTime;
 
 @Component
