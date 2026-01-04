@@ -1,8 +1,10 @@
 package org.valkyrapp.api.usuario;
 
 import org.springframework.stereotype.Component;
+import org.valkyrapp.api.rutina.Routine;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class UserMapper {
@@ -12,6 +14,7 @@ public class UserMapper {
     private String password;
     private String fullName;
     private LocalDateTime createdAt;
+    private List<Routine> routines;
 
     public static UserDTO convertToDTO(User user){
         if(user == null) return null;
@@ -22,6 +25,7 @@ public class UserMapper {
                 .password(null)
                 .fullName(user.getFullName())
                 .createdAt(user.getCreatedAt())
+                .routines(user.getRoutines())
                 .build();
     }
 
@@ -33,6 +37,7 @@ public class UserMapper {
                 .email(userdto.getEmail())
                 .password(userdto.getPassword())
                 .fullName(userdto.getFullName())
+                .routines(userdto.getRoutines())
                 .build();
     }
 }
