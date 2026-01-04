@@ -1,16 +1,12 @@
-package org.valkyrapp.api.service;
+package org.valkyrapp.api.usuario;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.valkyrapp.api.dto.UserDTO;
 import org.valkyrapp.api.exception.InvalidCredentialsException;
 import org.valkyrapp.api.exception.ResourceNotFoundException;
-import org.valkyrapp.api.mapper.UserMapper;
-import org.valkyrapp.api.model.User;
-import org.valkyrapp.api.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;

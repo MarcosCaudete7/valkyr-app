@@ -1,1 +1,32 @@
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+}
 
+.register-card {
+    background: var(--ion-color-step-50, #272727);
+    border-radius: 16px;
+    padding: 30px 24px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 24px;
+}
+
+.auth-link {
+    color: var(--ion-color-primary);
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 5px;
+    user-select: none;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}

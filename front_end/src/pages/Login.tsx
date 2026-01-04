@@ -1,33 +1,31 @@
 import React, { useState } from 'react';
 import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
-    IonInput, IonItem, IonLabel, IonButton, IonToast, IonLoading
+    IonInput, IonButton, IonToast, IonLoading, IonIcon
 } from '@ionic/react';
 import { authService } from '../services/api';
 import { useHistory } from 'react-router-dom';
+import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
+import './Login.css';
 
 const Login: React.FC = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [credentials, setCredentials] = useState({ username: '', password: '' });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const history = useHistory();
 
     const handleLogin = async () => {
-        if (!username || !password) {
+        if (!credentials.username || !credentials.password) {
             setErrorMsg('Por favor, rellena todos los campos');
             return;
         }
 
         setLoading(true);
         try {
-            const response = await authService.login({ username, password });
-
-            console.log('Login exitoso:', response.data);
-
+            const response = await authService.login(credentials);
             localStorage.setItem('user', JSON.stringify(response.data));
-
-            history.push('/tab1');
+            history.push('/tabs/tab1');
         } catch (error: any) {
             const message = error.response?.status === 401
                 ? 'Credenciales inválidas'
@@ -38,15 +36,6 @@ const Login: React.FC = () => {
         }
     };
 
-    const [formData, setFormData] = useState({
-        username: '',
-        email: '',
-        fullName: '',
-        password: '',
-        confirmPassword: ''
-    });
-
-
     return (
         <IonPage>
             <IonHeader>
@@ -54,34 +43,64 @@ const Login: React.FC = () => {
                     <IonTitle>Valkyr Login</IonTitle>
                 </IonToolbar>
             </IonHeader>
-            <IonContent className="ion-padding">
-                <IonItem>
-                    <IonLabel position="floating">Usuario</IonLabel>
-                    <IonInput
-                        value={username}
-                        onIonChange={e => setUsername(e.detail.value!)}
-                    />
-                </IonItem>
+            <IonContent className="ion-padding register-content">
+                <div className="flex-center">
+                    <div className="register-card">
+                        <div className="register-header">
+                            <h2>Bienvenido</h2>
+                            <p>Inicia sesión para continuar en Valkyr</p>
+                        </div>
 
-                <IonItem>
-                    <IonLabel position="floating">Contraseña</IonLabel>
-                    <IonInput
-                        type="password"
-                        value={password}
-                        onIonChange={e => setPassword(e.detail.value!)}
-                    />
-                </IonItem>
+                        <div className="register-container">
+                            {/* Usuario */}
+                            <div className="input-group">
+                                <IonInput
+                                    label="Nombre de Usuario"
+                                    labelPlacement="floating"
+                                    fill="outline"
+                                    value={credentials.username}
+                                    onIonInput={e => setCredentials({ ...credentials, username: e.detail.value! })}
+                                />
+                            </div>
 
-                <IonButton shape="round" onClick={handleLogin} className="ion-margin-top">
-                    Entrar
-                </IonButton>
+                            {/* Contraseña */}
+                            <div className="input-group">
+                                <div className="input-row">
+                                    <IonInput
+                                        label="Contraseña"
+                                        labelPlacement="floating"
+                                        fill="outline"
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={credentials.password}
+                                        onIonInput={e => setCredentials({ ...credentials, password: e.detail.value! })}
+                                    />
+                                    <IonButton
+                                        fill="clear"
+                                        onClick={(e) => { e.preventDefault(); setShowPassword(!showPassword); }}
+                                        className="eye-button-overlay"
+                                    >
+                                        <IonIcon slot="icon-only" icon={showPassword ? eyeOffOutline : eyeOutline} />
+                                    </IonButton>
+                                </div>
+                            </div>
 
-                <IonButton fill="clear" onClick={() => history.push('/register')}>
-                    ¿No tienes cuenta? Regístrate
-                </IonButton>
+                            <IonButton expand="block" onClick={handleLogin} className="submit-button">
+                                ENTRAR
+                            </IonButton>
+
+                            <div className="auth-footer">
+                                <p>
+                                    ¿No tienes cuenta?
+                                    <span className="auth-link" onClick={() => history.push('/register')}>
+                                        Regístrate
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <IonLoading isOpen={loading} message={'Autenticando...'} />
-
                 <IonToast
                     isOpen={!!errorMsg}
                     message={errorMsg}

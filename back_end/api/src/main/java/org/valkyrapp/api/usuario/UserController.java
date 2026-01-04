@@ -1,11 +1,7 @@
-package org.valkyrapp.api.controller;
+package org.valkyrapp.api.usuario;
 
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.valkyrapp.api.dto.UserDTO;
-import org.valkyrapp.api.service.UserService;
 
 import java.util.List;
 

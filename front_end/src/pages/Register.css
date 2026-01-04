@@ -131,8 +131,6 @@ ion-input.ion-valid.ion-touched {
     border: 2px solid transparent;
     border-radius: 10px;
     background-origin: border-box;
-
-
 }
 
 .register-header {
@@ -177,4 +175,32 @@ ion-input.ion-valid.ion-touched {
     --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
     font-weight: 600;
     height: 48px;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-bottom: 10px;
+}
+
+.auth-footer p {
+    font-size: 14px;
+    color: var(--ion-color-medium);
+}
+
+.auth-link {
+    color: var(--ion-color-primary);
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+.auth-link {
+    user-select: none;
 }

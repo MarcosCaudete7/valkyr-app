@@ -1,12 +1,12 @@
-package org.valkyrapp.api.controller;
+package org.valkyrapp.api.auth.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.valkyrapp.api.dto.UserDTO;
-import org.valkyrapp.api.repository.*;
-import org.valkyrapp.api.service.UserService;
+import org.valkyrapp.api.usuario.UserDTO;
+import org.valkyrapp.api.usuario.UserService;
+import org.valkyrapp.api.usuario.UserRepository;
 
 @RestController
 @RequestMapping("/api/auth")

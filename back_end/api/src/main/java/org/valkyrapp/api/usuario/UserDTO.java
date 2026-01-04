@@ -1,4 +1,4 @@
-package org.valkyrapp.api.dto;
+package org.valkyrapp.api.usuario;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

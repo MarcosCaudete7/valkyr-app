@@ -1,8 +1,8 @@
-package org.valkyrapp.api.repository;
+package org.valkyrapp.api.usuario;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.valkyrapp.api.model.User;
+
 import java.util.Optional;
 
 @Repository

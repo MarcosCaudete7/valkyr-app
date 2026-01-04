@@ -1,4 +1,4 @@
-package org.valkyrapp.api.model;
+package org.valkyrapp.api.usuario;
 
 import jakarta.persistence.*;
 import lombok.*;

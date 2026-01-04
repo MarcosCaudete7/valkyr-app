@@ -133,15 +133,19 @@ const Register: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding register-content">
-                <div className="flex-center"> {/* Contenedor para centrar la tarjeta */}
+
+                <div className="flex-center">
+
+
                     <div className="register-card">
+
                         <div className="register-header">
                             <h2>Crea tu cuenta</h2>
                             <p>Únete a la comunidad de Valkyr</p>
                         </div>
 
                         <div className="register-container">
-                            {/* Nombre Completo */}
+
                             <div className="input-group">
                                 <IonInput
                                     label="Nombre Completo"
@@ -152,16 +156,16 @@ const Register: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Nombre de Usuario */}
+
                             <div className="input-group">
                                 <IonInput
                                     label="Nombre de Usuario"
                                     labelPlacement="floating"
                                     fill="outline"
                                     className={`
-                            ${serverErrors.username ? 'ion-invalid ion-touched' : ''} 
-                            ${formData.username.length >= 3 && !serverErrors.username && !isValidating ? 'ion-valid ion-touched' : ''}
-                        `}
+                                        ${serverErrors.username ? 'ion-invalid ion-touched' : ''} 
+                                        ${formData.username.length >= 3 && !serverErrors.username && !isValidating ? 'ion-valid ion-touched' : ''}
+                                    `}
                                     value={formData.username}
                                     onIonInput={e => {
                                         const val = e.detail.value!;
@@ -172,7 +176,6 @@ const Register: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Email */}
                             <div className="input-group">
                                 <IonInput
                                     label="Email"
@@ -180,9 +183,9 @@ const Register: React.FC = () => {
                                     fill="outline"
                                     type="email"
                                     className={`
-                            ${serverErrors.email ? 'ion-invalid ion-touched' : ''} 
-                            ${formData.email && validateEmail(formData.email) && !serverErrors.email ? 'ion-valid ion-touched' : ''}
-                        `}
+                                        ${serverErrors.email ? 'ion-invalid ion-touched' : ''} 
+                                        ${formData.email && validateEmail(formData.email) && !serverErrors.email ? 'ion-valid ion-touched' : ''}
+                                    `}
                                     value={formData.email}
                                     onIonInput={e => {
                                         const val = e.detail.value!;
@@ -193,7 +196,6 @@ const Register: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Contraseña */}
                             <div className="input-group">
                                 <div className="input-row">
                                     <IonInput
@@ -202,6 +204,7 @@ const Register: React.FC = () => {
                                         fill="outline"
                                         type={showPassword ? 'text' : 'password'}
                                         value={formData.password}
+                                        className={formData.password.length >= 8 ? 'ion-valid ion-touched' : formData.password.length > 0 ? 'ion-invalid ion-touched' : ''}
                                         onIonInput={e => setFormData({ ...formData, password: e.detail.value! })}
                                     />
                                     <IonButton
@@ -230,7 +233,6 @@ const Register: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* Confirmar Contraseña */}
                             <div className="input-group">
                                 <div className="input-row">
                                     <IonInput
@@ -240,9 +242,9 @@ const Register: React.FC = () => {
                                         type={showConfirmPassword ? 'text' : 'password'}
                                         value={formData.confirmPassword}
                                         className={`
-                                ${formData.confirmPassword && formData.confirmPassword !== formData.password ? 'ion-invalid ion-touched' : ''}
-                                ${formData.confirmPassword && formData.confirmPassword === formData.password ? 'ion-valid ion-touched' : ''}
-                            `}
+                                            ${formData.confirmPassword && formData.confirmPassword !== formData.password ? 'ion-invalid ion-touched' : ''}
+                                            ${formData.confirmPassword && formData.confirmPassword === formData.password ? 'ion-valid ion-touched' : ''}
+                                        `}
                                         onIonInput={e => setFormData({ ...formData, confirmPassword: e.detail.value! })}
                                     />
                                     <IonButton
@@ -254,21 +256,38 @@ const Register: React.FC = () => {
                                     </IonButton>
                                 </div>
                                 {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                                    <span className="error-message-micro">Las contraseñas no coinciden</span>
+                                    <span className="error-message-small">Las contraseñas no coinciden</span>
                                 )}
                             </div>
 
                             <IonButton
                                 expand="block"
                                 onClick={handleRegister}
-                                className="submit-button"
+                                className="submit-button ion-margin-top"
                                 disabled={isValidating || (formData.confirmPassword !== formData.password) || formData.password.length < 8}
                             >
-                                {isValidating ? 'Comprobando...' : 'REGISTRARSE'}
+                                {isValidating ? 'Comprobando...' : 'Registrarse'}
                             </IonButton>
+
+                            <div className="auth-footer">
+                                <p>
+                                    ¿Ya tienes una cuenta?
+                                    <span className="auth-link" onClick={() => history.push('/login')}>
+                                        Inicia sesión
+                                    </span>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <IonToast
+                    isOpen={!!errorMsg}
+                    message={errorMsg}
+                    duration={3000}
+                    onDidDismiss={() => setErrorMsg('')}
+                    color={errorMsg.includes('exitoso') ? 'success' : 'danger'}
+                />
             </IonContent>
         </IonPage>
     );
