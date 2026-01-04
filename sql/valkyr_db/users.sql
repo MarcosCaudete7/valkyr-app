@@ -1,4 +1,7 @@
-create table valkyr_db.users
+create schema valkyr_db;
+use valkyr_db;
+
+create table users
 (
     id         bigint auto_increment
         primary key,

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.valkyrapp.api.rutina.Routine;
+//import org.valkyrapp.api.rutina.Routine;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,5 +31,5 @@ public class UserDTO {
 
     private LocalDateTime createdAt;
 
-    private List<Routine> routines;
+//    private List<Routine> routines;
 }

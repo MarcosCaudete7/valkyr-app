@@ -30,4 +30,9 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/test-auth")
+    public ResponseEntity<?> testAuth() {
+        return ResponseEntity.ok("Si lees esto, el JWT funciona y estás autenticado");
+    }
 }
