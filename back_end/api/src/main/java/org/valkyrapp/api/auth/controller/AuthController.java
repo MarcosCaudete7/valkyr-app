@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.valkyrapp.api.config.JwtProvider;
 import org.valkyrapp.api.usuario.UserDTO;
 import org.valkyrapp.api.usuario.UserService;
+import org.valkyrapp.api.usuario.UserServiceImpl;
 import org.valkyrapp.api.usuario.UserRepository;
 
 import java.util.HashMap;

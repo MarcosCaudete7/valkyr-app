@@ -1,5 +1,6 @@
 package org.valkyrapp.api.usuario;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -78,7 +79,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
+    public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException{
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado" + username));
 
@@ -88,5 +89,21 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .authorities("USER")
                 .build();
 
+    }
+
+    @Override
+    public UserDTO register(UserDTO userDto) {
+        if (userRepository.existsByUsername(userDto.getUsername())) {
+            throw new RuntimeException("Error: El nombre de usuario ya existe.");
+        }
+        if (userRepository.existsByEmail(userDto.getEmail())) {
+            throw new RuntimeException("Error: El email ya está registrado.");
+        }
+        User user = new User();
+        user.setUsername(userDto.getUsername());
+        user.setEmail(userDto.getEmail());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        User savedUser = userRepository.save(user);
+        return new UserDTO(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getFullName());
     }
 }

@@ -14,6 +14,12 @@ import java.util.List;
 @Builder
 @Data
 public class UserDTO {
+    public UserDTO(Long id, String username, String email, String fullName) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.fullName = fullName;
+    }
 
     private Long id;
 

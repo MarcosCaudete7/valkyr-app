@@ -13,4 +13,6 @@ public interface UserService {
 
     @Transactional(readOnly = true)
     UserDTO login(String username, String rawPassword);
+    @Transactional(readOnly = true)
+    UserDTO register(UserDTO userDTO);
 }
