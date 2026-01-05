@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Entity
+@Table(name = "exercise_tracker")
 public class ExerciseTracker {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

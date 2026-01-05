@@ -35,7 +35,7 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "routine",
+    @OneToMany(mappedBy = "user",
         fetch = FetchType.EAGER,
         cascade = CascadeType.ALL,
             orphanRemoval = true)
