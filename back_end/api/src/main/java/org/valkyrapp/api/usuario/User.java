@@ -2,7 +2,7 @@ package org.valkyrapp.api.usuario;
 
 import jakarta.persistence.*;
 import lombok.*;
-//import org.valkyrapp.api.rutina.Routine;
+import org.valkyrapp.api.rutina.Routine;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,12 +35,12 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-//    @OneToMany(mappedBy = "routine",
-//        fetch = FetchType.EAGER,
-//        cascade = CascadeType.ALL,
-//            orphanRemoval = true)
-//
-////    private List<Routine> routines=new ArrayList<>();
+    @OneToMany(mappedBy = "routine",
+        fetch = FetchType.EAGER,
+        cascade = CascadeType.ALL,
+            orphanRemoval = true)
+
+    private List<Routine> routines=new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
