@@ -1,4 +1,4 @@
-package org.valkyrapp.api.rutina;
+package org.valkyrapp.api.routine;
 
 public enum Muscles {
     LEG,

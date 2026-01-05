@@ -1,6 +1,5 @@
-package org.valkyrapp.api.rutina;
+package org.valkyrapp.api.routine;
 import lombok.*;
-import org.valkyrapp.api.rutina.Routine;
 import org.valkyrapp.api.usuario.User;
 
 import java.time.LocalDateTime;
@@ -25,6 +24,8 @@ public class RoutineDTO {
 
     private Set<Muscles> muscles;
 
-    private User user;
+    private List<ExerciseTrackerDTO> exercises;
+
+    private String creatorName;
 
 }

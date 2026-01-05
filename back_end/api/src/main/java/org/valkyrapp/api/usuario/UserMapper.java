@@ -1,7 +1,7 @@
 package org.valkyrapp.api.usuario;
 
 import org.springframework.stereotype.Component;
-import org.valkyrapp.api.rutina.Routine;
+import org.valkyrapp.api.routine.Routine;
 
 import java.time.LocalDateTime;
 import java.util.List;

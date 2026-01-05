@@ -2,7 +2,7 @@ package org.valkyrapp.api.usuario;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.valkyrapp.api.rutina.Routine;
+import org.valkyrapp.api.routine.Routine;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

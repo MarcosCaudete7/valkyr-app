@@ -1,10 +1,11 @@
-package org.valkyrapp.api.rutina;
+package org.valkyrapp.api.routine;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.valkyrapp.api.usuario.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -31,9 +32,13 @@ public class Routine {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @ElementCollection(targetClass = Muscles.class)
+    @CollectionTable(name = "routine_muscles", joinColumns = @JoinColumn(name = "routine_id"))
     @Enumerated(EnumType.STRING)
-    @Column (name = "routine", nullable = false)
     private Set<Muscles> muscles;
+
+    @OneToMany(mappedBy = "routine", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExerciseTracker> exercises;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
