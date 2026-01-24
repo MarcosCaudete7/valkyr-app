@@ -1,13 +1,16 @@
 package org.valkyrapp.api.auth.controller;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.http.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.valkyrapp.api.config.JwtProvider;
 import org.valkyrapp.api.usuario.UserDTO;
 import org.valkyrapp.api.usuario.UserService;
-import org.valkyrapp.api.usuario.UserServiceImpl;
 import org.valkyrapp.api.usuario.UserRepository;
 
 import java.util.HashMap;
@@ -22,8 +25,12 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private JwtProvider jwtProvider;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @PostMapping("/register")
     public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody UserDTO userDTO){
@@ -32,10 +39,19 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO loginDTO) {
-        String token = jwtProvider.generateToken(loginDTO.getUsername());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginDTO.getUsername(),
+                        loginDTO.getPassword()
+                )
+        );
+
+        String token = jwtProvider.generateToken(authentication.getName());
+
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
-        response.put("username", loginDTO.getUsername());
+        response.put("username", authentication.getName());
+
         return ResponseEntity.ok(response);
     }
 
@@ -46,7 +62,6 @@ public class AuthController {
 
     @GetMapping("/check-email")
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
-        boolean exists = userRepository.existsByEmail(email);
-        return ResponseEntity.ok(!exists);
+        return ResponseEntity.ok(!userRepository.existsByEmail(email));
     }
 }

@@ -6,31 +6,25 @@ import org.valkyrapp.api.usuario.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class RoutineMapper {
-    private Long id;
-    private String name;
-    private String description;
-    private boolean isPublic;
-    private LocalDateTime createdAt;
-    private Set<Muscles> muscles;
-    private User user;
 
     public static RoutineDTO convertToDTO(Routine routine) {
         if (routine == null) return null;
-        List<ExerciseTrackerDTO> exerciseDTO = routine.getExercises() != null ?
+
+        List<ExerciseTrackerDTO> exerciseDTOs = routine.getExercises() != null ?
                 routine.getExercises().stream()
-                        .map(exercise -> ExerciseTrackerDTO.builder()
-                                .id(exercise.getId())
-                                .name(exercise.getName())
-                                .series(exercise.getSeries())
-                                .reps(exercise.getReps())
-                                .weight(exercise.getWeight())
-                                .isCompleted(exercise.getIsCompleted())
-                                .build()
-                        )
-                        .toList() : null;
+                        .map(ex -> ExerciseTrackerDTO.builder()
+                                .id(ex.getId())
+                                .name(ex.getName())
+                                .series(ex.getSeries())
+                                .reps(ex.getReps())
+                                .weight(ex.getWeight())
+                                .isCompleted(ex.getIsCompleted())
+                                .build())
+                        .toList() : List.of();
 
         return RoutineDTO.builder()
                 .id(routine.getId())
@@ -39,20 +33,36 @@ public class RoutineMapper {
                 .isPublic(routine.isPublic())
                 .createdAt(routine.getCreatedAt())
                 .muscles(routine.getMuscles())
-                .exercises(exerciseDTO)
-                .creatorName(routine.getUser() != null ? routine.getUser().getUsername(): null)
+                .exercises(exerciseDTOs)
+                .creatorName(routine.getUser() != null ? routine.getUser().getUsername() : null)
+                .build();
+    }
+
+    public static Routine convertToEntity(RoutineDTO dto) {
+        if (dto == null) return null;
+
+        Routine routine = Routine.builder()
+                .id(dto.getId())
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .isPublic(dto.isPublic())
+                .muscles(dto.getMuscles())
                 .build();
 
-    }
-    public static Routine convertToEntity(RoutineDTO routineDTO) {
-        if (routineDTO == null) return null;
-        return Routine.builder()
-                .id(routineDTO.getId())
-                .name(routineDTO.getName())
-                .description(routineDTO.getDescription())
-                .isPublic(routineDTO.isPublic())
-                .createdAt(routineDTO.getCreatedAt())
-                .muscles(routineDTO.getMuscles())
-                .build();
+        if (dto.getExercises() != null) {
+            List<ExerciseTracker> exercises = dto.getExercises().stream()
+                    .map(exDto -> ExerciseTracker.builder()
+                            .id(exDto.getId())
+                            .name(exDto.getName())
+                            .series(exDto.getSeries())
+                            .reps(exDto.getReps())
+                            .weight(exDto.getWeight())
+                            .isCompleted(exDto.isCompleted())
+                            .routine(routine) // Crucial para la FK en DB
+                            .build())
+                    .collect(Collectors.toList());
+            routine.setExercises(exercises);
+        }
+        return routine;
     }
 }

@@ -15,6 +15,8 @@ const Login: React.FC = () => {
     const [errorMsg, setErrorMsg] = useState('');
     const history = useHistory();
 
+    // LAS LÍNEAS QUE ESTABAN AQUÍ FUERA HAN SIDO ELIMINADAS
+
     const handleLogin = async () => {
         if (!credentials.username || !credentials.password) {
             setErrorMsg('Por favor, rellena todos los campos');
@@ -24,13 +26,21 @@ const Login: React.FC = () => {
         setLoading(true);
         try {
             const response = await authService.login(credentials);
-            localStorage.setItem('user', JSON.stringify(response.data));
-            history.push('/tabs/tab1');
+            const token = response.data.token;
+
+            if (token) {
+                // Guardamos el token limpio
+                localStorage.setItem('token', token);
+                // Guardamos el resto del usuario
+                localStorage.setItem('user', JSON.stringify(response.data));
+
+                history.push('/tabs/Routines');
+            } else {
+                setErrorMsg('Error: El servidor no envió un token');
+            }
         } catch (error: any) {
-            const message = error.response?.status === 401
-                ? 'Credenciales inválidas'
-                : 'Error de conexión con el servidor';
-            setErrorMsg(message);
+            console.error("Fallo de login:", error);
+            setErrorMsg('Credenciales inválidas o error de servidor');
         } finally {
             setLoading(false);
         }

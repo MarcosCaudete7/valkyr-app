@@ -37,14 +37,19 @@ public class JwtProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().
-                    verifyWith(key)
+            Jwts.parser()
+                    .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
             return true;
-        }catch (JwtException | IllegalArgumentException e){
-            return false;
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            System.out.println("❌ ERROR: La firma no coincide. Revisa el KSECRET.");
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            System.out.println("❌ ERROR: El token ha expirado.");
+        } catch (Exception e) {
+            System.out.println("❌ ERROR: Token inválido: " + e.getMessage());
         }
+        return false;
     }
 }
 

@@ -26,11 +26,16 @@ public class Routine {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "isPublic", nullable = false)
+    @Column(name = "is_public", nullable = false)
     private boolean isPublic;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     @ElementCollection(targetClass = Muscles.class)
     @CollectionTable(name = "routine_muscles", joinColumns = @JoinColumn(name = "routine_id"))
@@ -44,8 +49,8 @@ public class Routine {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
+    public void addExercise(ExerciseTracker exercise) {
+        exercises.add(exercise);
+        exercise.setRoutine(this);
     }
 }

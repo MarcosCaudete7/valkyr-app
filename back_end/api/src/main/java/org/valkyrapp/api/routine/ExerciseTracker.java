@@ -29,7 +29,7 @@ public class ExerciseTracker {
     @Column(name = "weight")
     private Double weight;
 
-    @Column(name = "isCompleted")
+    @Column(name = "is_completed")
     private Boolean isCompleted;
 
     @ManyToOne

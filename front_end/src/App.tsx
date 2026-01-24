@@ -5,7 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import MainTabs from './MainTabs';
 
-/* CSS Obligatorios (Solo aquí) */
+
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
@@ -33,7 +33,6 @@ const App: React.FC = () => {
         <IonRouterOutlet id="main">
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
-
           <Route path="/tabs" render={() => {
             return isAuthenticated() ? <MainTabs /> : <Redirect to="/login" />
           }} />

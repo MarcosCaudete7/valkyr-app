@@ -1,4 +1,5 @@
 package org.valkyrapp.api.routine;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.valkyrapp.api.usuario.User;
 
@@ -19,7 +20,7 @@ public class RoutineDTO {
     private String description;
 
     private boolean isPublic;
-
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
     private Set<Muscles> muscles;
