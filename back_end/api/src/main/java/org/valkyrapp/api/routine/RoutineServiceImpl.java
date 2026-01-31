@@ -1,13 +1,16 @@
 package org.valkyrapp.api.routine;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.valkyrapp.api.exception.ResourceNotFoundException;
 import org.valkyrapp.api.usuario.User;
 import org.valkyrapp.api.usuario.UserRepository;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,9 +58,20 @@ public class RoutineServiceImpl implements RoutineService {
     }
     @Override
     public RoutineDTO getRoutineById(Long id) {
+        String currentUsername = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
+
         return routineRepository.findById(id)
-                .map(RoutineMapper::convertToDTO)
-                .orElseThrow(()-> new ResourceNotFoundException("Rutina con ID " + id + " no encontrada"));
+                .map(routine -> {
+                    if (!routine.getUser().getUsername().equals(currentUsername)){
+                        try {
+                            throw new AccessDeniedException("No tienes permisos para acceder a esta rutina.");
+                        } catch (AccessDeniedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    return  RoutineMapper.convertToDTO(routine);
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
     }
 
     @Override

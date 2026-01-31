@@ -32,12 +32,30 @@ export const getMyRoutines = async (): Promise<Routine[]> => {
   return response.data;
 };
 
+// --- NUEVA FUNCIÓN PARA OBTENER UNA RUTINA ESPECÍFICA ---
+export const getRoutineById = async (id: number): Promise<Routine> => {
+  const config = getAuthHeader();
+
+  if (!config) {
+    throw new Error("No autenticado");
+  }
+
+  // Llama al endpoint @GetMapping("/{id}") de tu RoutineController en Java
+  const response = await axios.get(`${API_URL}/${id}`, config);
+  return response.data;
+};
+
 export const updateExerciseStatus = async (exerciseId: number, completed: boolean) => {
   const config = getAuthHeader();
+
   if (!config) throw new Error("No autenticado");
 
-  return await axios.patch(`${API_URL}/exercises/${exerciseId}/status`, null, {
-    ...config,
-    params: { completed }
-  });
+  return await axios.patch(
+    `${API_URL}/exercises/${exerciseId}/status`,
+    null,
+    {
+      ...config,
+      params: { completed }
+    }
+  );
 };

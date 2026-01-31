@@ -1,0 +1,121 @@
+#routines-page IonContent {
+    --background: #f4f5f8;
+}
+
+.main-title {
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.header-background-gradient {
+    height: 140px;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 0;
+}
+
+.routines-container {
+    display: block;
+    width: 100%;
+    padding: 10px 0;
+    z-index: 1;
+    position: relative;
+}
+
+.routine-card-full {
+    margin: 0 0 15px 0 !important;
+    width: 100% !important;
+    border-radius: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background: #ffffff;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.routine-title {
+    font-size: 1.6rem !important;
+    font-weight: 800 !important;
+    color: #1a1a1a !important;
+}
+
+.routine-description {
+    font-size: 0.95rem;
+    color: #555;
+    margin-top: 5px;
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.custom-badge {
+    padding: 6px 10px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+}
+
+.section-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ion-color-medium);
+    text-transform: uppercase;
+}
+
+.exercise-list {
+    background: transparent;
+    padding: 0;
+}
+
+.exercise-item-modern {
+    --background: #f9f9f9;
+    --padding-start: 15px;
+    --border-radius: 12px;
+    margin-bottom: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+.ex-name {
+    font-weight: 700 !important;
+    color: #2d3436 !important;
+}
+
+.exercise-item-modern.is-done {
+    --background: #e8f5e9;
+    border-color: #c8e6c9;
+    opacity: 0.8;
+}
+
+.exercise-item-modern.is-done .ex-name {
+    text-decoration: line-through;
+    color: #888 !important;
+}
+
+ion-checkbox {
+    --size: 24px;
+    --checkbox-background-checked: var(--ion-color-success);
+    --border-color-checked: var(--ion-color-success);
+    --border-radius: 50%;
+}
+
+.centered-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 70vh;
+}
