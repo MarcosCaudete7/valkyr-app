@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Routine } from '../models/Routine';
 
-const API_URL = 'http://api.valkyrapp.com/api/routines';
+const API_URL = 'https://api.valkyrapp.com/api/routines';
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');

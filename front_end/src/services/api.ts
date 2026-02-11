@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://api.valkyrapp.com/api';
+const BASE_URL = 'https://api.valkyrapp.com/api';
 
 const api = axios.create({
     baseURL: BASE_URL,
