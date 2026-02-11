@@ -15,5 +15,5 @@ public class ExerciseTrackerDTO {
     private Integer series;
     private Integer reps;
     private Double weight;
-    private boolean isCompleted;
+    private Boolean isCompleted;
 }

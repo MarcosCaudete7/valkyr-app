@@ -19,7 +19,7 @@ public class RoutineDTO {
 
     private String description;
 
-    private boolean isPublic;
+    private Boolean isPublic;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 

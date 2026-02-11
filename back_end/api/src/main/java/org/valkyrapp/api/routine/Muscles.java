@@ -9,5 +9,4 @@ public enum Muscles {
     ABS,
     SHOULDERS,
     FOREARMS,
-
 }

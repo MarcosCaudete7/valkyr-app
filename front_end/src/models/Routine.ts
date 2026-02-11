@@ -17,3 +17,4 @@ export interface ExerciseLine {
   weight: number;
   isCompleted: boolean;
 }
+

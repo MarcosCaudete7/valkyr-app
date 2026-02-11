@@ -3,7 +3,7 @@ import { IonTabBar, IonTabButton, IonTabs, IonRouterOutlet, IonIcon, IonLabel } 
 import { Route, Redirect } from "react-router-dom";
 import { homeOutline, settingsOutline, personOutline, addOutline, barbellOutline } from "ionicons/icons";
 import myroutines from "./pages/Routines";
-import Tab2 from "./pages/Tab2";
+import CreateRoutine from "./pages/CreateRoutine";
 import Tab3 from "./pages/Tab3";
 import RoutineDetail from "./Details/RoutineDetail";
 
@@ -11,7 +11,7 @@ const MainTabs: React.FC = () => (
     <IonTabs>
         <IonRouterOutlet>
             <Route exact path="/tabs/myroutines" component={myroutines} />
-            <Route exact path="/tabs/create" component={Tab2} />
+            <Route exact path="/tabs/create" component={CreateRoutine} />
             <Route exact path="/tabs/tab3" component={Tab3} />
             <Route exact path="/tabs/routine/:id" component={RoutineDetail} />
             <Route exact path="/tabs">

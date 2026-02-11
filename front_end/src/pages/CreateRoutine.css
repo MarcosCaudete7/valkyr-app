@@ -1,0 +1,135 @@
+#create-routine-page IonContent {
+    --background: #f8f9fa;
+}
+
+ion-segment {
+    --background: rgba(255, 255, 255, 0.2);
+    margin: 10px 0;
+}
+
+ion-segment-button {
+    --color: #ffffff;
+    --color-checked: var(--ion-color-primary);
+    --indicator-color: #ffffff;
+    font-weight: 700;
+}
+
+.ai-card {
+    margin: 15px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(56, 128, 255, 0.15);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, var(--ion-color-primary), transparent 30%);
+    animation: rotate 4s linear infinite;
+    z-index: -1;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.ai-card ion-button {
+    --border-radius: 12px;
+    margin-top: 15px;
+    font-weight: 700;
+    --box-shadow: 0 4px 12px rgba(56, 128, 255, 0.3);
+}
+
+.form-section {
+    margin-top: 20px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 10px;
+}
+
+.form-section ion-item {
+    --border-color: #eee;
+    margin-bottom: 5px;
+}
+
+.exercises-list h3 {
+    margin: 25px 15px 10px;
+    font-weight: 800;
+    color: var(--ion-color-dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.exercise-card-small {
+    margin: 8px 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+}
+
+.exercise-card-small ion-item {
+    --padding-start: 10px;
+}
+
+.exercise-card-small strong {
+    color: var(--ion-color-primary);
+    font-size: 1.1rem;
+}
+
+.ion-margin-top {
+    --border-radius: 16px;
+    height: 55px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 20px 15px;
+}
+
+
+.radio-section {
+    margin-bottom: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+}
+
+.radio-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.radio-item {
+    --background: transparent;
+    --color: white;
+    width: 48%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.radio-item ion-radio {
+    --color: #a0a0a0;
+    --color-checked: var(--ion-color-primary);
+}
+
+.save-btn {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    --border-radius: 12px;
+    font-weight: bold;
+    height: 50px;
+}
+
+.add-ex-btn {
+    margin: 10px 15px;
+    --border-radius: 12px;
+}

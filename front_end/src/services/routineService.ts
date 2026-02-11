@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Routine } from '../models/Routine';
 
-const API_URL = 'http://localhost:8080/api/routines';
+const API_URL = 'http://api.valkyrapp.com/api/routines';
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');
@@ -32,7 +32,6 @@ export const getMyRoutines = async (): Promise<Routine[]> => {
   return response.data;
 };
 
-// --- NUEVA FUNCIÓN PARA OBTENER UNA RUTINA ESPECÍFICA ---
 export const getRoutineById = async (id: number): Promise<Routine> => {
   const config = getAuthHeader();
 
@@ -40,7 +39,6 @@ export const getRoutineById = async (id: number): Promise<Routine> => {
     throw new Error("No autenticado");
   }
 
-  // Llama al endpoint @GetMapping("/{id}") de tu RoutineController en Java
   const response = await axios.get(`${API_URL}/${id}`, config);
   return response.data;
 };
@@ -58,4 +56,26 @@ export const updateExerciseStatus = async (exerciseId: number, completed: boolea
       params: { completed }
     }
   );
+};
+
+export const createRoutine = async (routineData: any) => {
+  const config = getAuthHeader();
+  if (!config) throw new Error("No autenticado");
+
+  const payload = {
+    name: routineData.name,
+    description: routineData.description,
+    isPublic: false,
+    exercises: routineData.exercises.map((ex: any) => ({
+      id: parseInt(ex.id),
+      name: ex.name,
+      series: parseInt(ex.series),
+      reps: parseInt(ex.reps),
+      weight: parseFloat(ex.weight || 0),
+      isCompleted: false
+    }))
+  };
+
+  const response = await axios.post(`${API_URL}`, payload, config);
+  return response.data;
 };

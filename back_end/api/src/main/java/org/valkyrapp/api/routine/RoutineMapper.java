@@ -30,7 +30,7 @@ public class RoutineMapper {
                 .id(routine.getId())
                 .name(routine.getName())
                 .description(routine.getDescription())
-                .isPublic(routine.isPublic())
+                .isPublic(routine.getIsPublic())
                 .createdAt(routine.getCreatedAt())
                 .muscles(routine.getMuscles())
                 .exercises(exerciseDTOs)
@@ -45,7 +45,7 @@ public class RoutineMapper {
                 .id(dto.getId())
                 .name(dto.getName())
                 .description(dto.getDescription())
-                .isPublic(dto.isPublic())
+                .isPublic(dto.getIsPublic())
                 .muscles(dto.getMuscles())
                 .build();
 
@@ -57,8 +57,8 @@ public class RoutineMapper {
                             .series(exDto.getSeries())
                             .reps(exDto.getReps())
                             .weight(exDto.getWeight())
-                            .isCompleted(exDto.isCompleted())
-                            .routine(routine) // Crucial para la FK en DB
+                            .isCompleted(exDto.getIsCompleted())
+                            .routine(routine)
                             .build())
                     .collect(Collectors.toList());
             routine.setExercises(exercises);

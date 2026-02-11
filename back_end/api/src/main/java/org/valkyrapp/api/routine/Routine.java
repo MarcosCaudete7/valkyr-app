@@ -27,7 +27,7 @@ public class Routine {
     private String description;
 
     @Column(name = "is_public", nullable = false)
-    private boolean isPublic;
+    private Boolean isPublic;
 
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
