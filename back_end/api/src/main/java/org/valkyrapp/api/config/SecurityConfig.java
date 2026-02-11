@@ -45,7 +45,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:8100",
                 "https://valkyrapp.com",
-                "https://api.valkyrapp.com"
+                "https://api.valkyrapp.com",
+                "https://www.valkyrapp.com"
         ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
