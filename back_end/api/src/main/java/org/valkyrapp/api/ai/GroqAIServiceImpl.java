@@ -1,29 +1,33 @@
 package org.valkyrapp.api.ai;
 
-import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import org.valkyrapp.api.routine.Exercise; // Asegúrate de importar tu modelo
+import org.valkyrapp.api.routine.ExerciseRepository;
 
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class GroqAIServiceImpl implements GroqAIService {
-    private final ChatModel chatModel;
-    private final String modelName = "llama-3.3-70b-versatile";
 
-    public GroqAIServiceImpl(ChatModel chatModel) {
+    private final ChatModel chatModel;
+
+    private final ExerciseRepository exerciseRepository;
+
+    public GroqAIServiceImpl(ChatModel chatModel, ExerciseRepository exerciseRepository) {
         this.chatModel = chatModel;
+        this.exerciseRepository = exerciseRepository;
     }
 
     private OpenAiChatOptions getOptions() {
+        String modelName = "llama-3.3-70b-versatile";
         return OpenAiChatOptions.builder()
                 .model(modelName)
                 .temperature(0.5)
@@ -31,55 +35,47 @@ public class GroqAIServiceImpl implements GroqAIService {
     }
 
 
-    @Override
-    public String getRuntinaPower(String ejercicio) {
-        String systemInstruction = """
-            Eres un experto en Powerlifting. Tu objetivo es la fuerza máxima (1RM).
-            Genera una rutina basada en el ejercicio proporcionado.
-            Responde EXCLUSIVAMENTE en formato JSON plano con esta estructura:
+    private String buildSystemPrompt(String type, String description) {
+        List<Exercise> allExercises = exerciseRepository.findAll();
+        String exercisesList = allExercises.stream()
+                .map(Exercise::getName)
+                .collect(Collectors.joining(", "));
+
+        return String.format("""
+            Eres un experto en %s. %s.
+            
+            TU TAREA PRINCIPAL: Generar una rutina JSON válida usando SOLO ejercicios de la lista proporcionada abajo.
+            
+            LISTA DE EJERCICIOS DISPONIBLES (Usa nombres exactos de aquí):
+            [%s]
+            
+            REGLAS DE FORMATO (Responde SOLO JSON):
             {
-              "name": "Nombre Power",
-              "description": "Foco en intensidad y técnica",
+              "name": "Nombre Rutina",
+              "description": "Breve descripción",
               "exercises": [
-                {"name": "nombre", "series": 4, "reps": 3, "weight": 0.0}
+                {"name": "Nombre Exacto de la Lista", "series": 4, "reps": 10, "weight": 0.0}
               ]
             }
             
-            Recuerda que este es el formato, basate en entrenamientos publicos para guiarte.
-            Tienes que tener en cuenta que el musculo que se ejercite necesita MINIMO dos dias de descanso.
-            Tienes que tener en cuenta la implicación muscular. Esto es que si un musculo realiza otros musculos,
-            los otros musculos deberian de formar parte de la rutina (Ejemplo: Press banca tiene la implicacion del
-            hombro y del triceps)
-            Tambien separar y aislar bien los musculos que se realizan en la rutina
-            Recuerda hacer como mucho 2-3 ejercicios por grupo muscular y hacer en total unos 6-9 ejercicios por rutina
-            Los nombres de los ejercicios tienen que ser reales, basate en ejercicios buenos y existentes
-            """;
-        return callAi(systemInstruction, ejercicio);
+            REGLAS DE ENTRENAMIENTO:
+            - Minimo 2 días de descanso por músculo.
+            - Ten en cuenta la implicación muscular (sinergias).
+            - 2-3 ejercicios por grupo muscular, total 6-9 ejercicios.
+            - SI EL USUARIO PIDE UN EJERCICIO QUE NO ESTÁ EN LA LISTA, BUSCA EL MÁS PARECIDO EN LA LISTA.
+            """, type, description, exercisesList);
+    }
+
+    @Override
+    public String getRuntinaPower(String ejercicio) {
+        String instruction = buildSystemPrompt("Powerlifting", "Tu objetivo es la fuerza máxima (1RM). Foco en intensidad.");
+        return callAi(instruction, ejercicio);
     }
 
     @Override
     public String getRuntinaBodyBuilding(String ejercicio) {
-        String systemInstruction = """
-            Eres un experto en Bodybuilding e Hipertrofia. Tu objetivo es el crecimiento muscular.
-            Responde EXCLUSIVAMENTE en formato JSON plano con esta estructura:
-            {
-              "name": "Nombre Bodybuilding",
-              "description": "Foco en tiempo bajo tensión y volumen",
-              "exercises": [
-                {"name": "nombre", "series": 4, "reps": 12, "weight": 0.0}
-              ]
-            }
-            
-            Recuerda que este es el formato, basate en entrenamientos publicos para guiarte.
-            Tienes que tener en cuenta que el musculo que se ejercite necesita MINIMO dos dias de descanso.
-            Tienes que tener en cuenta la implicación muscular. Esto es que si un musculo realiza otros musculos,
-            los otros musculos deberian de formar parte de la rutina (Ejemplo: Press banca tiene la implicacion del
-            hombro y del triceps)
-            Tambien separar y aislar bien los musculos que se realizan en la rutina
-            Recuerda hacer como mucho 2-3 ejercicios por grupo muscular y hacer en total unos 6-9 ejercicios por rutina
-            Los nombres de los ejercicios tienen que ser reales, basate en ejercicios buenos y existentes
-            """;
-        return callAi(systemInstruction, ejercicio);
+        String instruction = buildSystemPrompt("Bodybuilding", "Tu objetivo es la hipertrofia. Foco en volumen y aislamiento.");
+        return callAi(instruction, ejercicio);
     }
 
     private String callAi(String systemPrompt, String userExercise) {

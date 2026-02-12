@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/routines/**").authenticated()
                         .requestMatchers("/api/v1/routine/**").authenticated()
+                        .requestMatchers("/api/exercises/**").authenticated()
                         .requestMatchers("/").permitAll()
                         .anyRequest().authenticated()
                 )
