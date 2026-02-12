@@ -12,6 +12,7 @@ export interface Exercise {
     name: string;
     muscleGroup: string;
     description: string;
+    equipment: string;
 }
 
 export const getAllExercises = async (): Promise<Exercise[]> => {

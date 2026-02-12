@@ -51,7 +51,6 @@ const CreateRoutine: React.FC = () => {
     setLoadingAi(true);
     try {
       const response = await getAiRoutine(routineData.exerciseInput, routineData.type);
-      // Intentar parsear si viene como string, o usar directo si ya es objeto
       const generated = typeof response === 'string' ? JSON.parse(response) : response;
 
       setRoutineData({
@@ -61,7 +60,7 @@ const CreateRoutine: React.FC = () => {
         exercises: generated.exercises || []
       });
       present({ message: '¡Rutina generada!', duration: 2000, color: 'success' });
-      setMode('manual'); 
+      setMode('manual');
     } catch (error) {
       console.error(error);
       present({ message: 'Error con la IA', duration: 2000, color: 'danger' });
@@ -75,11 +74,11 @@ const CreateRoutine: React.FC = () => {
   };
 
   const selectExercise = (exercise: Exercise) => {
-    const newExercise = { 
-      name: exercise.name, 
-      series: 4, 
-      reps: 10, 
-      weight: 0 
+    const newExercise = {
+      name: exercise.name,
+      series: 4,
+      reps: 10,
+      weight: 0
     };
     setRoutineData({ ...routineData, exercises: [...routineData.exercises, newExercise] });
     setIsModalOpen(false);
@@ -114,7 +113,7 @@ const CreateRoutine: React.FC = () => {
     }
   };
 
-  const filteredCatalog = catalog.filter(ex => 
+  const filteredCatalog = catalog.filter(ex =>
     ex.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -183,7 +182,7 @@ const CreateRoutine: React.FC = () => {
               <div className="list-header">
                 <h3>Ejercicios ({routineData.exercises.length})</h3>
               </div>
-              
+
               {routineData.exercises.map((ex, idx) => (
                 <IonCard key={idx} className="exercise-card-small">
                   <IonItem lines="none">
@@ -196,16 +195,16 @@ const CreateRoutine: React.FC = () => {
                   </IonItem>
                   <div style={{ display: 'flex', gap: '10px', padding: '0 10px 10px 10px' }}>
                     <IonItem lines="none" style={{ flex: 1, '--min-height': '30px' }}>
-                        <IonLabel position="stacked" style={{fontSize: '0.8rem'}}>Series</IonLabel>
-                        <IonInput type="number" value={ex.series} onIonChange={e => updateExerciseDetail(idx, 'series', parseInt(e.detail.value!))} />
+                      <IonLabel position="stacked" style={{ fontSize: '0.8rem' }}>Series</IonLabel>
+                      <IonInput type="number" value={ex.series} onIonChange={e => updateExerciseDetail(idx, 'series', parseInt(e.detail.value!))} />
                     </IonItem>
                     <IonItem lines="none" style={{ flex: 1, '--min-height': '30px' }}>
-                        <IonLabel position="stacked" style={{fontSize: '0.8rem'}}>Reps</IonLabel>
-                        <IonInput type="number" value={ex.reps} onIonChange={e => updateExerciseDetail(idx, 'reps', parseInt(e.detail.value!))} />
+                      <IonLabel position="stacked" style={{ fontSize: '0.8rem' }}>Reps</IonLabel>
+                      <IonInput type="number" value={ex.reps} onIonChange={e => updateExerciseDetail(idx, 'reps', parseInt(e.detail.value!))} />
                     </IonItem>
                     <IonItem lines="none" style={{ flex: 1, '--min-height': '30px' }}>
-                        <IonLabel position="stacked" style={{fontSize: '0.8rem'}}>Kg</IonLabel>
-                        <IonInput type="number" value={ex.weight} onIonChange={e => updateExerciseDetail(idx, 'weight', parseFloat(e.detail.value!))} />
+                      <IonLabel position="stacked" style={{ fontSize: '0.8rem' }}>Kg</IonLabel>
+                      <IonInput type="number" value={ex.weight} onIonChange={e => updateExerciseDetail(idx, 'weight', parseFloat(e.detail.value!))} />
                     </IonItem>
                   </div>
                 </IonCard>
@@ -216,7 +215,7 @@ const CreateRoutine: React.FC = () => {
               </IonButton>
             </div>
 
-            <IonButton expand="block" color="success" onClick={saveRoutine} className="save-btn" style={{marginTop: '20px'}}>
+            <IonButton expand="block" color="success" onClick={saveRoutine} className="save-btn" style={{ marginTop: '20px' }}>
               <IonIcon icon={saveOutline} slot="start" /> Guardar Rutina
             </IonButton>
           </>
@@ -231,9 +230,9 @@ const CreateRoutine: React.FC = () => {
               </IonButtons>
             </IonToolbar>
             <IonToolbar>
-              <IonSearchbar 
-                value={searchTerm} 
-                onIonInput={e => setSearchTerm(e.detail.value!)} 
+              <IonSearchbar
+                value={searchTerm}
+                onIonInput={e => setSearchTerm(e.detail.value!)}
                 placeholder="Buscar (ej: Press...)"
               />
             </IonToolbar>
