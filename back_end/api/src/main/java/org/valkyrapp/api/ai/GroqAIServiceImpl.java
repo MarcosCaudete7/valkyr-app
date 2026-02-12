@@ -63,6 +63,11 @@ public class GroqAIServiceImpl implements GroqAIService {
             - Ten en cuenta la implicación muscular (sinergias).
             - 2-3 ejercicios por grupo muscular, total 6-9 ejercicios.
             - SI EL USUARIO PIDE UN EJERCICIO QUE NO ESTÁ EN LA LISTA, BUSCA EL MÁS PARECIDO EN LA LISTA.
+            
+                IMPORTANTE:
+                    NO uses Markdown (nada de ```json).
+                    NO escribas texto introductorio como "Aquí tienes".
+                    Devuelve SOLO el texto JSON crudo.
             """, type, description, exercisesList);
     }
 
@@ -83,6 +88,22 @@ public class GroqAIServiceImpl implements GroqAIService {
         UserMessage userMessage = new UserMessage("Genera rutina para: " + userExercise);
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage), getOptions());
-        return Objects.requireNonNull(chatModel.call(prompt).getResult()).getOutput().getText();
+        String rawResponse = Objects.requireNonNull(chatModel.call(prompt).getResult()).getOutput().getText();
+
+        return cleanJson(rawResponse);
+    }
+
+    private String cleanJson(String text) {
+        if (text == null) return "{}";
+
+        String clean = text.replace("```json", "").replace("```", "");
+        int firstBrace = clean.indexOf("{");
+        int lastBrace = clean.lastIndexOf("}");
+
+        if (firstBrace != -1 && lastBrace != -1) {
+            return clean.substring(firstBrace, lastBrace + 1);
+        }
+
+        return clean.trim();
     }
 }
