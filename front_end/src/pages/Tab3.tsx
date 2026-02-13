@@ -3,7 +3,7 @@ import {
   IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
   IonButton, IonItem, IonLabel, IonIcon, IonList
 } from '@ionic/react';
-import { logOutOutline, personCircleOutline, shieldCheckmarkOutline } from 'ionicons/icons';
+import { helpCircle, logOutOutline, personCircleOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 
 const Tab3: React.FC = () => {
@@ -12,6 +12,13 @@ const Tab3: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     history.replace('/login');
+  };
+
+  const giveFeedBack = () => {
+    window.open(
+      'https://docs.google.com/forms/d/e/1FAIpQLSe9u1dYytvME4hE1Jb4e0yYFfd2-uiwLzfvkVISB3rVHelX_g/viewform?usp=dialog',
+      '_blank'
+    );
   };
 
   return (
@@ -34,6 +41,18 @@ const Tab3: React.FC = () => {
           </IonItem>
 
           <div style={{ marginTop: '40px', padding: '0 16px' }}>
+            <IonButton
+              expand="block"
+              color="success"
+              fill="outline"
+              onClick={giveFeedBack}
+            >
+              <IonIcon slot="start" icon={helpCircle} />
+              Dar Feedback
+            </IonButton>
+          </div>
+
+          <div style={{ marginTop: '20px', padding: '0 16px' }}>
             <IonButton
               expand="block"
               color="danger"

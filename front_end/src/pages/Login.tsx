@@ -34,7 +34,7 @@ const Login: React.FC = () => {
                 // Guardamos el resto del usuario
                 localStorage.setItem('user', JSON.stringify(response.data));
 
-                history.push('/tabs/Routines');
+                history.push('/tabs/myroutines');
             } else {
                 setErrorMsg('Error: El servidor no envió un token');
             }
