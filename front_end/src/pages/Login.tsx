@@ -26,21 +26,28 @@ const Login: React.FC = () => {
         setLoading(true);
         try {
             const response = await authService.login(credentials);
-            const token = response.data.token;
+
+            // CORRECCIÓN: Buscamos el token en el cuerpo O en la cabecera
+            let token = response.data.token || response.headers['authorization'];
 
             if (token) {
-                // Guardamos el token limpio
-                localStorage.setItem('token', token);
-                // Guardamos el resto del usuario
-                localStorage.setItem('user', JSON.stringify(response.data));
+                // Limpiamos el prefijo 'Bearer ' si viene en la cabecera
+                if (token.startsWith('Bearer ')) {
+                    token = token.substring(7);
+                }
 
-                history.push('/tabs/myroutines');
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(response.data)); // Guardamos los datos del usuario
+
+                // Forzamos la navegación y recargamos para asegurar que el AuthGuard pille el token
+                window.location.href = '/tabs/myroutines';
             } else {
-                setErrorMsg('Error: El servidor no envió un token');
+                setErrorMsg('Error: No se recibió el token de acceso');
             }
         } catch (error: any) {
             console.error("Fallo de login:", error);
-            setErrorMsg('Credenciales inválidas o error de servidor');
+            // Muestra el mensaje real del error si existe
+            setErrorMsg(error.response?.data?.message || 'Error de conexión con el servidor');
         } finally {
             setLoading(false);
         }

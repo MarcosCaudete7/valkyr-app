@@ -1,5 +1,6 @@
 package org.valkyrapp.api.routine;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.valkyrapp.api.usuario.User;
@@ -40,13 +41,16 @@ public class Routine {
     @ElementCollection(targetClass = Muscles.class)
     @CollectionTable(name = "routine_muscles", joinColumns = @JoinColumn(name = "routine_id"))
     @Enumerated(EnumType.STRING)
+    @JsonIgnore
     private Set<Muscles> muscles;
 
     @OneToMany(mappedBy = "routine", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<ExerciseTracker> exercises;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     public void addExercise(ExerciseTracker exercise) {

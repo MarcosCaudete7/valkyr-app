@@ -1,5 +1,6 @@
 package org.valkyrapp.api.usuario;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.valkyrapp.api.routine.Routine;
@@ -39,6 +40,7 @@ public class User {
         fetch = FetchType.EAGER,
         cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @JsonIgnore
 
     private List<Routine> routines=new ArrayList<>();
 

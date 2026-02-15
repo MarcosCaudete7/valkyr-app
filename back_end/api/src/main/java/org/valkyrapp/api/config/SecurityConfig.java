@@ -47,10 +47,12 @@ public class SecurityConfig {
                 "http://localhost:8100",
                 "https://valkyrapp.com",
                 "https://api.valkyrapp.com",
+                "https://valkyr-app.pages.dev",
                 "https://www.valkyrapp.com"
         ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Total-Count"));
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
