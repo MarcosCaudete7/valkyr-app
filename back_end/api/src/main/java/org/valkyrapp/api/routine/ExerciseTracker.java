@@ -1,5 +1,7 @@
 package org.valkyrapp.api.routine;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,5 +36,6 @@ public class ExerciseTracker {
 
     @ManyToOne
     @JoinColumn(name = "routine_id")
+    @JsonBackReference
     private Routine routine;
 }

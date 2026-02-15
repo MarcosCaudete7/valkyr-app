@@ -25,7 +25,9 @@ const Login: React.FC = () => {
 
         setLoading(true);
         try {
+            console.log('Intetando login con:', credentials.username);
             const response = await authService.login(credentials);
+            console.log('Respuesta login:', response);
 
             // CORRECCIÓN: Buscamos el token en el cuerpo O en la cabecera
             let token = response.data.token || response.headers['authorization'];
@@ -36,12 +38,19 @@ const Login: React.FC = () => {
                     token = token.substring(7);
                 }
 
+                console.log('Token encontrado:', token);
                 localStorage.setItem('token', token);
-                localStorage.setItem('user', JSON.stringify(response.data)); // Guardamos los datos del usuario
+                // Aseguramos que guardamos el objeto user correctamente
+                const userData = response.data;
+                console.log('Guardando usuario:', userData);
+                localStorage.setItem('user', JSON.stringify(userData)); 
 
-                // Forzamos la navegación y recargamos para asegurar que el AuthGuard pille el token
-                window.location.href = '/tabs/myroutines';
+                // Usamos history.push para mantener el estado de React
+                console.log('Redirigiendo a /tabs/myroutines');
+                history.push('/tabs/myroutines');
+                // window.location.reload(); // Opcional: si realmente necesitas recargar, úsalo después, pero history.push suele ser mejor
             } else {
+                console.error('No se encontró token en la respuesta');
                 setErrorMsg('Error: No se recibió el token de acceso');
             }
         } catch (error: any) {

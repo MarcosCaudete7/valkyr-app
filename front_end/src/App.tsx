@@ -33,8 +33,14 @@ const App: React.FC = () => {
         <IonRouterOutlet id="main">
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
+
+          {/* CAMBIO: Usamos render con lógica explícita */}
           <Route path="/tabs" render={() => {
-            return isAuthenticated() ? <MainTabs /> : <Redirect to="/login" />
+            const user = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            console.log('App.tsx: Verificando auth para /tabs', { user: !!user, token: !!token });
+            // Solo dejamos pasar si hay usuario Y token
+            return (user && token) ? <MainTabs /> : <Redirect to="/login" />
           }} />
 
           <Route exact path="/">
