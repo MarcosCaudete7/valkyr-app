@@ -104,7 +104,7 @@ const Routines: React.FC = () => {
                   </div>
 
                   <IonList lines="none" className="exercise-list">
-                    {routine.exercises.slice(0, 3).map(ex => ( // Mostramos solo los 3 primeros como preview
+                    {(routine.exercises || []).slice(0, 3).map(ex => ( // Mostramos solo los 3 primeros como preview
                       <IonItem key={ex.id} className="exercise-preview-item">
                         <IonLabel>
                           <h2 className={`ex-name ${ex.isCompleted ? 'text-strikethrough' : ''}`}>
@@ -115,9 +115,9 @@ const Routines: React.FC = () => {
                         {ex.isCompleted && <IonBadge color="success" slot="end">Listo</IonBadge>}
                       </IonItem>
                     ))}
-                    {routine.exercises.length > 3 && (
+                    {(routine.exercises || []).length > 3 && (
                       <IonNote className="ion-padding-start">
-                        + {routine.exercises.length - 3} ejercicios más...
+                        + {(routine.exercises || []).length - 3} ejercicios más...
                       </IonNote>
                     )}
                   </IonList>

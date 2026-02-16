@@ -67,7 +67,7 @@ const RoutineDetail: React.FC = () => {
                 <div className="detail-header">
                     <h1>{routine.name}</h1>
                     <p>{routine.description || 'Sin descripción'}</p>
-                    <IonBadge color="secondary">{routine.exercises.length} Ejercicios</IonBadge>
+                    <IonBadge color="secondary">{routine.exercises?.length || 0} Ejercicios</IonBadge>
                 </div>
 
                 <div className="section-divider" style={{ marginTop: '20px' }}>
@@ -76,7 +76,7 @@ const RoutineDetail: React.FC = () => {
                 </div>
 
                 <IonList lines="full">
-                    {routine.exercises.map(ex => (
+                    {(routine.exercises || []).map(ex => (
                         <IonItem key={ex.id}>
                             <IonLabel>
                                 <h2 style={{
