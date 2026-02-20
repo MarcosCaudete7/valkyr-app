@@ -19,6 +19,30 @@ const Routines: React.FC = () => {
     if (!event) setLoading(true);
     try {
       const data = await getMyRoutines();
+
+      const now = Date.now();
+      const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+
+      for (let routine of data) {
+        for (let ex of routine.exercises) {
+          if (ex.isCompleted) {
+            const savedTimeStr = localStorage.getItem(`ex_${ex.id}_completed_at`);
+            if (savedTimeStr) {
+              const savedTime = parseInt(savedTimeStr, 10);
+              if (now - savedTime > TWELVE_HOURS) {
+                ex.isCompleted = false;
+                try {
+                  await updateExerciseStatus(ex.id, false);
+                  localStorage.removeItem(`ex_${ex.id}_completed_at`);
+                } catch (e) {
+                  console.error("Failed to auto-uncheck", e);
+                }
+              }
+            }
+          }
+        }
+      }
+
       setRoutines(data);
     } catch (error) {
       console.error("Error cargando rutinas", error);
@@ -104,14 +128,13 @@ const Routines: React.FC = () => {
                   </div>
 
                   <IonList lines="none" className="exercise-list">
-                    {(routine.exercises || []).slice(0, 3).map(ex => ( // Mostramos solo los 3 primeros como preview
+                    {(routine.exercises || []).slice(0, 3).map(ex => (
                       <IonItem key={ex.id} className="exercise-preview-item">
                         <IonLabel>
                           <h2 className={`ex-name ${ex.isCompleted ? 'text-strikethrough' : ''}`}>
                             {ex.name}
                           </h2>
                         </IonLabel>
-                        {/* QUITAMOS EL CHECKBOX DE AQUÍ PARA EVITAR CONFLICTOS DE NAVEGACIÓN */}
                         {ex.isCompleted && <IonBadge color="success" slot="end">Listo</IonBadge>}
                       </IonItem>
                     ))}

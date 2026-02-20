@@ -25,10 +25,10 @@ public class RoutineController {
     }
 
     @PostMapping
-    public ResponseEntity<RoutineDTO> create(@RequestBody RoutineDTO routineDTO){
+    public ResponseEntity<RoutineDTO> create(@RequestBody RoutineDTO routineDTO) {
         String username = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
         RoutineDTO savedRoutine = routineService.saveRoutine(routineDTO, username);
-        return  ResponseEntity.status(HttpStatus.CREATED).body(savedRoutine);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedRoutine);
     }
 
     @GetMapping("/myroutines")
@@ -39,7 +39,17 @@ public class RoutineController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RoutineDTO> getRoutineById(@PathVariable Long id){
+    public ResponseEntity<RoutineDTO> getRoutineById(@PathVariable Long id) {
         return ResponseEntity.ok(routineService.getRoutineById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RoutineDTO> updateRoutine(
+            @PathVariable Long id,
+            @RequestBody RoutineDTO routineDTO) {
+
+        String username = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
+        RoutineDTO updatedRoutine = routineService.updateRoutine(id, routineDTO, username);
+        return ResponseEntity.ok(updatedRoutine);
     }
 }

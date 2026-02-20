@@ -1,2 +1,57 @@
 /* For information on how to create your own theme, please refer to:
 http://ionicframework.com/docs/theming/ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Premium Dark Theme Core */
+  --ion-color-primary: #6366f1;
+  --ion-color-primary-rgb: 99,102,241;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255,255,255;
+  --ion-color-primary-shade: #575ad4;
+  --ion-color-primary-tint: #7275f2;
+
+  --ion-color-secondary: #0ea5e9;
+  --ion-color-secondary-rgb: 14,165,233;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255,255,255;
+  --ion-color-secondary-shade: #0d91cd;
+  --ion-color-secondary-tint: #26aeeb;
+
+  --ion-color-tertiary: #10b981;
+  --ion-color-tertiary-rgb: 16,185,129;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255,255,255;
+  --ion-color-tertiary-shade: #0ea372;
+  --ion-color-tertiary-tint: #28c08e;
+
+  --ion-color-success: #22c55e;
+  --ion-color-warning: #f59e0b;
+  --ion-color-danger: #ef4444;
+  --ion-color-dark: #f8fafc;
+  --ion-color-medium: #94a3b8;
+  --ion-color-light: #1e293b;
+
+  --ion-background-color: #0f172a;
+  --ion-background-color-rgb: 15,23,42;
+
+  --ion-text-color: #f8fafc;
+  --ion-text-color-rgb: 248,250,252;
+
+  --ion-border-color: #334155;
+
+  --ion-font-family: 'Inter', sans-serif;
+
+  --card-bg: #1e293b;
+  --card-border: 1px solid rgba(255, 255, 255, 0.05);
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  font-family: 'Inter', sans-serif !important;
+  background-color: var(--ion-background-color);
+  color: var(--ion-text-color);
+}

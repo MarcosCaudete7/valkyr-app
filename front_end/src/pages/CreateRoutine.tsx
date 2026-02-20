@@ -114,7 +114,8 @@ const CreateRoutine: React.FC = () => {
   };
 
   const filteredCatalog = catalog.filter(ex =>
-    ex.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ex.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    ex.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

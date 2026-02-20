@@ -79,3 +79,25 @@ export const createRoutine = async (routineData: any) => {
   const response = await axios.post(`${API_URL}`, payload, config);
   return response.data;
 };
+
+export const updateRoutine = async (id: number, routineData: any) => {
+  const config = getAuthHeader();
+  if (!config) throw new Error("No autenticado");
+
+  const payload = {
+    name: routineData.name,
+    description: routineData.description,
+    isPublic: false,
+    exercises: routineData.exercises.map((ex: any) => ({
+      id: ex.id,
+      name: ex.name,
+      series: parseInt(ex.series) || 0,
+      reps: parseInt(ex.reps) || 0,
+      weight: parseFloat(ex.weight) || 0,
+      isCompleted: ex.isCompleted || false
+    }))
+  };
+
+  const response = await axios.put(`${API_URL}/${id}`, payload, config);
+  return response.data;
+};
