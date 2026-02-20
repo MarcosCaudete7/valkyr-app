@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://api.valkyrapp.com/api';
+// Cambiado a la IP Local del PC para que la APK de Android pueda comunicarse con tu backend local
+const BASE_URL = 'http://192.168.0.82:8080/api';
 
 const api = axios.create({
     baseURL: BASE_URL,

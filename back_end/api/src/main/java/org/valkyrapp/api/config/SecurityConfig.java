@@ -34,9 +34,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/routine/**").authenticated()
                         .requestMatchers("/api/exercises/**").authenticated()
                         .requestMatchers("/").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtFilter,
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
@@ -45,11 +45,13 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:8100",
+                "http://localhost",
+                "capacitor://localhost",
+                "http://192.168.0.82:8100",
                 "https://valkyrapp.com",
                 "https://api.valkyrapp.com",
                 "https://valkyr-app.pages.dev",
-                "https://www.valkyrapp.com"
-        ));
+                "https://www.valkyrapp.com"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Total-Count"));
         config.setAllowedHeaders(List.of("*"));
