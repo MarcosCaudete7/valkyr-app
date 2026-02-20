@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://192.168.0.82:8080/api/exercises';
+const API_URL = 'https://api.valkyrapp.com/api/exercises';
 
 const getAuthHeader = () => {
     const token = localStorage.getItem('token')?.replace(/"/g, '');
