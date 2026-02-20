@@ -82,3 +82,21 @@ Para levantar el ecosistema Valkyr en un entorno de desarrollo local, seguir los
    ```bash
    git clone [https://github.com/tu-usuario/valkyr-app.git](https://github.com/tu-usuario/valkyr-app.git)
    cd valkyr-app
+
+2. **Iniciar el contenedor Docker de MySQL:**
+   ```bash
+    docker start mysql-valkyr
+   
+
+3. **Arrancar Backend (Spring Boot):**
+   1. Accedemos a la parte backend de la aplicacion mediante un IDE o mediante Maven
+   2. Iniciamos la clase principal `ApiApplication.java`
+   3. Ya estaria arrancada la parte del servidor escuchando el puerto 8080
+
+4. **Arrancar Frontend (Vite/Ionic):**
+   ```bash
+    npm install
+    # Las variables de entorno en desarrollo apuntarán automáticamente a localhost
+    npm run dev
+
+5. **Acceder a http://localhost:8100**
