@@ -67,11 +67,11 @@ export const createRoutine = async (routineData: any) => {
     description: routineData.description,
     isPublic: false,
     exercises: routineData.exercises.map((ex: any) => ({
-      id: parseInt(ex.id),
+      id: ex.id ? parseInt(ex.id) : null,
       name: ex.name,
-      series: parseInt(ex.series),
-      reps: parseInt(ex.reps),
-      weight: parseFloat(ex.weight || 0),
+      series: parseInt(ex.series) || 0,
+      reps: parseInt(ex.reps) || 0,
+      weight: parseFloat(ex.weight) || 0,
       isCompleted: false
     }))
   };
