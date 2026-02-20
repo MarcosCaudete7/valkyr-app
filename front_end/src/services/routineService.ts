@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Routine } from '../models/Routine';
 
-const API_URL = 'https://192.168.0.82:8080/api/routines';
+const API_URL = 'http://192.168.0.82:8080/api/routines';
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');
