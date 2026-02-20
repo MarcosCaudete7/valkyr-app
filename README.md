@@ -1,7 +1,7 @@
 # 📖 Documentación Técnica y Arquitectura: Valkyr App
 
 ## 1. Visión General y Propósito
-Valkyr es una plataforma integral (Single Page Application) enfocada en la gestión personalizada de rutinas de entrenamiento físico. Desarrollada bajo una filosofía "Mobile-First", busca ofrecer la fluidez de una aplicación nativa desde el navegador. El sistema se apoya en una arquitectura cliente-servidor desacoplada, garantizando alta disponibilidad, seguridad mediante tokens y un despliegue en el borde (Edge) para minimizar la latencia.
+Valkyr es una plataforma integral enfocada en la gestión personalizada de rutinas de entrenamiento físico. Busca ofrecer la fluidez de una aplicación nativa desde el navegador. El sistema se apoya en una arquitectura cliente-servidor desacoplada, garantizando alta disponibilidad, seguridad mediante tokens y un despliegue en el borde (Edge) para minimizar la latencia.
 
 
 
@@ -87,7 +87,6 @@ Para levantar el ecosistema Valkyr en un entorno de desarrollo local, seguir los
    ```bash
     docker start mysql-valkyr
    
-
 3. **Arrancar Backend (Spring Boot):**
    1. Accedemos a la parte backend de la aplicacion mediante un IDE o mediante Maven
    2. Iniciamos la clase principal `ApiApplication.java`
