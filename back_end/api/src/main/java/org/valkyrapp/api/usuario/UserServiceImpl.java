@@ -106,4 +106,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User savedUser = userRepository.save(user);
         return new UserDTO(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getFullName());
     }
+
+    @Override
+    public List<UserDTO> searchByUsername(String query) {
+        List<User> users = userRepository.findByUsernameContainingIgnoreCase(query);
+
+        return users.stream()
+                .map(user -> {
+                    UserDTO dto = new UserDTO();
+                    dto.setId(user.getId());
+                    dto.setUsername(user.getUsername());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 }

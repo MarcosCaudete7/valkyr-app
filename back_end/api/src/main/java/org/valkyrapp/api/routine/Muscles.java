@@ -8,5 +8,5 @@ public enum Muscles {
     BICEPS,
     ABS,
     SHOULDERS,
-    FOREARMS,
+    FOREARMS
 }

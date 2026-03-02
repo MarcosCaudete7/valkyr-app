@@ -15,4 +15,5 @@ public interface UserService {
     UserDTO login(String username, String rawPassword);
     @Transactional(readOnly = true)
     UserDTO register(UserDTO userDTO);
+    List<UserDTO> searchByUsername(String query);
 }

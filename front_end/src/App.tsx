@@ -5,7 +5,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import MainTabs from './MainTabs';
 
-/* ... tus imports de CSS ... */
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
@@ -27,19 +26,14 @@ const App: React.FC = () => {
     <IonApp>
       <IonReactRouter>
         <IonRouterOutlet id="main">
-          {/* Rutas Públicas */}
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
 
-          {/* Ruta Protegida: /tabs */}
           <Route path="/tabs" render={() => {
-            // Verificamos el token, no solo el user, para ser más seguros
             const hasToken = localStorage.getItem('token');
             return hasToken ? <MainTabs /> : <Redirect to="/login" />
           }} />
 
-          {/* REDIRECCIÓN INTELIGENTE EN LA RAÍZ */}
-          {/* Esto rompe el bucle: Si ya estás dentro, no te manda al login */}
           <Route exact path="/" render={() => {
             const hasToken = localStorage.getItem('token');
             return hasToken ? <Redirect to="/tabs/myroutines" /> : <Redirect to="/login" />
