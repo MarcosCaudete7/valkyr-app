@@ -28,6 +28,10 @@ public class RoutineServiceImpl implements RoutineService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+        if (routineDTO.getIsPublic() == null) {
+            routineDTO.setIsPublic(false);
+        }
+
         Routine routine = RoutineMapper.convertToEntity(routineDTO);
         routine.setUser(user);
 
@@ -86,6 +90,13 @@ public class RoutineServiceImpl implements RoutineService {
     }
 
     @Override
+    public List<RoutineDTO> listPublicRoutinesByUserId(Long userId) {
+        return routineRepository.findByUserIdAndIsPublicTrue(userId).stream()
+                .map(RoutineMapper::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteRoutine(Long id, String username) {
         if (!routineRepository.existsById(id)) {
             throw new ResourceNotFoundException("No se puede eliminar: Rutina no encontrada");
@@ -109,6 +120,10 @@ public class RoutineServiceImpl implements RoutineService {
 
         existingRoutine.setName(routineDTO.getName());
         existingRoutine.setDescription(routineDTO.getDescription());
+
+        if (routineDTO.getIsPublic() != null) {
+            existingRoutine.setIsPublic(routineDTO.getIsPublic());
+        }
 
         if (routineDTO.getExercises() != null) {
             // Eliminar ejercicios que ya no están en la lista (basado en el nombre por

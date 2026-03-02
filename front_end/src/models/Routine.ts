@@ -7,6 +7,7 @@ export interface Routine {
   createdAt: string;
   muscles: string[];
   exercises: ExerciseLine[];
+  creatorName?: string;
 }
 
 export interface ExerciseLine {

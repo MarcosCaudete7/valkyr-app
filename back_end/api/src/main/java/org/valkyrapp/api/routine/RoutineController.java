@@ -43,6 +43,11 @@ public class RoutineController {
         return ResponseEntity.ok(routineService.getRoutineById(id));
     }
 
+    @GetMapping("/user/{userId}/public")
+    public ResponseEntity<List<RoutineDTO>> getPublicRoutines(@PathVariable Long userId) {
+        return ResponseEntity.ok(routineService.listPublicRoutinesByUserId(userId));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<RoutineDTO> updateRoutine(
             @PathVariable Long id,

@@ -9,6 +9,8 @@ public interface RoutineService {
 
     List<RoutineDTO> listAllRoutines(String username);
 
+    List<RoutineDTO> listPublicRoutinesByUserId(Long userId);
+
     void deleteRoutine(Long id, String username);
 
     void updateExerciseStatus(Long id, boolean completed);

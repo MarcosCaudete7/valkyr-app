@@ -43,6 +43,17 @@ export const getRoutineById = async (id: number): Promise<Routine> => {
   return response.data;
 };
 
+export const getPublicRoutinesByUserId = async (userId: string | number): Promise<Routine[]> => {
+  const config = getAuthHeader();
+
+  if (!config) {
+    throw new Error("No autenticado");
+  }
+
+  const response = await axios.get(`${API_URL}/user/${userId}/public`, config);
+  return response.data;
+};
+
 export const updateExerciseStatus = async (exerciseId: number, completed: boolean) => {
   const config = getAuthHeader();
 
@@ -65,7 +76,7 @@ export const createRoutine = async (routineData: any) => {
   const payload = {
     name: routineData.name,
     description: routineData.description,
-    isPublic: false,
+    isPublic: routineData.isPublic || false,
     exercises: routineData.exercises.map((ex: any) => ({
       id: ex.id ? parseInt(ex.id) : null,
       name: ex.name,
@@ -87,7 +98,7 @@ export const updateRoutine = async (id: number, routineData: any) => {
   const payload = {
     name: routineData.name,
     description: routineData.description,
-    isPublic: false,
+    isPublic: routineData.isPublic !== undefined ? routineData.isPublic : false,
     exercises: routineData.exercises.map((ex: any) => ({
       id: ex.id,
       name: ex.name,

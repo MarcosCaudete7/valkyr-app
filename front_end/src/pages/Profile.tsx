@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
     IonButtons, IonButton, IonIcon, IonAvatar, IonGrid,
-    IonRow, IonCol, IonLabel, useIonViewWillEnter, IonBackButton, IonModal, IonItem, IonInput, IonTextarea
+    IonRow, IonCol, IonLabel, useIonViewWillEnter, IonBackButton, IonModal, IonItem, IonInput, IonTextarea,
+    IonSegment, IonSegmentButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonList, IonNote
 } from '@ionic/react';
-import { settingsOutline, addCircleOutline, imageOutline, chatbubbleOutline, personAddOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import { settingsOutline, addCircleOutline, imageOutline, chatbubbleOutline, personAddOutline, checkmarkCircleOutline, listOutline, calendarOutline, clipboardOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { socialService, UserProfile } from '../services/socialService';
+import { getMyRoutines, getPublicRoutinesByUserId } from '../services/routineService';
+import { Routine } from '../models/Routine';
 import './Profile.css';
 
 const Profile: React.FC = () => {
@@ -22,6 +25,10 @@ const Profile: React.FC = () => {
     const [user, setUser] = useState<any>(null); // From API (username, name)
     const [socialProfile, setSocialProfile] = useState<UserProfile | null>(null); // From Supabase (bio, etc)
     const [posts, setPosts] = useState<string[]>([]);
+
+    // Tabs & Content
+    const [activeTab, setActiveTab] = useState<'posts' | 'routines'>('routines');
+    const [routines, setRoutines] = useState<Routine[]>([]);
 
     // Stats
     const [followers, setFollowers] = useState(0);
@@ -66,6 +73,15 @@ const Profile: React.FC = () => {
             // 5. Load Posts (Simulation for now)
             const savedPosts = localStorage.getItem(`valkyr_profile_posts_${userId}`);
             setPosts(savedPosts ? JSON.parse(savedPosts) : []);
+
+            // 6. Load Routines
+            if (isOwn) {
+                const fetchedRoutines = await getMyRoutines();
+                setRoutines(fetchedRoutines);
+            } else {
+                const fetchedRoutines = await getPublicRoutinesByUserId(userId);
+                setRoutines(fetchedRoutines);
+            }
 
         } catch (error) {
             console.error("Error cargando el perfil", error);
@@ -218,26 +234,96 @@ const Profile: React.FC = () => {
                     )}
                 </div>
 
-                {/* Galería de Fotos */}
-                <div className="profile-gallery-container">
-                    {posts.length === 0 ? (
-                        <div className="profile-empty-gallery">
-                            <IonIcon icon={imageOutline} />
-                            <h3>No hay publicaciones aún</h3>
-                            {isOwnProfile ? <p>Comparte tu progreso con la comunidad</p> : <p>Este usuario no tiene fotos públicas.</p>}
-                        </div>
-                    ) : (
-                        <IonGrid className="profile-grid">
-                            <IonRow>
-                                {posts.map((postImg, idx) => (
-                                    <IonCol size="4" key={idx} className="profile-grid-col">
-                                        <div className="profile-grid-item" style={{ backgroundImage: `url(${postImg})` }} />
-                                    </IonCol>
-                                ))}
-                            </IonRow>
-                        </IonGrid>
-                    )}
-                </div>
+                {/* Pestañas Segment */}
+                <IonSegment
+                    value={activeTab}
+                    onIonChange={e => setActiveTab(e.detail.value as 'posts' | 'routines')}
+                    className="ion-margin-vertical"
+                >
+                    <IonSegmentButton value="routines">
+                        <IonLabel>Rutinas</IonLabel>
+                        <IonIcon icon={listOutline} />
+                    </IonSegmentButton>
+                    <IonSegmentButton value="posts">
+                        <IonLabel>Publicaciones</IonLabel>
+                        <IonIcon icon={imageOutline} />
+                    </IonSegmentButton>
+                </IonSegment>
+
+                {/* Contenido Dinámico según Pestaña */}
+                {activeTab === 'posts' ? (
+                    <div className="profile-gallery-container">
+                        {posts.length === 0 ? (
+                            <div className="profile-empty-gallery">
+                                <IonIcon icon={imageOutline} />
+                                <h3>No hay publicaciones aún</h3>
+                                {isOwnProfile ? <p>Comparte tu progreso con la comunidad</p> : <p>Este usuario no tiene fotos públicas.</p>}
+                            </div>
+                        ) : (
+                            <IonGrid className="profile-grid">
+                                <IonRow>
+                                    {posts.map((postImg, idx) => (
+                                        <IonCol size="4" key={idx} className="profile-grid-col">
+                                            <div className="profile-grid-item" style={{ backgroundImage: `url(${postImg})` }} />
+                                        </IonCol>
+                                    ))}
+                                </IonRow>
+                            </IonGrid>
+                        )}
+                    </div>
+                ) : (
+                    <div className="routines-container ion-padding-horizontal">
+                        {routines.length === 0 ? (
+                            <div className="profile-empty-gallery" style={{ marginTop: '20px' }}>
+                                <IonIcon icon={clipboardOutline} />
+                                <h3>No hay rutinas públicas</h3>
+                                {isOwnProfile ? <p>Haz pública alguna rutina para que otros la vean</p> : <p>Este usuario no ha publicado ninguna rutina.</p>}
+                            </div>
+                        ) : (
+                            routines.map(routine => (
+                                <IonCard
+                                    key={routine.id}
+                                    style={{ margin: '15px 0', border: '1px solid #e1e4e8', boxShadow: 'none' }}
+                                    routerLink={`/tabs/routine/${routine.id}`}
+                                    button
+                                >
+                                    <IonCardHeader style={{ padding: '15px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                            <IonBadge color="secondary">
+                                                <IonIcon icon={calendarOutline} />
+                                                {routine.createdAt ? new Date(routine.createdAt).toLocaleDateString() : 'Sin fecha'}
+                                            </IonBadge>
+                                            {isOwnProfile && routine.isPublic && (
+                                                <IonBadge color="success">Pública</IonBadge>
+                                            )}
+                                        </div>
+                                        <IonCardTitle style={{ fontSize: '1.2rem', margin: 0 }}>{routine.name}</IonCardTitle>
+                                    </IonCardHeader>
+                                    <IonCardContent style={{ paddingTop: 0 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', color: 'gray', fontSize: '0.9rem', marginBottom: '10px' }}>
+                                            <IonIcon icon={clipboardOutline} style={{ marginRight: '5px' }} />
+                                            <span>{routine.exercises?.length || 0} ejercicios</span>
+                                        </div>
+                                        <IonList lines="none" style={{ background: 'transparent', padding: 0 }}>
+                                            {(routine.exercises || []).slice(0, 3).map(ex => (
+                                                <IonItem key={ex.id} style={{ '--background': 'transparent', '--min-height': '30px', margin: 0, padding: 0 }}>
+                                                    <IonLabel style={{ margin: 0 }}>
+                                                        <h2 style={{ fontSize: '0.9rem', opacity: 0.8 }}>{ex.name} • {ex.series}x{ex.reps}</h2>
+                                                    </IonLabel>
+                                                </IonItem>
+                                            ))}
+                                            {(routine.exercises || []).length > 3 && (
+                                                <IonNote style={{ fontSize: '0.8rem', paddingTop: '5px', display: 'block' }}>
+                                                    + {(routine.exercises || []).length - 3} más...
+                                                </IonNote>
+                                            )}
+                                        </IonList>
+                                    </IonCardContent>
+                                </IonCard>
+                            ))
+                        )}
+                    </div>
+                )}
 
                 {/* Modal de Edición de Perfil */}
                 <IonModal isOpen={showEditModal} onDidDismiss={() => setShowEditModal(false)}>

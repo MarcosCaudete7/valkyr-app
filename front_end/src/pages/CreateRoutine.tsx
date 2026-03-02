@@ -3,7 +3,7 @@ import {
   IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonList, IonItem,
   IonLabel, IonInput, IonButton, IonIcon, IonSpinner, IonCard,
   useIonToast, IonButtons, IonBackButton, IonSegment, IonSegmentButton,
-  IonRadioGroup, IonRadio, IonModal, IonSearchbar
+  IonRadioGroup, IonRadio, IonModal, IonSearchbar, IonToggle
 } from '@ionic/react';
 import { barbellOutline, flashOutline, saveOutline, addCircleOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
@@ -27,6 +27,7 @@ const CreateRoutine: React.FC = () => {
     description: '',
     exerciseInput: '',
     type: 'bodybuilding',
+    isPublic: false,
     exercises: [] as any[]
   });
 
@@ -105,7 +106,7 @@ const CreateRoutine: React.FC = () => {
     try {
       await createRoutine(routineData);
       present({ message: 'Rutina guardada correctamente', duration: 2000, color: 'success' });
-      setRoutineData({ name: '', description: '', exerciseInput: '', type: 'bodybuilding', exercises: [] });
+      setRoutineData({ name: '', description: '', exerciseInput: '', type: 'bodybuilding', isPublic: false, exercises: [] });
       history.push('/tabs/myroutines');
     } catch (error) {
       console.error("Error guardando:", error);
@@ -173,9 +174,16 @@ const CreateRoutine: React.FC = () => {
                 <IonLabel position="stacked">Nombre Rutina</IonLabel>
                 <IonInput value={routineData.name} onIonInput={(e) => setRoutineData({ ...routineData, name: e.detail.value! })} />
               </IonItem>
-              <IonItem lines="none">
+              <IonItem lines="full">
                 <IonLabel position="stacked">Descripción</IonLabel>
                 <IonInput value={routineData.description} onIonInput={(e) => setRoutineData({ ...routineData, description: e.detail.value! })} />
+              </IonItem>
+              <IonItem lines="none" style={{ marginTop: '10px' }}>
+                <IonLabel>
+                  <h2>Rutina Pública</h2>
+                  <p>Visible en tu perfil para otros</p>
+                </IonLabel>
+                <IonToggle slot="end" checked={routineData.isPublic} onIonChange={e => setRoutineData({ ...routineData, isPublic: e.detail.checked })} />
               </IonItem>
             </div>
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonList, IonItem,
-    IonLabel, IonCheckbox, IonBackButton, IonButtons, IonSpinner, IonBadge, IonIcon, IonNote, IonButton, IonInput, IonModal, IonSearchbar
+    IonLabel, IonCheckbox, IonBackButton, IonButtons, IonSpinner, IonBadge, IonIcon, IonNote, IonButton, IonInput, IonModal, IonSearchbar, IonToggle
 } from '@ionic/react';
 import { clipboardOutline, fitnessOutline, trashOutline, addCircleOutline, closeOutline } from 'ionicons/icons';
 import { getRoutineById, updateExerciseStatus, updateRoutine } from '../services/routineService';
@@ -13,6 +13,9 @@ const RoutineDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [routine, setRoutine] = useState<Routine | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const rawUserData = localStorage.getItem('user');
+    const myUsername = rawUserData ? JSON.parse(rawUserData).username : null;
 
     const [isEditing, setIsEditing] = useState(false);
     const [originalRoutine, setOriginalRoutine] = useState<Routine | null>(null);
@@ -157,13 +160,15 @@ const RoutineDetail: React.FC = () => {
                     </IonButtons>
                     <IonTitle>{isEditing ? 'Editar Rutina' : 'Entrenamiento'}</IonTitle>
                     <IonButtons slot="end">
-                        {!isEditing ? (
-                            <IonButton onClick={() => setIsEditing(true)}>Editar</IonButton>
-                        ) : (
-                            <>
-                                <IonButton onClick={handleCancel}>Cancelar</IonButton>
-                                <IonButton onClick={handleSave} color="success">Guardar</IonButton>
-                            </>
+                        {routine.creatorName === myUsername && (
+                            !isEditing ? (
+                                <IonButton onClick={() => setIsEditing(true)}>Editar</IonButton>
+                            ) : (
+                                <>
+                                    <IonButton onClick={handleCancel}>Cancelar</IonButton>
+                                    <IonButton onClick={handleSave} color="success">Guardar</IonButton>
+                                </>
+                            )
                         )}
                     </IonButtons>
                 </IonToolbar>
@@ -181,15 +186,22 @@ const RoutineDetail: React.FC = () => {
                         ) : routine.name}
                     </h1>
                     {isEditing ? (
-                        <IonInput
-                            value={routine.description}
-                            onIonInput={e => setRoutine({ ...routine, description: e.detail.value! })}
-                            placeholder="Descripción"
-                        />
+                        <div style={{ marginTop: '10px' }}>
+                            <IonInput
+                                value={routine.description}
+                                onIonInput={e => setRoutine({ ...routine, description: e.detail.value! })}
+                                placeholder="Descripción"
+                            />
+                            <IonItem lines="none" style={{ marginTop: '10px', padding: 0 }}>
+                                <IonLabel>Pública</IonLabel>
+                                <IonToggle checked={routine.isPublic} onIonChange={e => setRoutine({ ...routine, isPublic: e.detail.checked })} />
+                            </IonItem>
+                        </div>
                     ) : (
                         <p>{routine.description || 'Sin descripción'}</p>
                     )}
                     <IonBadge color="secondary">{routine.exercises?.length || 0} Ejercicios</IonBadge>
+                    {routine.isPublic && !isEditing && <IonBadge color="success" style={{ marginLeft: '10px' }}>Pública</IonBadge>}
                 </div>
 
                 <div className="section-divider" style={{ marginTop: '20px' }}>
