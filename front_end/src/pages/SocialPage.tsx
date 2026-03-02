@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSearchbar, IonList, IonItem, IonLabel, IonAvatar, IonListHeader, useIonViewWillEnter, IonIcon } from '@ionic/react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSearchbar, IonList, IonItem, IonLabel, IonAvatar, IonListHeader, useIonViewWillEnter, IonIcon, IonBadge } from '@ionic/react';
 import { chatbubbleEllipsesOutline } from 'ionicons/icons';
 import './SocialPage.css';
 import axios from 'axios';
@@ -25,11 +25,19 @@ const SocialPage: React.FC = () => {
                 const latestMsg = messages.find((m: any) =>
                     m.sender_id === chat.friendId || m.receiver_id === chat.friendId
                 );
+
+                // Calculate unread count
+                const unreadMsgs = messages.filter((m: any) =>
+                    m.sender_id === chat.friendId &&
+                    new Date(m.created_at).getTime() > new Date(chat.lastAccessed).getTime()
+                );
+
                 return {
                     ...chat,
                     lastMessage: latestMsg ? latestMsg.content : null,
                     lastMessageTime: latestMsg ? latestMsg.created_at : chat.lastAccessed,
-                    isUnread: latestMsg ? latestMsg.sender_id === chat.friendId && new Date(latestMsg.created_at).getTime() > new Date(chat.lastAccessed).getTime() : false
+                    isUnread: latestMsg ? latestMsg.sender_id === chat.friendId && new Date(latestMsg.created_at).getTime() > new Date(chat.lastAccessed).getTime() : false,
+                    unreadCount: unreadMsgs.length
                 };
             });
 
@@ -41,10 +49,11 @@ const SocialPage: React.FC = () => {
                     chats.push({
                         friendId: otherId,
                         friendName: 'Usuario',
-                        lastAccessed: m.created_at,
+                        lastAccessed: new Date(0).toISOString(), // Force all missing logic to count as unread if never accessed
                         lastMessage: m.content,
                         lastMessageTime: m.created_at,
-                        isUnread: m.sender_id === otherId
+                        isUnread: m.sender_id === otherId,
+                        unreadCount: m.sender_id === otherId ? 1 : 0 // initial assumption
                     });
                 }
             });
@@ -157,6 +166,11 @@ const SocialPage: React.FC = () => {
                                         {chat.lastMessage ? chat.lastMessage : `Último acceso: ${new Date(chat.lastAccessed).toLocaleDateString()}`}
                                     </p>
                                 </IonLabel>
+                                {chat.unreadCount > 0 && (
+                                    <IonBadge color="primary" slot="end" className="social-unread-badge">
+                                        {chat.unreadCount}
+                                    </IonBadge>
+                                )}
                             </IonItem>
                         ))}
                     </IonList>
