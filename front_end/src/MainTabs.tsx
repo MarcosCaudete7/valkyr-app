@@ -1,6 +1,6 @@
 import React from 'react';
 import { IonTabBar, IonTabButton, IonTabs, IonRouterOutlet, IonIcon, IonLabel } from "@ionic/react";
-import { Route, Redirect, useParams } from "react-router-dom";
+import { Route, Redirect } from "react-router-dom";
 import { settingsOutline, addOutline, barbellOutline, peopleOutline } from "ionicons/icons";
 import MyRoutines from "./pages/Routines";
 import CreateRoutine from "./pages/CreateRoutine";
@@ -8,14 +8,6 @@ import RoutineDetail from "./Details/RoutineDetail";
 import Settings from './pages/Settings';
 import ChatPage from './pages/ChatPage';
 import SocialPage from './pages/SocialPage';
-
-const ChatPageWrapper: React.FC = () => {
-    const { friendId, friendName } = useParams<{ friendId: string; friendName: string }>();
-    const userStr = localStorage.getItem('user');
-    const myId = userStr ? JSON.parse(userStr).id : '';
-
-    return <ChatPage myId={myId} friendId={friendId} friendName={friendName} />;
-};
 
 const MainTabs: React.FC = () => (
     <IonTabs>
