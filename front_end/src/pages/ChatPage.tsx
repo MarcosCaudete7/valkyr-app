@@ -92,7 +92,7 @@ const ChatPage: React.FC = () => {
                     <IonButtons slot="start">
                         <IonBackButton defaultHref="/tabs/social" />
                     </IonButtons>
-                    <IonTitle>Chat con {friendName}</IonTitle>
+                    <IonTitle>{friendName}</IonTitle>
                     <IonButtons slot="end">
                         <IonButton onClick={() => history.push(`/tabs/profile/${friendId}`)}>
                             <IonIcon icon={personCircleOutline} />

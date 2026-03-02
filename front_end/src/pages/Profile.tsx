@@ -35,7 +35,7 @@ const Profile: React.FC = () => {
     const token = localStorage.getItem('token')?.replace(/"/g, '');
     const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-    const loadProfileData = async (userId: string, isOwn: boolean) => {
+    const loadProfileData = async (userId: string, isOwn: boolean, currentAuthUserId: string | null) => {
         try {
             // 1. Fetch User Data from Spring Boot API
             if (isOwn) {
@@ -58,18 +58,14 @@ const Profile: React.FC = () => {
             setFollowing(rCount);
 
             // 4. Check if following (if not own profile)
-            if (!isOwn && authUserId) {
-                const followingStatus = await socialService.checkIsFollowing(authUserId, userId);
+            if (!isOwn && currentAuthUserId) {
+                const followingStatus = await socialService.checkIsFollowing(currentAuthUserId, userId);
                 setIsFollowing(followingStatus);
             }
 
             // 5. Load Posts (Simulation for now)
-            if (isOwn) {
-                const savedPosts = localStorage.getItem('valkyr_profile_posts');
-                setPosts(savedPosts ? JSON.parse(savedPosts) : []);
-            } else {
-                setPosts([]); // Here we would fetch other users posts if implemented
-            }
+            const savedPosts = localStorage.getItem(`valkyr_profile_posts_${userId}`);
+            setPosts(savedPosts ? JSON.parse(savedPosts) : []);
 
         } catch (error) {
             console.error("Error cargando el perfil", error);
@@ -83,10 +79,10 @@ const Profile: React.FC = () => {
 
         if (targetId && targetId !== myId) {
             setIsOwnProfile(false);
-            if (myId) loadProfileData(targetId, false);
+            if (myId) loadProfileData(targetId, false, myId);
         } else {
             setIsOwnProfile(true);
-            if (myId) loadProfileData(myId, true);
+            if (myId) loadProfileData(myId, true, myId);
         }
     });
 
@@ -126,13 +122,13 @@ const Profile: React.FC = () => {
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file) {
+        if (file && authUserId) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const newPost = e.target?.result as string;
                 const updatedPosts = [newPost, ...posts];
                 setPosts(updatedPosts);
-                localStorage.setItem('valkyr_profile_posts', JSON.stringify(updatedPosts));
+                localStorage.setItem(`valkyr_profile_posts_${authUserId}`, JSON.stringify(updatedPosts));
             };
             reader.readAsDataURL(file);
         }
