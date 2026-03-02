@@ -1,8 +1,11 @@
 /* Estilos para la barra de búsqueda */
 .social-searchbar {
-    --background: var(--ion-color-step-50, #f4f5f8);
-    --border-radius: 15px;
-    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    --background: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.06);
+    --color: var(--ion-text-color);
+    --icon-color: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.6);
+    --placeholder-color: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.5);
+    --border-radius: 14px;
+    --box-shadow: none;
     padding: 10px 16px;
     margin-top: 10px;
 }
@@ -19,16 +22,16 @@
 
 /* Tarjetas de los usuarios (Items de la lista) */
 .social-user-item {
-    --background: var(--ion-color-step-50, #ffffff);
-    --border-radius: 12px;
-    margin: 8px 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --background: transparent;
+    border-bottom: 1px solid rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.05);
+    margin: 4px 16px;
+    box-shadow: none;
 }
 
 .social-user-item h2 {
     font-weight: 600;
     font-size: 1.1em;
-    color: var(--ion-color-dark);
+    color: var(--ion-text-color);
 }
 
 .social-user-item p {
@@ -39,8 +42,8 @@
 /* Avatares */
 .social-avatar {
     margin-right: 15px;
-    border: 2px solid var(--ion-color-light);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.1);
+    box-shadow: none;
 }
 
 /* Estado vacío de inicio */
@@ -56,14 +59,14 @@
 
 .social-empty-state-icon {
     font-size: 64px;
-    color: var(--ion-color-step-300, #c0c0c0);
+    color: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.2);
     margin-bottom: 15px;
 }
 
 .social-empty-state h2 {
     font-size: 1.3em;
     font-weight: bold;
-    color: var(--ion-color-dark);
+    color: var(--ion-text-color);
     margin-bottom: 5px;
 }
 
