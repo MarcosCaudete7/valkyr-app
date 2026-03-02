@@ -3,9 +3,9 @@ import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
     IonButtons, IonButton, IonIcon, IonAvatar, IonGrid,
     IonRow, IonCol, IonLabel, useIonViewWillEnter, IonBackButton, IonModal, IonItem, IonInput, IonTextarea,
-    IonSegment, IonSegmentButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonList, IonNote
+    IonSegment, IonSegmentButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonList, IonNote, useIonAlert
 } from '@ionic/react';
-import { settingsOutline, addCircleOutline, imageOutline, chatbubbleOutline, personAddOutline, checkmarkCircleOutline, listOutline, calendarOutline, clipboardOutline } from 'ionicons/icons';
+import { settingsOutline, addCircleOutline, imageOutline, chatbubbleOutline, personAddOutline, checkmarkCircleOutline, listOutline, calendarOutline, clipboardOutline, documentTextOutline, trashOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { socialService, UserProfile } from '../services/socialService';
@@ -24,7 +24,8 @@ const Profile: React.FC = () => {
     const [isOwnProfile, setIsOwnProfile] = useState(true);
     const [user, setUser] = useState<any>(null); // From API (username, name)
     const [socialProfile, setSocialProfile] = useState<UserProfile | null>(null); // From Supabase (bio, etc)
-    const [posts, setPosts] = useState<string[]>([]);
+    const [posts, setPosts] = useState<{ type: 'image' | 'pdf', data: string, name?: string }[]>([]);
+    const [presentAlert] = useIonAlert();
 
     // Tabs & Content
     const [activeTab, setActiveTab] = useState<'posts' | 'routines'>('routines');
@@ -71,8 +72,20 @@ const Profile: React.FC = () => {
             }
 
             // 5. Load Posts (Simulation for now)
-            const savedPosts = localStorage.getItem(`valkyr_profile_posts_${userId}`);
-            setPosts(savedPosts ? JSON.parse(savedPosts) : []);
+            // Soporte para retrocompatibilidad con arrays de strings antiguos
+            const savedPostsStr = localStorage.getItem(`valkyr_profile_posts_${userId}`);
+            if (savedPostsStr) {
+                const parsed = JSON.parse(savedPostsStr);
+                const formattedPosts = parsed.map((p: any) => {
+                    if (typeof p === 'string') {
+                        return { type: 'image', data: p }; // Formato antiguo
+                    }
+                    return p; // Formato nuevo
+                });
+                setPosts(formattedPosts);
+            } else {
+                setPosts([]);
+            }
 
             // 6. Load Routines
             if (isOwn) {
@@ -139,15 +152,45 @@ const Profile: React.FC = () => {
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && authUserId) {
+            const isPdf = file.type === 'application/pdf';
             const reader = new FileReader();
             reader.onload = (e) => {
-                const newPost = e.target?.result as string;
+                const newData = e.target?.result as string;
+                const newPost: { type: 'image' | 'pdf', data: string, name?: string } = {
+                    type: isPdf ? 'pdf' : 'image',
+                    data: newData,
+                    name: isPdf ? file.name : undefined
+                };
+
                 const updatedPosts = [newPost, ...posts];
                 setPosts(updatedPosts);
                 localStorage.setItem(`valkyr_profile_posts_${authUserId}`, JSON.stringify(updatedPosts));
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const confirmDeletePost = (index: number) => {
+        if (!isOwnProfile) return;
+        presentAlert({
+            header: 'Eliminar Publicación',
+            message: '¿Estás seguro de que deseas eliminar este archivo de tu perfil?',
+            buttons: [
+                { text: 'Cancelar', role: 'cancel' },
+                {
+                    text: 'Eliminar',
+                    role: 'destructive',
+                    handler: () => {
+                        const updatedPosts = [...posts];
+                        updatedPosts.splice(index, 1);
+                        setPosts(updatedPosts);
+                        if (authUserId) {
+                            localStorage.setItem(`valkyr_profile_posts_${authUserId}`, JSON.stringify(updatedPosts));
+                        }
+                    }
+                }
+            ]
+        });
     };
 
     return (
@@ -212,7 +255,7 @@ const Profile: React.FC = () => {
                                 Editar Perfil
                             </IonButton>
                             <input
-                                type="file" accept="image/*" id="upload-post"
+                                type="file" accept="image/*,application/pdf" id="upload-post"
                                 style={{ display: 'none' }} onChange={handleFileUpload}
                             />
                             <IonButton expand="block" fill="outline" className="upload-btn" style={{ flex: 1 }} onClick={() => document.getElementById('upload-post')?.click()}>
@@ -262,9 +305,22 @@ const Profile: React.FC = () => {
                         ) : (
                             <IonGrid className="profile-grid">
                                 <IonRow>
-                                    {posts.map((postImg, idx) => (
-                                        <IonCol size="4" key={idx} className="profile-grid-col">
-                                            <div className="profile-grid-item" style={{ backgroundImage: `url(${postImg})` }} />
+                                    {posts.map((post, idx) => (
+                                        <IonCol size="4" key={idx} className="profile-grid-col" onClick={() => isOwnProfile && confirmDeletePost(idx)}>
+                                            {post.type === 'image' ? (
+                                                <div className="profile-grid-item" style={{ backgroundImage: `url(${post.data})` }}>
+                                                    {isOwnProfile && <div className="delete-overlay"><IonIcon icon={trashOutline} /></div>}
+                                                </div>
+                                            ) : (
+                                                <div className="profile-grid-item pdf-item">
+                                                    <IonIcon icon={documentTextOutline} className="pdf-icon" />
+                                                    <span className="pdf-name">{post.name || 'Documento PDF'}</span>
+                                                    {isOwnProfile && <div className="delete-overlay"><IonIcon icon={trashOutline} /></div>}
+                                                    <a href={post.data} download={post.name || 'documento.pdf'} className="pdf-download-overlay" onClick={e => e.stopPropagation()}>
+                                                        Abrir
+                                                    </a>
+                                                </div>
+                                            )}
                                         </IonCol>
                                     ))}
                                 </IonRow>
