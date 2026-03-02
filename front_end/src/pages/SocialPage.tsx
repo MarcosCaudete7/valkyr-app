@@ -135,13 +135,13 @@ const SocialPage: React.FC = () => {
                             <IonLabel>Resultados de búsqueda</IonLabel>
                         </IonListHeader>
                         {users.map(user => (
-                            <IonItem className="social-user-item" key={user.id} button onClick={() => history.push(`/tabs/chat/${user.id}/${user.username}`)}>
+                            <IonItem className="social-user-item" key={user.id} button onClick={() => history.push(`/tabs/profile/${user.id}`)}>
                                 <IonAvatar slot="start" className="social-avatar">
                                     <img src={`https://ui-avatars.com/api/?name=${user.username}&background=random`} />
                                 </IonAvatar>
                                 <IonLabel>
                                     <h2>{user.username}</h2>
-                                    <p>Pulsa para chatear</p>
+                                    <p>Ver perfil</p>
                                 </IonLabel>
                             </IonItem>
                         ))}

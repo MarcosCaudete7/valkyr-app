@@ -17,6 +17,7 @@ const MainTabs: React.FC = () => (
             <Route exact path="/tabs/create" component={CreateRoutine} />
             <Route exact path="/tabs/settings" component={Settings} />
             <Route exact path="/tabs/profile" component={Profile} />
+            <Route exact path="/tabs/profile/:targetId" component={Profile} />
             <Route exact path="/tabs/routine/:id" component={RoutineDetail} />
             <Route exact path="/tabs/social" component={SocialPage} />
             <Route exact path="/tabs/chat/:friendId/:friendName" component={ChatPage} />
