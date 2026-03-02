@@ -74,7 +74,8 @@ const Profile: React.FC = () => {
             // 5. Load Posts (Simulation for now)
             // Soporte para retrocompatibilidad con arrays de strings antiguos
             const savedPostsStr = localStorage.getItem(`valkyr_profile_posts_${userId}`);
-            if (savedPostsStr) {
+
+            if (savedPostsStr && savedPostsStr !== "[]") {
                 const parsed = JSON.parse(savedPostsStr);
                 const formattedPosts = parsed.map((p: any) => {
                     if (typeof p === 'string') {
@@ -83,6 +84,22 @@ const Profile: React.FC = () => {
                     return p; // Formato nuevo
                 });
                 setPosts(formattedPosts);
+            } else if (!isOwn) {
+                // Simulación para ver posts de OTRA persona (ya que localStorage no se comparte entre navegadores distintos en pruebas locales si no subes a una DB real)
+                const globalPostsStr = localStorage.getItem('valkyr_profile_posts'); // Fallback a los antiguos globales
+                if (globalPostsStr) {
+                    const parsed = JSON.parse(globalPostsStr);
+                    const formattedPosts = parsed.map((p: any) => {
+                        return typeof p === 'string' ? { type: 'image', data: p } : p;
+                    });
+                    // Mostramos solo un par aleatorio para simular que son de este usuario
+                    setPosts(formattedPosts.slice(0, 3));
+                } else {
+                    setPosts([
+                        { type: 'image', data: `https://source.unsplash.com/random/500x500/?fitness,gym&sig=${userId}1` },
+                        { type: 'image', data: `https://source.unsplash.com/random/500x500/?fitness,workout&sig=${userId}2` }
+                    ]);
+                }
             } else {
                 setPosts([]);
             }
