@@ -1,11 +1,12 @@
 import React from 'react';
 import { IonTabBar, IonTabButton, IonTabs, IonRouterOutlet, IonIcon, IonLabel } from "@ionic/react";
 import { Route, Redirect } from "react-router-dom";
-import { settingsOutline, addOutline, barbellOutline, peopleOutline } from "ionicons/icons";
+import { settingsOutline, addOutline, barbellOutline, peopleOutline, personOutline } from "ionicons/icons";
 import MyRoutines from "./pages/Routines";
 import CreateRoutine from "./pages/CreateRoutine";
 import RoutineDetail from "./Details/RoutineDetail";
 import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 import ChatPage from './pages/ChatPage';
 import SocialPage from './pages/SocialPage';
 
@@ -15,6 +16,7 @@ const MainTabs: React.FC = () => (
             <Route exact path="/tabs/myroutines" component={MyRoutines} />
             <Route exact path="/tabs/create" component={CreateRoutine} />
             <Route exact path="/tabs/settings" component={Settings} />
+            <Route exact path="/tabs/profile" component={Profile} />
             <Route exact path="/tabs/routine/:id" component={RoutineDetail} />
             <Route exact path="/tabs/social" component={SocialPage} />
             <Route exact path="/tabs/chat/:friendId/:friendName" component={ChatPage} />
@@ -39,9 +41,9 @@ const MainTabs: React.FC = () => (
                 <IonLabel>Comunidad</IonLabel>
             </IonTabButton>
 
-            <IonTabButton tab="settings" href="/tabs/settings">
-                <IonIcon icon={settingsOutline} />
-                <IonLabel>Ajustes</IonLabel>
+            <IonTabButton tab="profile" href="/tabs/profile">
+                <IonIcon icon={personOutline} />
+                <IonLabel>Perfil</IonLabel>
             </IonTabButton>
         </IonTabBar>
     </IonTabs>

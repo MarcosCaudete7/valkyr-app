@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
-  IonButton, IonItem, IonLabel, IonIcon, IonList
+  IonButton, IonItem, IonLabel, IonIcon, IonList, IonButtons, IonBackButton
 } from '@ionic/react';
 import { helpCircle, logOutOutline, personCircleOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
@@ -26,6 +26,9 @@ const Tab3: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
+          <IonButtons slot="start">
+            <IonBackButton defaultHref="/tabs/profile" />
+          </IonButtons>
           <IonTitle>Ajustes</IonTitle>
         </IonToolbar>
       </IonHeader>
