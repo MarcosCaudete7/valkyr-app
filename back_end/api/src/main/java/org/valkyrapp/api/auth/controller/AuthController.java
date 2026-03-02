@@ -36,7 +36,6 @@ public class AuthController {
     public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody UserDTO userDTO){
         return new ResponseEntity<>(userService.saveUser(userDTO), HttpStatus.CREATED);
     }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO loginDTO) {
         Authentication authentication = authenticationManager.authenticate(
@@ -52,7 +51,7 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("username", username);
-
+        
         userRepository.findByUsername(username).ifPresent(user -> {
             response.put("id", user.getId());
         });

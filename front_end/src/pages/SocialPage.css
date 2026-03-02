@@ -1,0 +1,73 @@
+/* Estilos para la barra de búsqueda */
+.social-searchbar {
+    --background: var(--ion-color-step-50, #f4f5f8);
+    --border-radius: 15px;
+    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 10px 16px;
+    margin-top: 10px;
+}
+
+/* Títulos de las listas (Resultados y Recientes) */
+.social-list-header {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+    padding-left: 16px;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+}
+
+/* Tarjetas de los usuarios (Items de la lista) */
+.social-user-item {
+    --background: var(--ion-color-step-50, #ffffff);
+    --border-radius: 12px;
+    margin: 8px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.social-user-item h2 {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: var(--ion-color-dark);
+}
+
+.social-user-item p {
+    color: var(--ion-color-medium);
+    font-size: 0.9em;
+}
+
+/* Avatares */
+.social-avatar {
+    margin-right: 15px;
+    border: 2px solid var(--ion-color-light);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Estado vacío de inicio */
+.social-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 60px;
+    padding: 0 20px;
+}
+
+.social-empty-state-icon {
+    font-size: 64px;
+    color: var(--ion-color-step-300, #c0c0c0);
+    margin-bottom: 15px;
+}
+
+.social-empty-state h2 {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: var(--ion-color-dark);
+    margin-bottom: 5px;
+}
+
+.social-empty-state p {
+    color: var(--ion-color-medium);
+    font-size: 1em;
+}

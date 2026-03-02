@@ -1,0 +1,63 @@
+.chat-message-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --background: transparent;
+    margin-bottom: 12px;
+}
+
+.chat-bubble {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 14px;
+    max-width: 80%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    word-wrap: break-word;
+}
+
+.chat-bubble-me {
+    background: var(--ion-color-primary) !important;
+    color: #fff !important;
+    border-radius: 18px 18px 0px 18px !important;
+}
+
+.chat-bubble-other {
+    background: var(--ion-color-step-100, #e0e0e0) !important;
+    color: var(--ion-text-color, #000) !important;
+    border-radius: 18px 18px 18px 0px !important;
+}
+
+.chat-message-time {
+    font-size: 0.65em;
+    opacity: 0.75;
+    margin-top: 5px;
+    text-align: right;
+    display: block;
+}
+
+.chat-input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: var(--ion-color-step-50, #f4f5f8);
+    border-top: 1px solid var(--ion-color-step-150, #ddd);
+}
+
+.chat-input {
+    --background: var(--ion-color-step-100, #fff);
+    --border-radius: 20px;
+    --padding-start: 15px;
+    margin-right: 10px;
+    flex: 1;
+    box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chat-send-btn {
+    --border-radius: 50px;
+    margin: 0;
+    height: 40px;
+}
+
+.ion-content-chat {
+    --background: var(--ion-color-light, #f4f5f8);
+}

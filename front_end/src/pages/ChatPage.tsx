@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton } from '@ionic/react';
+import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton, IonIcon } from '@ionic/react';
+import { send } from 'ionicons/icons';
 import { supabase } from '../supabaseClient';
 import { chatService } from '../services/chatService';
+import './ChatPage.css';
 
 const ChatPage: React.FC = () => {
     const { friendId, friendName } = useParams<{ friendId: string; friendName: string }>();
@@ -13,6 +15,23 @@ const ChatPage: React.FC = () => {
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const contentRef = useRef<HTMLIonContentElement>(null);
+
+    const formatTime = (isoString?: string) => {
+        if (!isoString) return '';
+        const d = new Date(isoString);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    useEffect(() => {
+        if (myId && friendId && friendName) {
+            const storageKey = `valkyr_active_chats_${myId}`;
+            const storedChats = localStorage.getItem(storageKey);
+            let activeChats = storedChats ? JSON.parse(storedChats) : [];
+            activeChats = activeChats.filter((chat: any) => chat.friendId !== friendId);
+            activeChats.unshift({ friendId, friendName, lastAccessed: Date.now() });
+            localStorage.setItem(storageKey, JSON.stringify(activeChats.slice(0, 20)));
+        }
+    }, [myId, friendId, friendName]);
 
     useEffect(() => {
         contentRef.current?.scrollToBottom(500);
@@ -76,24 +95,18 @@ const ChatPage: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
 
-            <IonContent className="ion-padding" ref={contentRef}>
-                <IonList style={{ background: 'transparent' }}>
+            <IonContent className="ion-content-chat" ref={contentRef}>
+                <IonList style={{ background: 'transparent', padding: '10px' }}>
                     {messages.map((m) => {
                         const isMe = m.sender_id === myId;
                         return (
-                            <IonItem key={m.id} lines="none" style={{ '--background': 'transparent' }}>
+                            <IonItem className="chat-message-item" key={m.id} lines="none">
                                 <div
                                     slot={isMe ? 'end' : 'start'}
-                                    style={{
-                                        background: isMe ? 'var(--ion-color-primary)' : 'var(--ion-color-step-100, #e0e0e0)',
-                                        color: isMe ? '#fff' : 'inherit',
-                                        padding: '10px 15px',
-                                        borderRadius: isMe ? '15px 15px 0 15px' : '15px 15px 15px 0',
-                                        maxWidth: '80%',
-                                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                                    }}
+                                    className={`chat-bubble ${isMe ? 'chat-bubble-me' : 'chat-bubble-other'}`}
                                 >
                                     <IonLabel className="ion-text-wrap">{m.content}</IonLabel>
+                                    <span className="chat-message-time">{formatTime(m.created_at)}</span>
                                 </div>
                             </IonItem>
                         );
@@ -101,15 +114,17 @@ const ChatPage: React.FC = () => {
                 </IonList>
             </IonContent>
 
-            <div style={{ display: 'flex', padding: '10px', background: 'var(--ion-background-color)', borderTop: '1px solid var(--ion-color-step-150)' }}>
+            <div className="chat-input-container">
                 <IonInput
+                    className="chat-input"
                     value={newMessage}
                     placeholder="Escribe un mensaje..."
                     onIonInput={e => setNewMessage(e.detail.value!)}
                     onKeyUp={e => e.key === 'Enter' && handleSendMessage()}
-                    style={{ background: 'var(--ion-color-step-50)', borderRadius: '20px', paddingLeft: '15px', marginRight: '10px' }}
                 />
-                <IonButton shape="round" onClick={handleSendMessage}>Enviar</IonButton>
+                <IonButton shape="round" className="chat-send-btn" onClick={handleSendMessage}>
+                    <IonIcon icon={send} slot="icon-only" />
+                </IonButton>
             </div>
         </IonPage>
     );
