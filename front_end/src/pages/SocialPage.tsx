@@ -1,26 +1,95 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSearchbar, IonList, IonItem, IonLabel, IonAvatar, IonListHeader, useIonViewWillEnter, IonIcon } from '@ionic/react';
 import { chatbubbleEllipsesOutline } from 'ionicons/icons';
 import './SocialPage.css';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
+import { chatService } from '../services/chatService';
+import { supabase } from '../supabaseClient';
 
 const SocialPage: React.FC = () => {
     const [users, setUsers] = useState<any[]>([]);
     const [recentChats, setRecentChats] = useState<any[]>([]);
+    const [myId, setMyId] = useState<string | null>(null);
     const history = useHistory();
+
+    const loadChatsAndPreviews = async (userId: string) => {
+        const storageKey = `valkyr_active_chats_${userId}`;
+        const stored = localStorage.getItem(storageKey);
+        let chats = stored ? JSON.parse(stored) : [];
+
+        try {
+            const messages = await chatService.getUserMessages(userId);
+
+            chats = chats.map((chat: any) => {
+                const latestMsg = messages.find((m: any) =>
+                    m.sender_id === chat.friendId || m.receiver_id === chat.friendId
+                );
+                return {
+                    ...chat,
+                    lastMessage: latestMsg ? latestMsg.content : null,
+                    lastMessageTime: latestMsg ? latestMsg.created_at : chat.lastAccessed,
+                    isUnread: latestMsg ? latestMsg.sender_id === chat.friendId && new Date(latestMsg.created_at).getTime() > new Date(chat.lastAccessed).getTime() : false
+                };
+            });
+
+            const existingIds = new Set(chats.map((c: any) => c.friendId));
+            messages.forEach((m: any) => {
+                const otherId = m.sender_id === userId ? m.receiver_id : m.sender_id;
+                if (!existingIds.has(otherId)) {
+                    existingIds.add(otherId);
+                    chats.push({
+                        friendId: otherId,
+                        friendName: 'Usuario',
+                        lastAccessed: m.created_at,
+                        lastMessage: m.content,
+                        lastMessageTime: m.created_at,
+                        isUnread: m.sender_id === otherId
+                    });
+                }
+            });
+
+            chats.sort((a: any, b: any) => new Date(b.lastMessageTime || b.lastAccessed).getTime() - new Date(a.lastMessageTime || a.lastAccessed).getTime());
+
+            setRecentChats(chats);
+        } catch (error) {
+            console.error("Error loading chat previews", error);
+            setRecentChats(chats);
+        }
+    };
 
     useIonViewWillEnter(() => {
         const rawUserData = localStorage.getItem('user');
         if (rawUserData) {
-            const myId = JSON.parse(rawUserData).id;
-            const storageKey = `valkyr_active_chats_${myId}`;
-            const stored = localStorage.getItem(storageKey);
-            if (stored) {
-                setRecentChats(JSON.parse(stored));
+            const userId = JSON.parse(rawUserData).id?.toString();
+            setMyId(userId);
+            if (userId) {
+                loadChatsAndPreviews(userId);
             }
         }
     });
+
+    useEffect(() => {
+        if (!myId) return;
+
+        const channel = supabase
+            .channel(`social_chats_${myId}`)
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages'
+            }, (payload) => {
+                const msg = payload.new;
+                if (msg.sender_id === myId || msg.receiver_id === myId) {
+                    loadChatsAndPreviews(myId);
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [myId]);
 
     const handleSearch = async (query: string) => {
         if (query.length < 3) {
@@ -81,8 +150,12 @@ const SocialPage: React.FC = () => {
                                     <img src={`https://ui-avatars.com/api/?name=${chat.friendName}&background=random`} />
                                 </IonAvatar>
                                 <IonLabel>
-                                    <h2>{chat.friendName}</h2>
-                                    <p>Último acceso: {new Date(chat.lastAccessed).toLocaleDateString()}</p>
+                                    <h2 style={{ fontWeight: chat.isUnread ? 'bold' : '600', color: chat.isUnread ? 'var(--ion-color-primary)' : 'var(--ion-text-color)' }}>
+                                        {chat.friendName}
+                                    </h2>
+                                    <p style={{ fontWeight: chat.isUnread ? 'bold' : 'normal', color: chat.isUnread ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>
+                                        {chat.lastMessage ? chat.lastMessage : `Último acceso: ${new Date(chat.lastAccessed).toLocaleDateString()}`}
+                                    </p>
                                 </IonLabel>
                             </IonItem>
                         ))}
