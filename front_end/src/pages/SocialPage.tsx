@@ -10,7 +10,6 @@ const SocialPage: React.FC = () => {
     const handleSearch = async (query: string) => {
         if (query.length < 3) return;
         try {
-            // Llamada a tu API de Spring Boot
             const token = localStorage.getItem('token')?.replace(/"/g, '');
             const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
             const res = await axios.get(`https://api.valkyrapp.com/api/users/search?query=${query}`, config);

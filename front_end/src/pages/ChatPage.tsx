@@ -1,17 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton } from '@ionic/react';
 import { supabase } from '../supabaseClient';
-import { chatService } from '../services/chatService'; // Asegúrate de que la ruta coincida con donde guardaste el service
+import { chatService } from '../services/chatService';
 
 const ChatPage: React.FC = () => {
     const { friendId, friendName } = useParams<{ friendId: string; friendName: string }>();
 
-    const rawUserData = localStorage.getItem('userData');
+    const rawUserData = localStorage.getItem('user');
     const myId = rawUserData ? JSON.parse(rawUserData).id?.toString() : null;
 
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState('');
+    const contentRef = useRef<HTMLIonContentElement>(null);
+
+    useEffect(() => {
+        contentRef.current?.scrollToBottom(500);
+    }, [messages]);
 
     useEffect(() => {
         if (!myId || !friendId) {
@@ -71,7 +76,7 @@ const ChatPage: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
 
-            <IonContent className="ion-padding">
+            <IonContent className="ion-padding" ref={contentRef}>
                 <IonList style={{ background: 'transparent' }}>
                     {messages.map((m) => {
                         const isMe = m.sender_id === myId;
@@ -101,7 +106,7 @@ const ChatPage: React.FC = () => {
                     value={newMessage}
                     placeholder="Escribe un mensaje..."
                     onIonInput={e => setNewMessage(e.detail.value!)}
-                    onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
+                    onKeyUp={e => e.key === 'Enter' && handleSendMessage()}
                     style={{ background: 'var(--ion-color-step-50)', borderRadius: '20px', paddingLeft: '15px', marginRight: '10px' }}
                 />
                 <IonButton shape="round" onClick={handleSendMessage}>Enviar</IonButton>
