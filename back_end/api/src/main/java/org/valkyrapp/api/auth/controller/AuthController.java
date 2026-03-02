@@ -46,11 +46,16 @@ public class AuthController {
                 )
         );
 
-        String token = jwtProvider.generateToken(authentication.getName());
+        String username = authentication.getName();
+        String token = jwtProvider.generateToken(username);
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
-        response.put("username", authentication.getName());
+        response.put("username", username);
+
+        userRepository.findByUsername(username).ifPresent(user -> {
+            response.put("id", user.getId());
+        });
 
         return ResponseEntity.ok(response);
     }

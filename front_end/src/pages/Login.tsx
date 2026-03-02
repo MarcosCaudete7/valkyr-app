@@ -15,8 +15,6 @@ const Login: React.FC = () => {
     const [errorMsg, setErrorMsg] = useState('');
     const history = useHistory();
 
-    // LAS LÍNEAS QUE ESTABAN AQUÍ FUERA HAN SIDO ELIMINADAS
-
     const handleLogin = async () => {
         if (!credentials.username || !credentials.password) {
             setErrorMsg('Por favor, rellena todos los campos');
@@ -29,33 +27,26 @@ const Login: React.FC = () => {
             const response = await authService.login(credentials);
             console.log('Respuesta login:', response);
 
-            // CORRECCIÓN: Buscamos el token en el cuerpo O en la cabecera
             let token = response.data.token || response.headers['authorization'];
 
             if (token) {
-                // Limpiamos el prefijo 'Bearer ' si viene en la cabecera
                 if (token.startsWith('Bearer ')) {
                     token = token.substring(7);
                 }
 
                 console.log('Token encontrado:', token);
                 localStorage.setItem('token', token);
-                // Aseguramos que guardamos el objeto user correctamente
                 const userData = response.data;
                 console.log('Guardando usuario:', userData);
-                localStorage.setItem('user', JSON.stringify(userData)); 
-
-                // Usamos history.push para mantener el estado de React
+                localStorage.setItem('user', JSON.stringify(userData));
                 console.log('Redirigiendo a /tabs/myroutines');
                 history.push('/tabs/myroutines');
-                // window.location.reload(); // Opcional: si realmente necesitas recargar, úsalo después, pero history.push suele ser mejor
             } else {
                 console.error('No se encontró token en la respuesta');
                 setErrorMsg('Error: No se recibió el token de acceso');
             }
         } catch (error: any) {
             console.error("Fallo de login:", error);
-            // Muestra el mensaje real del error si existe
             setErrorMsg(error.response?.data?.message || 'Error de conexión con el servidor');
         } finally {
             setLoading(false);
