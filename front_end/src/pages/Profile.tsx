@@ -8,7 +8,7 @@ import {
 import { settingsOutline, addCircleOutline, imageOutline, chatbubbleOutline, personAddOutline, checkmarkCircleOutline, listOutline, calendarOutline, clipboardOutline, documentTextOutline, trashOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { socialService, UserProfile } from '../services/socialService';
+import { socialService, UserProfile, Post } from '../services/socialService';
 import { getMyRoutines, getPublicRoutinesByUserId } from '../services/routineService';
 import { Routine } from '../models/Routine';
 import './Profile.css';
@@ -24,7 +24,7 @@ const Profile: React.FC = () => {
     const [isOwnProfile, setIsOwnProfile] = useState(true);
     const [user, setUser] = useState<any>(null); // From API (username, name)
     const [socialProfile, setSocialProfile] = useState<UserProfile | null>(null); // From Supabase (bio, etc)
-    const [posts, setPosts] = useState<{ type: 'image' | 'pdf', data: string, name?: string }[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
     const [presentAlert] = useIonAlert();
 
     // Tabs & Content
@@ -71,38 +71,9 @@ const Profile: React.FC = () => {
                 setIsFollowing(followingStatus);
             }
 
-            // 5. Load Posts (Simulation for now)
-            // Soporte para retrocompatibilidad con arrays de strings antiguos
-            const savedPostsStr = localStorage.getItem(`valkyr_profile_posts_${userId}`);
-
-            if (savedPostsStr && savedPostsStr !== "[]") {
-                const parsed = JSON.parse(savedPostsStr);
-                const formattedPosts = parsed.map((p: any) => {
-                    if (typeof p === 'string') {
-                        return { type: 'image', data: p }; // Formato antiguo
-                    }
-                    return p; // Formato nuevo
-                });
-                setPosts(formattedPosts);
-            } else if (!isOwn) {
-                // Simulación para ver posts de OTRA persona (ya que localStorage no se comparte entre navegadores distintos en pruebas locales si no subes a una DB real)
-                const globalPostsStr = localStorage.getItem('valkyr_profile_posts'); // Fallback a los antiguos globales
-                if (globalPostsStr) {
-                    const parsed = JSON.parse(globalPostsStr);
-                    const formattedPosts = parsed.map((p: any) => {
-                        return typeof p === 'string' ? { type: 'image', data: p } : p;
-                    });
-                    // Mostramos solo un par aleatorio para simular que son de este usuario
-                    setPosts(formattedPosts.slice(0, 3));
-                } else {
-                    setPosts([
-                        { type: 'image', data: `https://source.unsplash.com/random/500x500/?fitness,gym&sig=${userId}1` },
-                        { type: 'image', data: `https://source.unsplash.com/random/500x500/?fitness,workout&sig=${userId}2` }
-                    ]);
-                }
-            } else {
-                setPosts([]);
-            }
+            // 5. Load Posts from Supabase
+            const fetchedPosts = await socialService.getPosts(userId);
+            setPosts(fetchedPosts);
 
             // 6. Load Routines
             if (isOwn) {
@@ -166,28 +137,31 @@ const Profile: React.FC = () => {
         }
     };
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && authUserId) {
             const isPdf = file.type === 'application/pdf';
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 const newData = e.target?.result as string;
-                const newPost: { type: 'image' | 'pdf', data: string, name?: string } = {
-                    type: isPdf ? 'pdf' : 'image',
-                    data: newData,
-                    name: isPdf ? file.name : undefined
-                };
-
-                const updatedPosts = [newPost, ...posts];
-                setPosts(updatedPosts);
-                localStorage.setItem(`valkyr_profile_posts_${authUserId}`, JSON.stringify(updatedPosts));
+                try {
+                    const newPost = await socialService.uploadPost(
+                        authUserId,
+                        isPdf ? 'pdf' : 'image',
+                        newData,
+                        isPdf ? file.name : undefined
+                    );
+                    setPosts(prevPosts => [newPost, ...prevPosts]);
+                } catch (error) {
+                    console.error("Error subiendo el archivo a Supabase", error);
+                    presentAlert({ header: 'Error', message: 'No se pudo subir la publicación.', buttons: ['OK'] });
+                }
             };
             reader.readAsDataURL(file);
         }
     };
 
-    const confirmDeletePost = (index: number) => {
+    const confirmDeletePost = (post: Post) => {
         if (!isOwnProfile) return;
         presentAlert({
             header: 'Eliminar Publicación',
@@ -197,12 +171,13 @@ const Profile: React.FC = () => {
                 {
                     text: 'Eliminar',
                     role: 'destructive',
-                    handler: () => {
-                        const updatedPosts = [...posts];
-                        updatedPosts.splice(index, 1);
-                        setPosts(updatedPosts);
-                        if (authUserId) {
-                            localStorage.setItem(`valkyr_profile_posts_${authUserId}`, JSON.stringify(updatedPosts));
+                    handler: async () => {
+                        try {
+                            await socialService.deletePost(post.id);
+                            setPosts(prevPosts => prevPosts.filter(p => p.id !== post.id));
+                        } catch (error) {
+                            console.error("Error eliminando el post en Supabase", error);
+                            presentAlert({ header: 'Error', message: 'No se pudo eliminar la publicación.', buttons: ['OK'] });
                         }
                     }
                 }
@@ -322,8 +297,8 @@ const Profile: React.FC = () => {
                         ) : (
                             <IonGrid className="profile-grid">
                                 <IonRow>
-                                    {posts.map((post, idx) => (
-                                        <IonCol size="4" key={idx} className="profile-grid-col" onClick={() => isOwnProfile && confirmDeletePost(idx)}>
+                                    {posts.map((post) => (
+                                        <IonCol size="4" key={post.id} className="profile-grid-col" onClick={() => isOwnProfile && confirmDeletePost(post)}>
                                             {post.type === 'image' ? (
                                                 <div className="profile-grid-item" style={{ backgroundImage: `url(${post.data})` }}>
                                                     {isOwnProfile && <div className="delete-overlay"><IonIcon icon={trashOutline} /></div>}

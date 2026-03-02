@@ -26,3 +26,16 @@ ALTER TABLE followers ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public read/write profiles" ON profiles FOR ALL USING (true);
 CREATE POLICY "Allow public read/write followers" ON followers FOR ALL USING (true);
+
+-- 5. Tabla de Publicaciones (Posts y PDFs)
+CREATE TABLE posts (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  data TEXT NOT NULL,
+  name TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read/write posts" ON posts FOR ALL USING (true);

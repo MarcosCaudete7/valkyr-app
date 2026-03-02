@@ -6,6 +6,15 @@ export interface UserProfile {
     website: string;
 }
 
+export interface Post {
+    id: string;
+    user_id: string;
+    type: 'image' | 'pdf';
+    data: string;
+    name?: string;
+    created_at: string;
+}
+
 export const socialService = {
     // Profiles
     async getProfile(userId: string): Promise<UserProfile | null> {
@@ -76,5 +85,40 @@ export const socialService = {
 
         if (error) throw error;
         return count || 0;
+    },
+
+    // Posts
+    async getPosts(userId: string): Promise<Post[]> {
+        const { data, error } = await supabase
+            .from('posts')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("Error obteniendo posts:", error);
+            return [];
+        }
+        return data || [];
+    },
+
+    async uploadPost(userId: string, type: 'image' | 'pdf', data: string, name?: string): Promise<Post> {
+        const { data: newPost, error } = await supabase
+            .from('posts')
+            .insert([{ user_id: userId, type, data, name }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return newPost;
+    },
+
+    async deletePost(postId: string) {
+        const { error } = await supabase
+            .from('posts')
+            .delete()
+            .eq('id', postId);
+
+        if (error) throw error;
     }
 };
