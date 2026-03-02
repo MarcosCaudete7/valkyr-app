@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton, IonIcon } from '@ionic/react';
-import { send } from 'ionicons/icons';
+import { send, personCircleOutline } from 'ionicons/icons';
 import { supabase } from '../supabaseClient';
 import { chatService } from '../services/chatService';
 import './ChatPage.css';
 
 const ChatPage: React.FC = () => {
     const { friendId, friendName } = useParams<{ friendId: string; friendName: string }>();
+    const history = useHistory();
 
     const rawUserData = localStorage.getItem('user');
     const myId = rawUserData ? JSON.parse(rawUserData).id?.toString() : null;
@@ -92,6 +93,11 @@ const ChatPage: React.FC = () => {
                         <IonBackButton defaultHref="/tabs/social" />
                     </IonButtons>
                     <IonTitle>Chat con {friendName}</IonTitle>
+                    <IonButtons slot="end">
+                        <IonButton onClick={() => history.push(`/tabs/profile/${friendId}`)}>
+                            <IonIcon icon={personCircleOutline} />
+                        </IonButton>
+                    </IonButtons>
                 </IonToolbar>
             </IonHeader>
 
