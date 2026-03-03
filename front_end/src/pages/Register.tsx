@@ -18,6 +18,7 @@ const Register: React.FC = () => {
     });
 
     const [errorMsg, setErrorMsg] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [serverErrors, setServerErrors] = useState({ username: '', email: '' });
@@ -98,7 +99,7 @@ const Register: React.FC = () => {
 
         try {
             await authService.register({ username, email, password, fullName });
-            setErrorMsg('¡Registro exitoso! Por favor inicia sesión.');
+            setSuccessMsg('¡Registro exitoso! Por favor inicia sesión.');
             setTimeout(() => history.replace('/login'), 2000);
         } catch (error: any) {
             if (error.response?.status === 409) {
@@ -280,7 +281,15 @@ const Register: React.FC = () => {
                     message={errorMsg}
                     duration={3000}
                     onDidDismiss={() => setErrorMsg('')}
-                    color={errorMsg.includes('éxito') || errorMsg.includes('exitoso') ? 'success' : 'danger'}
+                    color="danger"
+                />
+
+                <IonToast
+                    isOpen={!!successMsg}
+                    message={successMsg}
+                    duration={3000}
+                    onDidDismiss={() => setSuccessMsg('')}
+                    color="success"
                 />
             </IonContent>
         </IonPage>
