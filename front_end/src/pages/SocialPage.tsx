@@ -5,6 +5,8 @@ import './SocialPage.css';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import { chatService } from '../services/chatService';
+import { socialService, UserProfile } from '../services/socialService';
+import { API_BASE_URL } from '../services/api';
 import { supabase } from '../supabaseClient';
 
 const SocialPage: React.FC = () => {
@@ -108,7 +110,7 @@ const SocialPage: React.FC = () => {
         try {
             const token = localStorage.getItem('token')?.replace(/"/g, '');
             const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-            const res = await axios.get(`https://api.valkyrapp.com/api/users/search?query=${query}`, config);
+            const res = await axios.get(`${API_BASE_URL}/users/search?query=${query}`, config);
             setUsers(res.data);
         } catch (err) {
             console.error("Error buscando usuarios", err);

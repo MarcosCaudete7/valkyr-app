@@ -4,6 +4,7 @@ import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, I
 import { send, personCircleOutline } from 'ionicons/icons';
 import { supabase } from '../supabaseClient';
 import { chatService } from '../services/chatService';
+import { API_BASE_URL } from '../services/api';
 import './ChatPage.css';
 
 const ChatPage: React.FC = () => {
@@ -57,7 +58,7 @@ const ChatPage: React.FC = () => {
             try {
                 const token = localStorage.getItem('token')?.replace(/"/g, '');
                 const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-                const res = await fetch(`https://api.valkyrapp.com/api/users/${friendId}`, config as any);
+                const res = await fetch(`${API_BASE_URL}/users/${friendId}`, config as any);
                 if (res.ok) {
                     const friendData = await res.json();
                     if (friendData?.username) {

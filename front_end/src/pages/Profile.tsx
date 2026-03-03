@@ -8,6 +8,7 @@ import {
 import { settingsOutline, addCircleOutline, imageOutline, chatbubbleOutline, personAddOutline, checkmarkCircleOutline, listOutline, calendarOutline, clipboardOutline, documentTextOutline, trashOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../services/api';
 import { socialService, UserProfile, Post } from '../services/socialService';
 import { getMyRoutines, getPublicRoutinesByUserId } from '../services/routineService';
 import { Routine } from '../models/Routine';
@@ -50,7 +51,7 @@ const Profile: React.FC = () => {
                 const rawUserData = localStorage.getItem('user');
                 if (rawUserData) setUser(JSON.parse(rawUserData));
             } else {
-                const res = await axios.get(`https://api.valkyrapp.com/api/users/${userId}`, config);
+                const res = await axios.get(`${API_BASE_URL}/users/${userId}`, config);
                 setUser(res.data);
             }
 

@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_BASE_URL } from './api';
 
-const API_URL = 'https://api.valkyrapp.com/api/v1';
+const API_URL = `${API_BASE_URL.replace('/api', '')}/api/v1`;
 
 const getAuthHeader = () => {
     const token = localStorage.getItem('token')?.replace(/"/g, '');
