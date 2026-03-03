@@ -11,14 +11,17 @@ export const chatService = {
         let finalContent = content;
         const friendPubKey = await cryptoService.getFriendPublicKey(receiverId);
 
-        if (friendPubKey) {
-            // Uint8Array to Base64 para guardarlo como string en la BD
-            const friendPubKeyBase64 = naclUtil.encodeBase64(friendPubKey);
-            try {
-                finalContent = cryptoService.encryptMessage(senderId, friendPubKeyBase64, content);
-            } catch (e) {
-                console.error("Error al encriptar, enviando en plano como fallback", e);
-            }
+        if (!friendPubKey) {
+            throw new Error("E2EE_MISSING_KEY");
+        }
+
+        // Uint8Array to Base64 para guardarlo como string en la BD
+        const friendPubKeyBase64 = naclUtil.encodeBase64(friendPubKey);
+        try {
+            finalContent = cryptoService.encryptMessage(senderId, friendPubKeyBase64, content);
+        } catch (e) {
+            console.error("Error al encriptar", e);
+            throw new Error("E2EE_ENCRYPTION_FAILED");
         }
 
         const { data, error } = await supabase

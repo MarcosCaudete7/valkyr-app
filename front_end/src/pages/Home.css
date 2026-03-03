@@ -95,6 +95,25 @@
     padding: 0 10px;
 }
 
+@media (prefers-color-scheme: dark) {
+    .calculator-widget {
+        background: rgba(40, 40, 40, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .calculator-widget ion-input {
+        --background: rgba(0, 0, 0, 0.3);
+        --color: #ffffff;
+    }
+
+    .calculator-widget select {
+        background: rgba(0, 0, 0, 0.3);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+}
+
 .rm-result {
     margin-top: 15px;
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton, IonIcon } from '@ionic/react';
-import { send, personCircleOutline } from 'ionicons/icons';
+import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton, IonIcon, useIonAlert } from '@ionic/react';
+import { send, personCircleOutline, lockClosedOutline } from 'ionicons/icons';
 import { supabase } from '../supabaseClient';
 import { chatService } from '../services/chatService';
 import { cryptoService } from '../services/cryptoService';
@@ -12,6 +12,7 @@ import './ChatPage.css';
 const ChatPage: React.FC = () => {
     const { friendId, friendName } = useParams<{ friendId: string; friendName: string }>();
     const history = useHistory();
+    const [presentAlert] = useIonAlert();
 
     const rawUserData = localStorage.getItem('user');
     const myId = rawUserData ? JSON.parse(rawUserData).id?.toString() : null;
@@ -24,7 +25,8 @@ const ChatPage: React.FC = () => {
 
     const formatTime = (isoString?: string) => {
         if (!isoString) return '';
-        const d = new Date(isoString);
+        const utcString = isoString.endsWith('Z') ? isoString : `${isoString}Z`;
+        const d = new Date(utcString);
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
@@ -116,8 +118,22 @@ const ChatPage: React.FC = () => {
         try {
             await chatService.sendMessage(myId, friendId, newMessage);
             setNewMessage('');
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error al enviar el mensaje:", error);
+            if (error.message === "E2EE_MISSING_KEY") {
+                presentAlert({
+                    header: 'Cifrado No Disponible',
+                    subHeader: 'Atención',
+                    message: `${resolvedName} aún no ha actualizado la app a la última versión. Los mensajes privados no se pueden encriptar hasta que inicie sesión.`,
+                    buttons: ['Entendido']
+                });
+            } else {
+                presentAlert({
+                    header: 'Error',
+                    message: 'Hubo un problema al enviar el mensaje secreto.',
+                    buttons: ['OK']
+                });
+            }
         }
     };
 
@@ -128,7 +144,10 @@ const ChatPage: React.FC = () => {
                     <IonButtons slot="start">
                         <IonBackButton defaultHref="/tabs/social" />
                     </IonButtons>
-                    <IonTitle>{resolvedName}</IonTitle>
+                    <IonTitle style={{ fontSize: '1.1rem' }}>
+                        {resolvedName}
+                        <IonIcon icon={lockClosedOutline} style={{ fontSize: '0.8rem', marginLeft: '5px', color: 'var(--ion-color-success)' }} />
+                    </IonTitle>
                     <IonButtons slot="end">
                         <IonButton onClick={() => history.push(`/tabs/profile/${friendId}`)}>
                             <IonIcon icon={personCircleOutline} />
