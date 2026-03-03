@@ -4,6 +4,8 @@ import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, I
 import { send, personCircleOutline } from 'ionicons/icons';
 import { supabase } from '../supabaseClient';
 import { chatService } from '../services/chatService';
+import { cryptoService } from '../services/cryptoService';
+import naclUtil from 'tweetnacl-util';
 import { API_BASE_URL } from '../services/api';
 import './ChatPage.css';
 
@@ -18,6 +20,7 @@ const ChatPage: React.FC = () => {
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const contentRef = useRef<HTMLIonContentElement>(null);
+    const friendPubKeyRef = useRef<string | null>(null);
 
     const formatTime = (isoString?: string) => {
         if (!isoString) return '';
@@ -47,6 +50,10 @@ const ChatPage: React.FC = () => {
         }
         const fetchMessages = async () => {
             try {
+                // Fetch public key first for real-time messages
+                const key = await cryptoService.getFriendPublicKey(friendId);
+                friendPubKeyRef.current = key ? naclUtil.encodeBase64(key) : null;
+
                 const data = await chatService.getMessages(myId, friendId);
                 setMessages(data);
             } catch (error) {
@@ -83,6 +90,16 @@ const ChatPage: React.FC = () => {
                 const msg = payload.new;
                 if ((msg.sender_id === myId && msg.receiver_id === friendId) ||
                     (msg.sender_id === friendId && msg.receiver_id === myId)) {
+
+                    if (friendPubKeyRef.current) {
+                        try {
+                            const decrypted = cryptoService.decryptMessage(myId, friendPubKeyRef.current, msg.content);
+                            if (decrypted) msg.content = decrypted;
+                        } catch (e) {
+                            // Leave as plaintext if decryption fails
+                        }
+                    }
+
                     setMessages((prev) => [...prev, msg]);
                 }
             })

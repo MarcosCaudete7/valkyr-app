@@ -16,7 +16,6 @@ const MainTabs: React.FC = () => (
         <IonRouterOutlet>
             <Route exact path="/tabs/home" component={Home} />
             <Route exact path="/tabs/myroutines" component={MyRoutines} />
-            <Route exact path="/tabs/create" component={CreateRoutine} />
             <Route exact path="/tabs/settings" component={Settings} />
             <Route exact path="/tabs/profile" component={Profile} />
             <Route exact path="/tabs/profile/:targetId" component={Profile} />

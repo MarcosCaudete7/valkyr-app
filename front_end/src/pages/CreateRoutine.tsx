@@ -12,7 +12,11 @@ import { createRoutine } from '../services/routineService';
 import { getAllExercises, Exercise } from '../services/exerciseService';
 import './CreateRoutine.css';
 
-const CreateRoutine: React.FC = () => {
+interface CreateRoutineProps {
+  onComplete?: () => void;
+}
+
+const CreateRoutine: React.FC<CreateRoutineProps> = ({ onComplete }) => {
   const [mode, setMode] = useState<'manual' | 'ai'>('manual');
   const [loadingAi, setLoadingAi] = useState(false);
   const [present] = useIonToast();
@@ -107,7 +111,11 @@ const CreateRoutine: React.FC = () => {
       await createRoutine(routineData);
       present({ message: 'Rutina guardada correctamente', duration: 2000, color: 'success' });
       setRoutineData({ name: '', description: '', exerciseInput: '', type: 'bodybuilding', isPublic: false, exercises: [] });
-      history.push('/tabs/myroutines');
+      if (onComplete) {
+        onComplete();
+      } else {
+        history.push('/tabs/myroutines');
+      }
     } catch (error) {
       console.error("Error guardando:", error);
       present({ message: 'Error al guardar', duration: 2000, color: 'danger' });
@@ -120,27 +128,21 @@ const CreateRoutine: React.FC = () => {
   );
 
   return (
-    <IonPage id="create-routine-page">
-      <IonHeader className="ion-no-border">
-        <IonToolbar color="primary">
-          <IonButtons slot="start"><IonBackButton defaultHref="/tabs/myroutines" /></IonButtons>
-          <IonTitle>Nueva Rutina</IonTitle>
-        </IonToolbar>
-        <IonToolbar color="primary">
-          <IonSegment value={mode} onIonChange={(e) => setMode(e.detail.value as any)}>
-            <IonSegmentButton value="manual">
-              <IonLabel>Editor</IonLabel>
-              <IonIcon icon={barbellOutline} />
-            </IonSegmentButton>
-            <IonSegmentButton value="ai">
-              <IonLabel>Valkyr AI</IonLabel>
-              <IonIcon icon={flashOutline} />
-            </IonSegmentButton>
-          </IonSegment>
-        </IonToolbar>
-      </IonHeader>
+    <div className="create-routine-wrapper">
+      <div className="segment-container" style={{ margin: '10px 0', padding: '0 10px' }}>
+        <IonSegment value={mode} onIonChange={(e) => setMode(e.detail.value as any)}>
+          <IonSegmentButton value="manual">
+            <IonLabel>Editor Libre</IonLabel>
+            <IonIcon icon={barbellOutline} />
+          </IonSegmentButton>
+          <IonSegmentButton value="ai">
+            <IonLabel>Valkyr AI</IonLabel>
+            <IonIcon icon={flashOutline} />
+          </IonSegmentButton>
+        </IonSegment>
+      </div>
 
-      <IonContent fullscreen className="ion-padding">
+      <div className="ion-padding">
         {mode === 'ai' ? (
           <div className="ai-assistant-container">
             <div className="ai-header">
@@ -265,9 +267,8 @@ const CreateRoutine: React.FC = () => {
             </IonList>
           </IonContent>
         </IonModal>
-
-      </IonContent>
-    </IonPage>
+      </div>
+    </div>
   );
 };
 

@@ -111,8 +111,7 @@ const Routines: React.FC = () => {
 
         {activeTab === 'create' ? (
           <div style={{ marginTop: '10px' }}>
-            {/* The CreateRoutine component itself is a page, but since we are embedding it, we might just render its content. However, rendering an IonPage inside another IonPage can cause scroll issues. It's better to navigate. Actually, the user asked for two tabs inside routines. Let's render it directly. */}
-            <CreateRoutine />
+            <CreateRoutine onComplete={() => setActiveTab('list')} />
           </div>
         ) : loading && routines.length === 0 ? (
           <div className="centered-container">
