@@ -36,13 +36,20 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user",
-        fetch = FetchType.EAGER,
-        cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    @JsonIgnore
+    @Column(name = "is_verified", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private Boolean isVerified = false;
 
-    private List<Routine> routines=new ArrayList<>();
+    @Column(name = "otp_code", length = 6)
+    private String otpCode;
+
+    @Column(name = "otp_expiry")
+    private LocalDateTime otpExpiry;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @Builder.Default
+    private List<Routine> routines = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

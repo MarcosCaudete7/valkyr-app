@@ -105,7 +105,10 @@ const Login: React.FC = () => {
                                 ENTRAR
                             </IonButton>
 
-                            <div className="auth-footer">
+                            <div className="auth-footer" style={{ marginTop: '16px' }}>
+                                <span className="auth-link" onClick={() => history.push('/forgot-password')} style={{ display: 'block', marginBottom: '16px' }}>
+                                    ¿Olvidaste tu contraseña?
+                                </span>
                                 <p>
                                     ¿No tienes cuenta?
                                     <span className="auth-link" onClick={() => history.push('/register')}>
