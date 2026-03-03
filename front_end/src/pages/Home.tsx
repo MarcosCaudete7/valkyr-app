@@ -3,7 +3,8 @@ import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
     IonGrid, IonRow, IonCol, IonCard, IonIcon, IonText, IonRefresher, IonRefresherContent
 } from '@ionic/react';
-import { walkOutline, flameOutline, mapOutline, timeOutline } from 'ionicons/icons';
+import { Capacitor } from '@capacitor/core';
+import { walkOutline, flameOutline, mapOutline, timeOutline, informationCircleOutline } from 'ionicons/icons';
 import { healthService, HealthData } from '../services/healthService';
 import './Home.css';
 
@@ -57,6 +58,12 @@ const Home: React.FC = () => {
                 </div>
 
                 <div className="widgets-container">
+                    {!Capacitor.isNativePlatform() && (
+                        <div style={{ textAlign: 'center', marginBottom: '15px', color: 'var(--ion-color-medium)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                            <IonIcon icon={informationCircleOutline} />
+                            <span>Datos simulados (Modo Web). Conecta la App Android para ver pasos reales.</span>
+                        </div>
+                    )}
                     <IonGrid>
                         <IonRow>
                             {/* Pasos */}

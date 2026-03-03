@@ -13,6 +13,7 @@ const ChatPage: React.FC = () => {
     const rawUserData = localStorage.getItem('user');
     const myId = rawUserData ? JSON.parse(rawUserData).id?.toString() : null;
 
+    const [resolvedName, setResolvedName] = useState(friendName || 'Usuario');
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const contentRef = useRef<HTMLIonContentElement>(null);
@@ -52,7 +53,24 @@ const ChatPage: React.FC = () => {
             }
         };
 
+        const fetchFriendDetails = async () => {
+            try {
+                const token = localStorage.getItem('token')?.replace(/"/g, '');
+                const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+                const res = await fetch(`https://api.valkyrapp.com/api/users/${friendId}`, config as any);
+                if (res.ok) {
+                    const friendData = await res.json();
+                    if (friendData?.username) {
+                        setResolvedName(friendData.username);
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not fetch fresh user details", err);
+            }
+        };
+
         fetchMessages();
+        fetchFriendDetails();
 
         const channel = supabase
             .channel(`chat_${myId}_${friendId}`)
@@ -92,7 +110,7 @@ const ChatPage: React.FC = () => {
                     <IonButtons slot="start">
                         <IonBackButton defaultHref="/tabs/social" />
                     </IonButtons>
-                    <IonTitle>{friendName}</IonTitle>
+                    <IonTitle>{resolvedName}</IonTitle>
                     <IonButtons slot="end">
                         <IonButton onClick={() => history.push(`/tabs/profile/${friendId}`)}>
                             <IonIcon icon={personCircleOutline} />
