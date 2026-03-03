@@ -204,3 +204,69 @@ ion-input.ion-valid.ion-touched {
 .auth-link {
     user-select: none;
 }
+
+/* OTP Modal Premium Styling */
+.otp-modal-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    height: 100%;
+    justify-content: center;
+    text-align: center;
+    background: var(--ion-color-step-50, #272727);
+}
+
+.otp-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(var(--ion-color-primary-rgb), 0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.otp-icon {
+    font-size: 32px;
+    color: var(--ion-color-primary);
+}
+
+.otp-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--ion-text-color, #ffffff);
+    letter-spacing: -0.5px;
+}
+
+.otp-subtitle {
+    font-size: 16px;
+    color: var(--ion-color-medium);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.otp-helper-text {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 20px;
+    max-width: 80%;
+}
+
+.otp-input-field ion-input {
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 8px;
+    text-align: center;
+    --padding-start: 20px !important;
+}
+
+.otp-submit-button {
+    margin-top: 30px;
+    height: 52px;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    width: 100%;
+}

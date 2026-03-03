@@ -161,4 +161,18 @@ public class AuthController {
 
         return ResponseEntity.badRequest().body(Map.of("message", "El código OTP es inválido"));
     }
+
+    @GetMapping("/test-email")
+    public ResponseEntity<?> testEmail(@RequestParam String to) {
+        try {
+            emailService.sendVerificationEmail(to, "999999");
+            return ResponseEntity.ok(Map.of("message", "Email sent successfully to " + to));
+        } catch (Exception e) {
+            String rootCause = e.getCause() != null ? e.getCause().toString() : "";
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", e.getMessage() != null ? e.getMessage() : "Null message",
+                    "cause", rootCause,
+                    "stack", e.getStackTrace().length > 0 ? e.getStackTrace()[0].toString() : "No stack"));
+        }
+    }
 }
