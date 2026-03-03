@@ -51,7 +51,7 @@ const Home: React.FC = () => {
 
                 <div className="home-welcome-section">
                     <h1 className="welcome-title">
-                        ¡Hola, {user?.fullName?.split(' ')[0] || user?.username || 'Atleta'}! 👋
+                        ¡Hola, {user?.fullName?.split(' ')?.[0] || user?.username || 'Atleta'}! 👋
                     </h1>
                     <p className="welcome-subtitle">Tu resumen de hoy</p>
                 </div>
