@@ -93,7 +93,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", "El código OTP ha expirado"));
         }
 
-        if (otpCode != null && otpCode.equals(user.getOtpCode())) {
+        if (otpCode != null && user.getOtpCode() != null && otpCode.trim().equals(user.getOtpCode().trim())) {
             user.setIsVerified(true);
             user.setOtpCode(null);
             user.setOtpExpiry(null);
@@ -150,7 +150,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", "El código OTP ha expirado"));
         }
 
-        if (otpCode != null && otpCode.equals(user.getOtpCode())) {
+        if (otpCode != null && user.getOtpCode() != null && otpCode.trim().equals(user.getOtpCode().trim())) {
             user.setPassword(passwordEncoder.encode(newPassword));
             user.setOtpCode(null);
             user.setOtpExpiry(null);

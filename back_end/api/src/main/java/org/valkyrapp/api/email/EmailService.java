@@ -2,6 +2,7 @@ package org.valkyrapp.api.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,6 +22,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(to);
+            helper.setFrom("valkyrapp@gmail.com", "Valkyr App");
             helper.setSubject("Verificación de correo - Valkyr App");
 
             String htmlContent = "<div style=\"font-family: Arial, sans-serif; text-align: center; color: #333;\">"
@@ -38,7 +40,7 @@ public class EmailService {
             log.info("Enviando email de OTP a {}", to);
             mailSender.send(message);
 
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             log.error("Fallo al enviar el correo de verificación a {}", to, e);
             throw new RuntimeException("Error al enviar el correo con el código OTP.");
         }
@@ -50,6 +52,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(to);
+            helper.setFrom("valkyrapp@gmail.com", "Valkyr App");
             helper.setSubject("Restablecer Contraseña - Valkyr App");
 
             String htmlContent = "<div style=\"font-family: Arial, sans-serif; text-align: center; color: #333;\">"
@@ -67,7 +70,7 @@ public class EmailService {
             log.info("Enviando email de Recuperación de Contraseña a {}", to);
             mailSender.send(message);
 
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             log.error("Fallo al enviar el correo de recuperación a {}", to, e);
             throw new RuntimeException("Error al enviar el correo con el código de recuperación.");
         }
