@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
-    IonInput, IonButton, IonToast, IonLoading, IonIcon
+    IonInput, IonButton, IonToast, IonLoading, IonIcon, IonModal
 } from '@ionic/react';
-import { authService } from '../services/api';
+import axios from 'axios';
+import { authService, API_BASE_URL } from '../services/api';
 import { useHistory } from 'react-router-dom';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import './Login.css';
@@ -13,6 +14,10 @@ const Login: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [showOtpModal, setShowOtpModal] = useState(false);
+    const [otpCode, setOtpCode] = useState('');
+    const [verifyingOtp, setVerifyingOtp] = useState(false);
+    const [emailToVerify, setEmailToVerify] = useState('');
     const history = useHistory();
 
     const handleLogin = async () => {
@@ -47,7 +52,12 @@ const Login: React.FC = () => {
             }
         } catch (error: any) {
             console.error("Fallo de login:", error);
-            setErrorMsg(error.response?.data?.message || 'Error de conexión con el servidor');
+            if (error.response?.data?.message === 'ACCOUNT_NOT_VERIFIED') {
+                setEmailToVerify(error.response.data.email || '');
+                setShowOtpModal(true);
+            } else {
+                setErrorMsg(error.response?.data?.message || 'Error de conexión con el servidor');
+            }
         } finally {
             setLoading(false);
         }
@@ -128,6 +138,71 @@ const Login: React.FC = () => {
                     onDidDismiss={() => setErrorMsg('')}
                     color="danger"
                 />
+
+                {/* MODAL OTP PARA VERIFICAR CUENTAS NO VERIFICADAS */}
+                <IonModal isOpen={showOtpModal} backdropDismiss={false} className="premium-otp-modal">
+                    <IonContent className="otp-modal-content">
+                        <div className="otp-modal-container">
+                            <div className="otp-icon-wrapper">
+                                <IonIcon icon={eyeOutline} className="otp-icon" />
+                            </div>
+                            <h2 className="otp-title">Validar Cuenta</h2>
+                            <p className="otp-subtitle">
+                                Hemos enviado un código a <strong>{emailToVerify}</strong>
+                            </p>
+                            <p className="otp-helper-text">
+                                Revisa tu bandeja de entrada o la carpeta de spam e introduce el código de 6 dígitos.
+                            </p>
+
+                            <div className="input-group" style={{ marginTop: '24px' }}>
+                                <IonInput
+                                    label="Código OTP"
+                                    labelPlacement="floating"
+                                    fill="outline"
+                                    type="number"
+                                    maxlength={6}
+                                    value={otpCode}
+                                    onIonInput={e => setOtpCode(e.detail.value!)}
+                                    className="otp-input-field"
+                                />
+                            </div>
+
+                            <IonButton
+                                expand="block"
+                                className="submit-button otp-submit-button"
+                                disabled={otpCode.length !== 6 || verifyingOtp}
+                                onClick={async () => {
+                                    setVerifyingOtp(true);
+                                    try {
+                                        const response = await axios.post(`${API_BASE_URL}/auth/verify-otp`, {
+                                            email: emailToVerify,
+                                            otpCode: otpCode
+                                        });
+
+                                        setErrorMsg('¡Cuenta validada con éxito!');
+                                        setShowOtpModal(false);
+                                        // Auto-login since verify-otp returns token 
+                                        let token = response.data.token;
+                                        if (token) {
+                                            if (token.startsWith('Bearer ')) {
+                                                token = token.substring(7);
+                                            }
+                                            localStorage.setItem('token', token);
+                                            localStorage.setItem('user', JSON.stringify(response.data));
+                                            setTimeout(() => history.push('/tabs/myroutines'), 1500);
+                                        }
+                                    } catch (err: any) {
+                                        setErrorMsg(err.response?.data?.message || 'Código OTP inválido');
+                                    } finally {
+                                        setVerifyingOtp(false);
+                                    }
+                                }}
+                            >
+                                {verifyingOtp ? 'Validando...' : 'Verificar Cuenta'}
+                            </IonButton>
+                        </div>
+                    </IonContent>
+                </IonModal>
             </IonContent>
         </IonPage>
     );

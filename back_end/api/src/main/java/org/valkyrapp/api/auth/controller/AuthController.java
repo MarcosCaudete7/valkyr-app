@@ -48,6 +48,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO loginDTO) {
+        org.valkyrapp.api.usuario.User userCheck = userRepository.findByUsername(loginDTO.getUsername()).orElse(null);
+
+        if (userCheck != null && userCheck.getIsVerified() != null && !userCheck.getIsVerified()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "ACCOUNT_NOT_VERIFIED", "email", userCheck.getEmail()));
+        }
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginDTO.getUsername(),
@@ -78,9 +85,9 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String otpCode = request.get("otpCode");
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, Object> request) {
+        String email = String.valueOf(request.get("email"));
+        String otpCode = String.valueOf(request.get("otpCode"));
 
         org.valkyrapp.api.usuario.User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ese email"));
@@ -138,10 +145,10 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String otpCode = request.get("otpCode");
-        String newPassword = request.get("newPassword");
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, Object> request) {
+        String email = String.valueOf(request.get("email"));
+        String otpCode = String.valueOf(request.get("otpCode"));
+        String newPassword = String.valueOf(request.get("newPassword"));
 
         org.valkyrapp.api.usuario.User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ese email"));
