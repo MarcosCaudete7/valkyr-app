@@ -56,7 +56,22 @@ const CreateRoutine: React.FC<CreateRoutineProps> = ({ onComplete }) => {
     setLoadingAi(true);
     try {
       const response = await getAiRoutine(routineData.exerciseInput, routineData.type);
-      const generated = typeof response === 'string' ? JSON.parse(response) : response;
+
+      let generated;
+      if (typeof response === 'string') {
+        if (response.trim().startsWith('<!DOCTYPE') || response.trim().startsWith('<html')) {
+          console.error("El servidor devolvio una pagina HTML de error:", response);
+          throw new Error("El servidor devolvio un error, revisa Backend logs");
+        }
+        try {
+          generated = JSON.parse(response);
+        } catch (e) {
+          console.error("Error parseando la respuesta de la IA a JSON:", response);
+          throw new Error("La IA no devolvió un JSON válido");
+        }
+      } else {
+        generated = response;
+      }
 
       setRoutineData({
         ...routineData,

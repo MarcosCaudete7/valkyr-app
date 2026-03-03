@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-// Si estamos en el móvil (donde localhost no es el ordenador, sino el propio móvil), 
-// usamos la IP local del ordenador en la red Wi-Fi.
-export const API_BASE_URL = 'https://api.valkyrapp.com/api';
+// Determinamos la URL base dinámicamente según el entorno
+export const API_BASE_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:8080/api'
+    : 'https://api.valkyrapp.com/api';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
