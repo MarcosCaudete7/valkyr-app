@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
-    IonInput, IonButton, IonToast, IonBackButton, IonButtons, IonIcon,
-    IonModal
+    IonInput, IonButton, IonToast, IonBackButton, IonButtons, IonIcon
 } from '@ionic/react';
-import axios from 'axios';
-import { API_BASE_URL, authService } from '../services/api';
+import { authService } from '../services/api';
 import { useHistory } from 'react-router-dom';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import './Register.css';
@@ -25,11 +23,6 @@ const Register: React.FC = () => {
     const [serverErrors, setServerErrors] = useState({ username: '', email: '' });
     const [isValidating, setIsValidating] = useState(false);
     const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
-
-    // OTP State
-    const [showOtpModal, setShowOtpModal] = useState(false);
-    const [otpCode, setOtpCode] = useState('');
-    const [verifyingOtp, setVerifyingOtp] = useState(false);
 
     const history = useHistory();
 
@@ -105,7 +98,8 @@ const Register: React.FC = () => {
 
         try {
             await authService.register({ username, email, password, fullName });
-            setShowOtpModal(true); // Open Modal to ask for OTP instead of redirecting
+            setErrorMsg('¡Registro exitoso! Por favor inicia sesión.');
+            setTimeout(() => history.replace('/login'), 2000);
         } catch (error: any) {
             if (error.response?.status === 409) {
                 const msg = error.response.data?.message?.toLowerCase() || "";
@@ -288,67 +282,6 @@ const Register: React.FC = () => {
                     onDidDismiss={() => setErrorMsg('')}
                     color={errorMsg.includes('éxito') || errorMsg.includes('exitoso') ? 'success' : 'danger'}
                 />
-
-                {/* OTP Verification Modal */}
-                <IonModal isOpen={showOtpModal} backdropDismiss={false}>
-                    <IonHeader>
-                        <IonToolbar>
-                            <IonTitle>Validar Cuenta</IonTitle>
-                        </IonToolbar>
-                    </IonHeader>
-                    <IonContent className="ion-padding">
-                        <div className="otp-modal-container">
-                            <div className="otp-icon-wrapper">
-                                <IonIcon icon={eyeOutline} className="otp-icon" />
-                            </div>
-                            <h2 className="otp-title">Validar Cuenta</h2>
-                            <p className="otp-subtitle">
-                                Hemos enviado un código a <strong>{formData.email}</strong>
-                            </p>
-                            <p className="otp-helper-text">
-                                Revisa tu bandeja de entrada o la carpeta de spam e introduce el código de 6 dígitos.
-                            </p>
-
-                            <div className="input-group" style={{ marginTop: '24px' }}>
-                                <IonInput
-                                    label="Código OTP"
-                                    labelPlacement="floating"
-                                    fill="outline"
-                                    type="number"
-                                    maxlength={6}
-                                    value={otpCode}
-                                    onIonInput={e => setOtpCode(e.detail.value!)}
-                                    className="otp-input-field"
-                                />
-                            </div>
-
-                            <IonButton
-                                expand="block"
-                                className="submit-button otp-submit-button"
-                                disabled={otpCode.length !== 6 || verifyingOtp}
-                                onClick={async () => {
-                                    setVerifyingOtp(true);
-                                    try {
-                                        await axios.post(`${API_BASE_URL}/auth/verify-otp`, {
-                                            email: formData.email.trim(),
-                                            otpCode: otpCode.trim()
-                                        });
-                                        // Éxito:
-                                        setErrorMsg('¡Cuenta validada con éxito!');
-                                        setShowOtpModal(false);
-                                        setTimeout(() => history.replace('/login'), 1500);
-                                    } catch (err: any) {
-                                        setErrorMsg(err.response?.data?.message || 'Código OTP inválido');
-                                    } finally {
-                                        setVerifyingOtp(false);
-                                    }
-                                }}
-                            >
-                                {verifyingOtp ? 'Validando...' : 'Verificar Cuenta'}
-                            </IonButton>
-                        </div>
-                    </IonContent>
-                </IonModal>
             </IonContent>
         </IonPage>
     );
