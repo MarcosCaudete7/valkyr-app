@@ -9,10 +9,12 @@ import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import ChatPage from './pages/ChatPage';
 import SocialPage from './pages/SocialPage';
+import Home from './pages/Home';
 
 const MainTabs: React.FC = () => (
     <IonTabs>
         <IonRouterOutlet>
+            <Route exact path="/tabs/home" component={Home} />
             <Route exact path="/tabs/myroutines" component={MyRoutines} />
             <Route exact path="/tabs/create" component={CreateRoutine} />
             <Route exact path="/tabs/settings" component={Settings} />
@@ -22,11 +24,16 @@ const MainTabs: React.FC = () => (
             <Route exact path="/tabs/social" component={SocialPage} />
             <Route exact path="/tabs/chat/:friendId/:friendName" component={ChatPage} />
             <Route exact path="/tabs">
-                <Redirect to="/tabs/myroutines" />
+                <Redirect to="/tabs/home" />
             </Route>
         </IonRouterOutlet>
 
         <IonTabBar slot="bottom">
+            <IonTabButton tab="home" href="/tabs/home">
+                <IonIcon icon={personOutline} /> {/* Reuse any appealing icon for Home if needed */}
+                <IonLabel>Inicio</IonLabel>
+            </IonTabButton>
+
             <IonTabButton tab="myroutines" href="/tabs/myroutines">
                 <IonIcon icon={barbellOutline} />
                 <IonLabel>Rutinas</IonLabel>
@@ -40,11 +47,6 @@ const MainTabs: React.FC = () => (
             <IonTabButton tab="social" href="/tabs/social">
                 <IonIcon icon={peopleOutline} />
                 <IonLabel>Comunidad</IonLabel>
-            </IonTabButton>
-
-            <IonTabButton tab="profile" href="/tabs/profile">
-                <IonIcon icon={personOutline} />
-                <IonLabel>Perfil</IonLabel>
             </IonTabButton>
         </IonTabBar>
     </IonTabs>

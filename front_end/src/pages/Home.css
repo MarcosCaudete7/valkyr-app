@@ -1,0 +1,139 @@
+/* Tema Home - Diseño Premium Glassmorphism / Tarjetas Modernas */
+.home-page {
+    --background: var(--ion-background-color);
+}
+
+.home-toolbar {
+    --background: transparent;
+    --border-color: transparent;
+}
+
+.home-toolbar ion-title {
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.home-content {
+    --padding-top: 10px;
+}
+
+.home-header-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 250px;
+    background: linear-gradient(135deg, var(--ion-color-primary) 0%, rgba(138, 43, 226, 1) 100%);
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    z-index: -1;
+}
+
+.home-welcome-section {
+    padding: 20px 25px;
+    color: white;
+}
+
+.welcome-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-top: 5px;
+}
+
+/* Widgets Grid */
+.widgets-container {
+    padding: 0 15px;
+    margin-top: 15px;
+}
+
+.widget-card {
+    border-radius: 20px;
+    padding: 20px 15px;
+    margin: 5px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 140px;
+    position: relative;
+    overflow: hidden;
+    background: var(--ion-color-step-50, #ffffff);
+}
+
+/* Dark mode fallback if steps 50 is dark */
+@media (prefers-color-scheme: dark) {
+    .widget-card {
+        background: var(--ion-color-step-100, #1e2023);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.widget-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.widget-icon ion-icon {
+    font-size: 22px;
+    color: white;
+}
+
+/* Colores Específicos de cada Widget */
+.steps-widget .widget-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.calories-widget .widget-icon {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.distance-widget .widget-icon {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.time-widget .widget-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.widget-data h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--ion-text-color);
+}
+
+.widget-data p {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+    margin: 5px 0 0 0;
+}
+
+/* Barra de progreso para pasos */
+.widget-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(16, 185, 129, 0.2);
+}
+
+.progress-bar {
+    height: 100%;
+    background: #10b981;
+    border-radius: 0 4px 4px 0;
+    transition: width 1s ease-in-out;
+}

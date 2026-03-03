@@ -51,7 +51,7 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("username", username);
-        
+
         userRepository.findByUsername(username).ifPresent(user -> {
             response.put("id", user.getId());
         });
