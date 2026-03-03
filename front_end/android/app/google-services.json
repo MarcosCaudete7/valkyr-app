@@ -1,0 +1,29 @@
+{
+    "project_info": {
+        "project_number": "64758627013",
+        "project_id": "valkyrapp",
+        "storage_bucket": "valkyrapp.firebasestorage.app"
+    },
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:64758627013:android:69455d98414d78e7fa0eac",
+                "android_client_info": {
+                    "package_name": "com.valkyr.app"
+                }
+            },
+            "oauth_client": [],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyDcgpY0Ttc1TYby-D86PKH7e6aKe2DskOE"
+                }
+            ],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": []
+                }
+            }
+        }
+    ],
+    "configuration_version": "1"
+}

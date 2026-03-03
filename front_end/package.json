@@ -17,6 +17,7 @@
     "@capacitor/core": "8.0.0",
     "@capacitor/haptics": "8.0.0",
     "@capacitor/keyboard": "8.0.0",
+    "@capacitor/push-notifications": "^8.0.1",
     "@capacitor/status-bar": "8.0.0",
     "@devmaxime/capacitor-health-connect": "^1.1.0",
     "@ionic/react": "^8.5.0",
@@ -29,7 +30,9 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-router": "^5.3.4",
-    "react-router-dom": "^5.3.4"
+    "react-router-dom": "^5.3.4",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.1.0",

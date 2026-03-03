@@ -1,7 +1,7 @@
 import React from 'react';
 import { IonTabBar, IonTabButton, IonTabs, IonRouterOutlet, IonIcon, IonLabel } from "@ionic/react";
 import { Route, Redirect } from "react-router-dom";
-import { settingsOutline, addOutline, barbellOutline, peopleOutline, personOutline } from "ionicons/icons";
+import { settingsOutline, addOutline, barbellOutline, peopleOutline, personOutline, homeOutline } from "ionicons/icons";
 import MyRoutines from "./pages/Routines";
 import CreateRoutine from "./pages/CreateRoutine";
 import RoutineDetail from "./Details/RoutineDetail";
@@ -30,7 +30,7 @@ const MainTabs: React.FC = () => (
 
         <IonTabBar slot="bottom">
             <IonTabButton tab="home" href="/tabs/home">
-                <IonIcon icon={personOutline} /> {/* Reuse any appealing icon for Home if needed */}
+                <IonIcon icon={homeOutline} />
                 <IonLabel>Inicio</IonLabel>
             </IonTabButton>
 
@@ -42,6 +42,11 @@ const MainTabs: React.FC = () => (
             <IonTabButton tab="social" href="/tabs/social">
                 <IonIcon icon={peopleOutline} />
                 <IonLabel>Comunidad</IonLabel>
+            </IonTabButton>
+
+            <IonTabButton tab="profile" href="/tabs/profile">
+                <IonIcon icon={personOutline} />
+                <IonLabel>Perfil</IonLabel>
             </IonTabButton>
         </IonTabBar>
     </IonTabs>

@@ -3,17 +3,19 @@ import {
   IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonList, IonItem,
   IonLabel, IonCheckbox, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonBadge, IonRefresher, IonRefresherContent, IonSpinner, IonIcon,
-  IonButton, IonText, IonFab, IonFabButton,
+  IonButton, IonText, IonSegment, IonSegmentButton,
   IonNote
 } from '@ionic/react';
-import { refreshOutline, fitnessOutline, calendarOutline, clipboardOutline, addOutline } from 'ionicons/icons';
+import { refreshOutline, fitnessOutline, calendarOutline, clipboardOutline, addOutline, listOutline } from 'ionicons/icons';
 import { getMyRoutines, updateExerciseStatus } from '../services/routineService';
 import { Routine } from '../models/Routine';
+import CreateRoutine from './CreateRoutine'; // Added import for CreateRoutine
 import './Routines.css';
 
 const Routines: React.FC = () => {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<'list' | 'create'>('list');
 
   const loadRoutines = useCallback(async (event?: CustomEvent) => {
     if (!event) setLoading(true);
@@ -90,7 +92,29 @@ const Routines: React.FC = () => {
 
         <div className="header-background-gradient"></div>
 
-        {loading && routines.length === 0 ? (
+        <IonSegment
+          value={activeTab}
+          onIonChange={(e) => setActiveTab(e.detail.value as 'list' | 'create')}
+          style={{ margin: '10px 15px', width: 'calc(100% - 30px)', background: 'var(--ion-color-white)', borderRadius: '8px' }}
+        >
+          <IonSegmentButton value="list">
+            <IonLabel style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <IonIcon icon={listOutline} /> Mis Rutinas
+            </IonLabel>
+          </IonSegmentButton>
+          <IonSegmentButton value="create">
+            <IonLabel style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <IonIcon icon={addOutline} /> Crear Rutina
+            </IonLabel>
+          </IonSegmentButton>
+        </IonSegment>
+
+        {activeTab === 'create' ? (
+          <div style={{ marginTop: '10px' }}>
+            {/* The CreateRoutine component itself is a page, but since we are embedding it, we might just render its content. However, rendering an IonPage inside another IonPage can cause scroll issues. It's better to navigate. Actually, the user asked for two tabs inside routines. Let's render it directly. */}
+            <CreateRoutine />
+          </div>
+        ) : loading && routines.length === 0 ? (
           <div className="centered-container">
             <IonSpinner name="crescent" color="primary" />
           </div>
@@ -150,13 +174,6 @@ const Routines: React.FC = () => {
             <div style={{ height: '80px' }}></div>
           </div>
         )}
-
-        {/* Botón Flotante para Crear Rutina */}
-        <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ marginBottom: '20px', marginRight: '10px' }}>
-          <IonFabButton routerLink="/tabs/create" color="secondary">
-            <IonIcon icon={addOutline} />
-          </IonFabButton>
-        </IonFab>
       </IonContent>
     </IonPage>
   );

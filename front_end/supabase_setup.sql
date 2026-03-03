@@ -5,6 +5,8 @@ CREATE TABLE profiles (
   id TEXT PRIMARY KEY,
   bio TEXT,
   website TEXT,
+  public_key TEXT,
+  push_token TEXT,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
