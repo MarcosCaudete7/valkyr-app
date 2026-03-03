@@ -31,12 +31,16 @@ export const chatService = {
         return data;
     },
 
-    async getMessages(myId: string, friendId: string) {
+    async getMessages(myId: string, friendId: string, page: number = 0, limit: number = 50) {
+        const start = page * limit;
+        const end = start + limit - 1;
+
         const { data, error } = await supabase
             .from('messages')
             .select('*')
             .or(`and(sender_id.eq."${myId}",receiver_id.eq."${friendId}"),and(sender_id.eq."${friendId}",receiver_id.eq."${myId}")`)
-            .order('created_at', { ascending: true });
+            .order('created_at', { ascending: false })
+            .range(start, end);
 
         if (error) throw error;
 
@@ -45,7 +49,7 @@ export const chatService = {
             const friendPubKey = await cryptoService.getFriendPublicKey(friendId);
             const friendPubKeyBase64 = friendPubKey ? naclUtil.encodeBase64(friendPubKey) : null;
 
-            return data.map((msg: any) => {
+            const processedMsg = data.map((msg: any) => {
                 if (friendPubKeyBase64) {
                     try {
                         const decrypted = cryptoService.decryptMessage(myId, friendPubKeyBase64, msg.content);
@@ -58,6 +62,8 @@ export const chatService = {
                 }
                 return msg;
             });
+            // Revertir para que lleguen en orden cronológico a la UI
+            return processedMsg.reverse();
         }
 
         return data || [];

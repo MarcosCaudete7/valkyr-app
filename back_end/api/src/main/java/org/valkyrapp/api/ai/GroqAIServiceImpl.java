@@ -6,6 +6,7 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
 import org.valkyrapp.api.routine.Exercise; // Asegúrate de importar tu modelo
 import org.valkyrapp.api.routine.ExerciseRepository;
 
@@ -76,6 +77,7 @@ public class GroqAIServiceImpl implements GroqAIService {
     }
 
     @Override
+    @Cacheable(value = "aiRoutinesPower", key = "#ejercicio")
     public String getRuntinaPower(String ejercicio) {
         String instruction = buildSystemPrompt("Powerlifting",
                 "Tu objetivo es la fuerza máxima (1RM). Foco en intensidad.");
@@ -83,6 +85,7 @@ public class GroqAIServiceImpl implements GroqAIService {
     }
 
     @Override
+    @Cacheable(value = "aiRoutinesBodyBuilding", key = "#ejercicio")
     public String getRuntinaBodyBuilding(String ejercicio) {
         String instruction = buildSystemPrompt("Bodybuilding",
                 "Tu objetivo es la hipertrofia. Foco en volumen y aislamiento.");

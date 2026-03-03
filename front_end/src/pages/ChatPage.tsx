@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton, IonIcon, useIonAlert } from '@ionic/react';
+import { IonContent, IonPage, IonInput, IonButton, IonList, IonItem, IonLabel, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton, IonIcon, useIonAlert, IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
 import { send, personCircleOutline, lockClosedOutline } from 'ionicons/icons';
 import { supabase } from '../supabaseClient';
 import { chatService } from '../services/chatService';
@@ -23,6 +23,11 @@ const ChatPage: React.FC = () => {
     const contentRef = useRef<HTMLIonContentElement>(null);
     const friendPubKeyRef = useRef<string | null>(null);
 
+    // Pagination State
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const isInitialLoad = useRef(true);
+
     const formatTime = (isoString?: string) => {
         if (!isoString) return '';
         const utcString = isoString.endsWith('Z') ? isoString : `${isoString}Z`;
@@ -42,26 +47,47 @@ const ChatPage: React.FC = () => {
     }, [myId, friendId, friendName]);
 
     useEffect(() => {
-        contentRef.current?.scrollToBottom(500);
+        if (isInitialLoad.current && messages.length > 0) {
+            contentRef.current?.scrollToBottom(0); // Scroll inicial instantáneo
+            isInitialLoad.current = false;
+        }
     }, [messages]);
+
+    const loadMessages = async (targetPage: number, event?: any) => {
+        if (!myId || !friendId) return;
+
+        try {
+            if (targetPage === 0) {
+                const key = await cryptoService.getFriendPublicKey(friendId);
+                friendPubKeyRef.current = key ? naclUtil.encodeBase64(key) : null;
+            }
+
+            const data = await chatService.getMessages(myId, friendId, targetPage, 50);
+
+            if (data.length < 50) {
+                setHasMore(false);
+            }
+
+            if (targetPage === 0) {
+                setMessages(data);
+            } else {
+                setMessages(prev => [...data, ...prev]);
+            }
+            setPage(targetPage);
+        } catch (error) {
+            console.error("Error al cargar mensajes:", error);
+        } finally {
+            if (event) event.target.complete();
+        }
+    };
 
     useEffect(() => {
         if (!myId || !friendId) {
             console.error("Falta un ID. myId:", myId, "friendId:", friendId);
             return;
         }
-        const fetchMessages = async () => {
-            try {
-                // Fetch public key first for real-time messages
-                const key = await cryptoService.getFriendPublicKey(friendId);
-                friendPubKeyRef.current = key ? naclUtil.encodeBase64(key) : null;
 
-                const data = await chatService.getMessages(myId, friendId);
-                setMessages(data);
-            } catch (error) {
-                console.error("Error al cargar mensajes:", error);
-            }
-        };
+        loadMessages(0);
 
         const fetchFriendDetails = async () => {
             try {
@@ -79,7 +105,6 @@ const ChatPage: React.FC = () => {
             }
         };
 
-        fetchMessages();
         fetchFriendDetails();
 
         const channel = supabase
@@ -103,6 +128,9 @@ const ChatPage: React.FC = () => {
                     }
 
                     setMessages((prev) => [...prev, msg]);
+                    setTimeout(() => {
+                        contentRef.current?.scrollToBottom(300);
+                    }, 100);
                 }
             })
             .subscribe();
@@ -157,6 +185,17 @@ const ChatPage: React.FC = () => {
             </IonHeader>
 
             <IonContent className="ion-content-chat" ref={contentRef}>
+                <IonInfiniteScroll
+                    position="top"
+                    onIonInfinite={(e) => loadMessages(page + 1, e)}
+                    disabled={!hasMore}
+                >
+                    <IonInfiniteScrollContent
+                        loadingSpinner="bubbles"
+                        loadingText="Cargando mensajes anteriores..."
+                    />
+                </IonInfiniteScroll>
+
                 <IonList style={{ background: 'transparent', padding: '10px' }}>
                     {messages.map((m) => {
                         const isMe = m.sender_id === myId;
