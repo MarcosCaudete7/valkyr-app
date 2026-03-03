@@ -39,11 +39,6 @@ const MainTabs: React.FC = () => (
                 <IonLabel>Rutinas</IonLabel>
             </IonTabButton>
 
-            <IonTabButton tab="create" href="/tabs/create">
-                <IonIcon icon={addOutline} />
-                <IonLabel>Crear</IonLabel>
-            </IonTabButton>
-
             <IonTabButton tab="social" href="/tabs/social">
                 <IonIcon icon={peopleOutline} />
                 <IonLabel>Comunidad</IonLabel>

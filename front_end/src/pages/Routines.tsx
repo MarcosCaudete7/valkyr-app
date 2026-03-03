@@ -3,10 +3,10 @@ import {
   IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonList, IonItem,
   IonLabel, IonCheckbox, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonBadge, IonRefresher, IonRefresherContent, IonSpinner, IonIcon,
-  IonButton, IonText,
+  IonButton, IonText, IonFab, IonFabButton,
   IonNote
 } from '@ionic/react';
-import { refreshOutline, fitnessOutline, calendarOutline, clipboardOutline } from 'ionicons/icons';
+import { refreshOutline, fitnessOutline, calendarOutline, clipboardOutline, addOutline } from 'ionicons/icons';
 import { getMyRoutines, updateExerciseStatus } from '../services/routineService';
 import { Routine } from '../models/Routine';
 import './Routines.css';
@@ -147,8 +147,16 @@ const Routines: React.FC = () => {
                 </IonCardContent>
               </IonCard>
             ))}
+            <div style={{ height: '80px' }}></div>
           </div>
         )}
+
+        {/* Botón Flotante para Crear Rutina */}
+        <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ marginBottom: '20px', marginRight: '10px' }}>
+          <IonFabButton routerLink="/tabs/create" color="secondary">
+            <IonIcon icon={addOutline} />
+          </IonFabButton>
+        </IonFab>
       </IonContent>
     </IonPage>
   );
