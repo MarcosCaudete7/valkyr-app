@@ -5,7 +5,7 @@ import {
     IonModal
 } from '@ionic/react';
 import axios from 'axios';
-import API_BASE_URL, { authService } from '../services/api';
+import { API_BASE_URL, authService } from '../services/api';
 import { useHistory } from 'react-router-dom';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import './Register.css';
@@ -286,7 +286,7 @@ const Register: React.FC = () => {
                     message={errorMsg}
                     duration={3000}
                     onDidDismiss={() => setErrorMsg('')}
-                    color={errorMsg.includes('exitoso') ? 'success' : 'danger'}
+                    color={errorMsg.includes('éxito') || errorMsg.includes('exitoso') ? 'success' : 'danger'}
                 />
 
                 {/* OTP Verification Modal */}
@@ -330,8 +330,8 @@ const Register: React.FC = () => {
                                     setVerifyingOtp(true);
                                     try {
                                         await axios.post(`${API_BASE_URL}/auth/verify-otp`, {
-                                            email: formData.email,
-                                            otpCode: otpCode
+                                            email: formData.email.trim(),
+                                            otpCode: otpCode.trim()
                                         });
                                         // Éxito:
                                         setErrorMsg('¡Cuenta validada con éxito!');

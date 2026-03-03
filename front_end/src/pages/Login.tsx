@@ -136,7 +136,7 @@ const Login: React.FC = () => {
                     message={errorMsg}
                     duration={3000}
                     onDidDismiss={() => setErrorMsg('')}
-                    color="danger"
+                    color={errorMsg.includes('éxito') ? 'success' : 'danger'}
                 />
 
                 {/* MODAL OTP PARA VERIFICAR CUENTAS NO VERIFICADAS */}
@@ -175,8 +175,8 @@ const Login: React.FC = () => {
                                     setVerifyingOtp(true);
                                     try {
                                         const response = await axios.post(`${API_BASE_URL}/auth/verify-otp`, {
-                                            email: emailToVerify,
-                                            otpCode: otpCode
+                                            email: emailToVerify.trim(),
+                                            otpCode: otpCode.trim()
                                         });
 
                                         setErrorMsg('¡Cuenta validada con éxito!');
