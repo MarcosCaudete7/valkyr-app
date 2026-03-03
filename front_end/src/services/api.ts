@@ -1,11 +1,8 @@
 import axios from 'axios';
-import { Capacitor } from '@capacitor/core';
 
 // Si estamos en el móvil (donde localhost no es el ordenador, sino el propio móvil), 
 // usamos la IP local del ordenador en la red Wi-Fi.
-export const API_BASE_URL = Capacitor.isNativePlatform()
-    ? 'http://192.168.0.82:8080/api'
-    : 'https://api.valkyrapp.com/api';
+export const API_BASE_URL = 'https://api.valkyrapp.com/api';
 
 const api = axios.create({
     baseURL: API_BASE_URL,

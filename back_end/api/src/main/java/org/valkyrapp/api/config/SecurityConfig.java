@@ -46,6 +46,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:8100",
                 "http://localhost",
+                "https://localhost",
                 "capacitor://localhost",
                 "http://192.168.0.82:8100",
                 "https://valkyrapp.com",
