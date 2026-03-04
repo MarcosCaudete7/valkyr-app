@@ -50,13 +50,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         User savedUser = userRepository.save(user);
 
-        // Enviar Correo Asincronamente (evitando bloquear la excepcion principal)
-        try {
-            emailService.sendVerificationEmail(savedUser.getEmail(), otp);
-        } catch (Exception e) {
-            // Log target, but don't fail user creation if email service is down right down
-            System.err.println("Error sending email: " + e.getMessage());
-        }
+        // Enviar Correo Asincronamente (evitando bloquear la excepcion principal y la
+        // transaccion de BD)
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                emailService.sendVerificationEmail(savedUser.getEmail(), otp);
+            } catch (Exception e) {
+                System.err.println("Error asincrono enviando email: " + e.getMessage());
+            }
+        });
 
         return UserMapper.convertToDTO(savedUser);
     }
