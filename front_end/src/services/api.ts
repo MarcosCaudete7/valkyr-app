@@ -33,6 +33,7 @@ api.interceptors.response.use(
 export const authService = {
     register: (userData: any) => api.post('/auth/register', userData),
     login: (credentials: any) => api.post('/auth/login', credentials),
+    resendOtp: (email: string) => api.post('/auth/resend-otp', { email }),
 
     checkUnique: async (field: 'username' | 'email', value: string): Promise<boolean> => {
         try {

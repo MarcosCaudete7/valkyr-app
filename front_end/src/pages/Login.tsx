@@ -19,6 +19,7 @@ const Login: React.FC = () => {
     const [otpCode, setOtpCode] = useState('');
     const [verifyingOtp, setVerifyingOtp] = useState(false);
     const [emailToVerify, setEmailToVerify] = useState('');
+    const [resendingOtp, setResendingOtp] = useState(false);
     const history = useHistory();
 
     const handleLogin = async () => {
@@ -219,6 +220,26 @@ const Login: React.FC = () => {
                                 }}
                             >
                                 {verifyingOtp ? 'Validando...' : 'Verificar Cuenta'}
+                            </IonButton>
+
+                            <IonButton
+                                expand="block"
+                                fill="clear"
+                                className="otp-resend-button"
+                                disabled={resendingOtp}
+                                onClick={async () => {
+                                    setResendingOtp(true);
+                                    try {
+                                        await authService.resendOtp(emailToVerify.trim());
+                                        setErrorMsg('¡Nuevo código enviado con éxito!');
+                                    } catch (err: any) {
+                                        setErrorMsg(err.response?.data?.message || 'Error al reenviar el código');
+                                    } finally {
+                                        setResendingOtp(false);
+                                    }
+                                }}
+                            >
+                                {resendingOtp ? 'Enviando...' : 'Reenviar Código'}
                             </IonButton>
                         </div>
                     </IonContent>
