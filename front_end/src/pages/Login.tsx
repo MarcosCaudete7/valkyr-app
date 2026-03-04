@@ -5,6 +5,7 @@ import {
 } from '@ionic/react';
 import axios from 'axios';
 import { authService, API_BASE_URL } from '../services/api';
+import { cryptoService } from '../services/cryptoService';
 import { useHistory } from 'react-router-dom';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import './Login.css';
@@ -44,6 +45,16 @@ const Login: React.FC = () => {
                 const userData = response.data;
                 console.log('Guardando usuario:', userData);
                 localStorage.setItem('user', JSON.stringify(userData));
+
+                // Generar llaves E2EE de forma proactiva al iniciar sesión
+                if (userData.id) {
+                    try {
+                        await cryptoService.generateAndPublishKeys(userData.id);
+                    } catch (e) {
+                        console.error("Error generating keys on login", e);
+                    }
+                }
+
                 console.log('Redirigiendo a /tabs/myroutines');
                 history.push('/tabs/myroutines');
             } else {
@@ -189,6 +200,15 @@ const Login: React.FC = () => {
                                             }
                                             localStorage.setItem('token', token);
                                             localStorage.setItem('user', JSON.stringify(response.data));
+
+                                            if (response.data.id) {
+                                                try {
+                                                    await cryptoService.generateAndPublishKeys(response.data.id);
+                                                } catch (e) {
+                                                    console.error("Error generating keys on OTP verify", e);
+                                                }
+                                            }
+
                                             setTimeout(() => history.push('/tabs/myroutines'), 1500);
                                         }
                                     } catch (err: any) {
