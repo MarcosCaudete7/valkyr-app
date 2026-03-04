@@ -30,8 +30,7 @@ const ChatPage: React.FC = () => {
 
     const formatTime = (isoString?: string) => {
         if (!isoString) return '';
-        const utcString = isoString.endsWith('Z') ? isoString : `${isoString}Z`;
-        const d = new Date(utcString);
+        const d = new Date(isoString);
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 

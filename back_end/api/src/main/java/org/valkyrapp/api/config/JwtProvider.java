@@ -10,14 +10,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
-
 @Component
 public class JwtProvider {
     private final String KSECRET = "ClaVe_uSAda_ParA_NUestra_App_ValkyR_2026_HaciDa_Por_AarbaLsae_Y_MarGabesc";
     private final SecretKey key = Keys.hmacShaKeyFor(KSECRET.getBytes());
-    private final long EXPIRATION_TIME = 3600000 * 10;
+    private final long EXPIRATION_TIME = 1000L * 60 * 60 * 24 * 30; // 30 dias
 
-    public String generateToken(String username){
+    public String generateToken(String username) {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
@@ -26,7 +25,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String getUsernameFromToken(String token){
+    public String getUsernameFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(key)
                 .build()
@@ -52,5 +51,3 @@ public class JwtProvider {
         return false;
     }
 }
-
-
