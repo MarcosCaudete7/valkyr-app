@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { Capacitor } from '@capacitor/core';
 
 // Determinamos la URL base dinámicamente según el entorno
-export const API_BASE_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:8080/api'
-    : 'https://api.valkyrapp.com/api';
+export const API_BASE_URL = Capacitor.isNativePlatform()
+    ? 'https://api.valkyrapp.com/api'
+    : (window.location.hostname === 'localhost' ? 'http://localhost:8080/api' : 'https://api.valkyrapp.com/api');
 
 const api = axios.create({
     baseURL: API_BASE_URL,
