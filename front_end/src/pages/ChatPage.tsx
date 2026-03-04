@@ -113,10 +113,15 @@ const ChatPage: React.FC = () => {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'messages'
-            }, (payload) => {
+            }, async (payload) => {
                 const msg = payload.new;
                 if ((msg.sender_id === myId && msg.receiver_id === friendId) ||
                     (msg.sender_id === friendId && msg.receiver_id === myId)) {
+
+                    if (!friendPubKeyRef.current) {
+                        const key = await cryptoService.getFriendPublicKey(friendId);
+                        friendPubKeyRef.current = key ? naclUtil.encodeBase64(key) : null;
+                    }
 
                     if (friendPubKeyRef.current) {
                         try {

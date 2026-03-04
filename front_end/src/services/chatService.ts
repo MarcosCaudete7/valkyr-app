@@ -78,15 +78,44 @@ export const chatService = {
             .limit(100);
 
         if (error) throw error;
+        if (!data || data.length === 0) return [];
 
-        // Como aquí hay mensajes de múltiples amigos, necesitaríamos las llaves de todos.
-        // Por simplicidad en esta vista general (Inbox), intentaremos descifrar si podemos,
-        // pero idealmente deberíamos hacer un batch fetch de llaves. 
-        // Lo dejamos tal cual para la vista de inbox o implementamos un caché de llaves.
+        // Colectar IDs únicos de los amigos en los mensajes y traer sus public_keys
+        const friendIds = new Set<string>();
+        data.forEach(m => {
+            if (m.sender_id !== myId) friendIds.add(m.sender_id);
+            if (m.receiver_id !== myId) friendIds.add(m.receiver_id);
+        });
 
-        // Vamos a optimizar: solo descifrar en el chat 1 a 1, el inbox puede ignorarse o
-        // requerir un refactor mayor. Por ahora, si es cifrado, en el inbox saldrá gibberish
-        // a menos que también carguemos la llave.
-        return data || [];
+        const friendIdsArray = Array.from(friendIds);
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, public_key')
+            .in('id', friendIdsArray);
+
+        const keyMap: Record<string, string> = {};
+        if (profiles) {
+            profiles.forEach(p => {
+                if (p.public_key) keyMap[p.id] = p.public_key;
+            });
+        }
+
+        // Ya podemos mapear y desencriptar cada preview del inbox
+        const processedMsg = data.map((msg: any) => {
+            const friendId = msg.sender_id === myId ? msg.receiver_id : msg.sender_id;
+            const friendPubKeyBase64 = keyMap[friendId];
+
+            if (friendPubKeyBase64) {
+                try {
+                    const decrypted = cryptoService.decryptMessage(myId, friendPubKeyBase64, msg.content);
+                    if (decrypted) return { ...msg, content: decrypted };
+                } catch (e) {
+                    // Ignorar si no se puede desencriptar (mensajes viejos)
+                }
+            }
+            return msg;
+        });
+
+        return processedMsg;
     }
 };
