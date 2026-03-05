@@ -1,19 +1,19 @@
 const nacl = require('tweetnacl');
-const util = require('tweetnacl-util');
+const naclUtil = require('tweetnacl-util');
 
-const alice = nacl.box.keyPair();
-const bob = nacl.box.keyPair();
+const keyPairA = nacl.box.keyPair();
+const keyPairB = nacl.box.keyPair();
 
+const msg = "Hola mundo";
 const nonce = nacl.randomBytes(nacl.box.nonceLength);
-const msg = util.decodeUTF8("Hello World");
 
-// Alice encrypts to Bob
-const box = nacl.box(msg, nonce, bob.publicKey, alice.secretKey);
+// A encrypts for B
+const box = nacl.box(naclUtil.decodeUTF8(msg), nonce, keyPairB.publicKey, keyPairA.secretKey);
 
-// Bob decrypts from Alice
-const bobDecrypted = nacl.box.open(box, nonce, alice.publicKey, bob.secretKey);
-console.log("Bob decrypted:", bobDecrypted ? util.encodeUTF8(bobDecrypted) : "FAILED");
+// B decrypts from A
+const decryptedB = nacl.box.open(box, nonce, keyPairA.publicKey, keyPairB.secretKey);
+console.log("B decrypted:", decryptedB ? naclUtil.encodeUTF8(decryptedB) : "null");
 
-// Alice tries to decrypt her own sent message
-const aliceDecrypted = nacl.box.open(box, nonce, bob.publicKey, alice.secretKey);
-console.log("Alice decrypted:", aliceDecrypted ? util.encodeUTF8(aliceDecrypted) : "FAILED");
+// A decrypts its own sent message, sent to B
+const decryptedA = nacl.box.open(box, nonce, keyPairB.publicKey, keyPairA.secretKey);
+console.log("A decrypted:", decryptedA ? naclUtil.encodeUTF8(decryptedA) : "null");

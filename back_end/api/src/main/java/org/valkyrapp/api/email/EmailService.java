@@ -35,7 +35,7 @@ public class EmailService {
                     + "<p style=\"font-size: 12px; color: #777;\">Si no creaste esta cuenta, simplemente ignora este correo.</p>"
                     + "</div>";
 
-            helper.setText(htmlContent, true); // true indica que es HTML
+            helper.setText(htmlContent, true);
 
             log.info("Enviando email de OTP a {}", to);
             mailSender.send(message);
@@ -65,7 +65,7 @@ public class EmailService {
                     + "<p style=\"font-size: 12px; color: #777;\">Si no solicitaste este cambio, simplemente ignora y elimina este correo. Tu cuenta está segura.</p>"
                     + "</div>";
 
-            helper.setText(htmlContent, true); // true indica que es HTML
+            helper.setText(htmlContent, true);
 
             log.info("Enviando email de Recuperación de Contraseña a {}", to);
             mailSender.send(message);

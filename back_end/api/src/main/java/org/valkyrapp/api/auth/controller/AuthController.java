@@ -118,13 +118,40 @@ public class AuthController {
         return ResponseEntity.badRequest().body(Map.of("message", "El código OTP es inválido"));
     }
 
+    @PostMapping("/resend-otp")
+    public ResponseEntity<?> resendOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        org.valkyrapp.api.usuario.User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Usuario no encontrado"));
+        }
+
+        if (user.getIsVerified()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "La cuenta ya está verificada"));
+        }
+
+        // Generar nuevo código
+        String otp = String.format("%06d", new java.util.Random().nextInt(999999));
+        user.setOtpCode(otp);
+        user.setOtpExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+        userRepository.save(user);
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), otp);
+        } catch (Exception e) {
+            System.err.println("Error reenviando email de OTP: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Nuevo código enviado"));
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
 
         org.valkyrapp.api.usuario.User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
-            // Retornamos OK de todos modos por seguridad (evitar user enumeration)
             return ResponseEntity
                     .ok(Map.of("message", "Si el correo existe, se ha enviado un código de recuperación."));
         }

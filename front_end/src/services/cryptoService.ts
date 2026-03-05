@@ -7,18 +7,24 @@ export const cryptoService = {
     // La privada se guarda en local (localStorage), la pública en Supabase.
     async generateAndPublishKeys(userId: string) {
         const existingPrivKey = localStorage.getItem(`privKey_${userId}`);
+        let publicKeyBase64: string;
+
         if (existingPrivKey) {
-            return; // Ya existen llaves
+            // Ya existen llaves localmente. Restauramos la pública para asegurarnos de que el servidor la tenga.
+            const secretKeyUint8 = naclUtil.decodeBase64(existingPrivKey);
+            const keyPair = nacl.box.keyPair.fromSecretKey(secretKeyUint8);
+            publicKeyBase64 = naclUtil.encodeBase64(keyPair.publicKey);
+        } else {
+            // Generar un nuevo par de llaves
+            const keyPair = nacl.box.keyPair();
+            publicKeyBase64 = naclUtil.encodeBase64(keyPair.publicKey);
+            const secretKeyBase64 = naclUtil.encodeBase64(keyPair.secretKey);
+
+            // Guardar la llave privada LOCALMENTE. NUNCA DEBE SALIR DEL DISPOSITIVO.
+            localStorage.setItem(`privKey_${userId}`, secretKeyBase64);
         }
 
-        const keyPair = nacl.box.keyPair();
-        const publicKeyBase64 = naclUtil.encodeBase64(keyPair.publicKey);
-        const secretKeyBase64 = naclUtil.encodeBase64(keyPair.secretKey);
-
-        // Guardar la llave privada LOCALMENTE. NUNCA DEBE SALIR DEL DISPOSITIVO.
-        localStorage.setItem(`privKey_${userId}`, secretKeyBase64);
-
-        // Subir la llave pública al servidor (Supabase)
+        // Subir la llave pública al servidor (Supabase) siempre, para arreglar desincronizaciones
         const { error } = await supabase
             .from('profiles')
             .upsert({ id: userId, public_key: publicKeyBase64 }, { onConflict: 'id' });

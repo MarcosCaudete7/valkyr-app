@@ -42,7 +42,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = UserMapper.convertToEntity(userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
-        // Generar OTP
         String otp = String.format("%06d", new Random().nextInt(999999));
         user.setOtpCode(otp);
         user.setIsVerified(false);
@@ -50,8 +49,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         User savedUser = userRepository.save(user);
 
-        // Enviar Correo Asincronamente (evitando bloquear la excepcion principal y la
-        // transaccion de BD)
         java.util.concurrent.CompletableFuture.runAsync(() -> {
             try {
                 emailService.sendVerificationEmail(savedUser.getEmail(), otp);
