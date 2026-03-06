@@ -462,9 +462,9 @@ const RoutineDetail: React.FC = () => {
                             <div style={{ marginTop: 'auto', width: '100%', marginBottom: '20px' }}>
                                 <IonButton expand="block" shape="round" color="light" onClick={() => {
                                     setShowEpicSummary(false);
-                                    history.replace('/routines');
+                                    history.replace('/tabs/home');
                                 }}>
-                                    DESCANSAR Y VOLVER
+                                    VOLVER AL INICIO
                                 </IonButton>
                             </div>
                         </div>
