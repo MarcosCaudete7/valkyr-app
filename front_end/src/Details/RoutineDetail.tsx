@@ -9,6 +9,7 @@ import { getRoutineById, updateExerciseStatus, updateRoutine } from '../services
 import { Routine, ExerciseLine } from '../models/Routine';
 import { getAllExercises, Exercise } from '../services/exerciseService';
 import MuscleMap from '../components/MuscleMap';
+import FloatingTimer from '../components/FloatingTimer';
 import './RoutineDetail.css';
 
 const RoutineDetail: React.FC = () => {
@@ -28,6 +29,14 @@ const RoutineDetail: React.FC = () => {
 
     // Modal de Información del Ejercicio
     const [infoModalExercise, setInfoModalExercise] = useState<{ name: string, muscleGroup: string } | null>(null);
+
+    // Modal Resumen Épico y Rachas
+    const [showEpicSummary, setShowEpicSummary] = useState(false);
+    const [workedMuscles, setWorkedMuscles] = useState<string[]>([]);
+    const [currentStreak, setCurrentStreak] = useState(0);
+
+    // Timestamp para saber cuándo empezó
+    const startTimeRef = React.useRef(Date.now());
 
     useEffect(() => {
         const fetchRoutineAndCatalog = async () => {
@@ -101,6 +110,10 @@ const RoutineDetail: React.FC = () => {
             await updateExerciseStatus(exerciseId, !currentStatus);
             if (!currentStatus) { // Si se está marcando como completado
                 localStorage.setItem(`ex_${exerciseId}_completed_at`, Date.now().toString());
+                // Haptic feedback de satisfacción al hacer check
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
             } else { // Si se está desmarcando
                 localStorage.removeItem(`ex_${exerciseId}_completed_at`);
             }
@@ -108,6 +121,49 @@ const RoutineDetail: React.FC = () => {
             console.error("Error en el servidor, revertiendo...");
             // Aquí podrías recargar los datos del servidor para sincronizar
         }
+    };
+
+    const handleFinishWorkout = () => {
+        if (!routine) return;
+        const completed = routine.exercises.filter(ex => ex.isCompleted);
+
+        if (completed.length === 0) {
+            // No se hizo nada
+            return;
+        }
+
+        // Obtener músculos trabajados mirando el catálogo base
+        const muscles = completed.map(ex => {
+            const catInfo = catalog.find(c => c.name.toLowerCase() === ex.name.toLowerCase());
+            return catInfo ? catInfo.muscleGroup : ex.name;
+        });
+        setWorkedMuscles(muscles);
+
+        // Lógica de Rachas (Streaks) Valhalla
+        const todayStr = new Date().toDateString();
+        const lastWorkout = localStorage.getItem('lastWorkoutDate');
+        let streak = parseInt(localStorage.getItem('currentStreak') || '0', 10);
+
+        if (lastWorkout !== todayStr) {
+            if (lastWorkout) {
+                const lastDate = new Date(lastWorkout);
+                const today = new Date();
+                const diffTime = Math.abs(today.getTime() - lastDate.getTime());
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 1) {
+                    streak += 1; // Día consecutivo
+                } else if (diffDays > 1) {
+                    streak = 1; // Racha perdida
+                }
+            } else {
+                streak = 1; // Primer entrenamiento
+            }
+            localStorage.setItem('lastWorkoutDate', todayStr);
+            localStorage.setItem('currentStreak', streak.toString());
+        }
+        setCurrentStreak(streak);
+        setShowEpicSummary(true);
     };
 
     const handleSave = async () => {
@@ -369,6 +425,53 @@ const RoutineDetail: React.FC = () => {
                                 </div>
                             )}
                         </IonList>
+                    </IonContent>
+                </IonModal>
+
+                <FloatingTimer initialTime={90} />
+
+                {/* Finalizar Entrenamiento Button */}
+                {!isEditing && routine.exercises.length > 0 && (
+                    <div style={{ padding: '20px' }}>
+                        <IonButton expand="block" size="large" onClick={handleFinishWorkout} style={{ '--background': 'linear-gradient(90deg, #ef4444, #b91c1c)', '--box-shadow': '0 4px 15px rgba(239, 68, 68, 0.4)' }}>
+                            FINALIZAR AL VALHALLA
+                        </IonButton>
+                    </div>
+                )}
+
+                {/* Resumen Épico Modal */}
+                <IonModal isOpen={showEpicSummary} onDidDismiss={() => setShowEpicSummary(false)}>
+                    <IonContent style={{ '--background': '#0f0f0f' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '20px', textAlign: 'center', background: 'radial-gradient(circle at center, #2a0808 0%, #000 70%)', color: '#fff' }}>
+                            <h1 style={{ fontWeight: 900, fontSize: '2.5rem', color: '#ef4444', textShadow: '0 0 15px rgba(239, 68, 68, 0.8)', margin: '0 0 10px 0' }}>¡ENTRENAMIENTO<br />COMPLETADO!</h1>
+                            <p style={{ fontSize: '1.2rem', opacity: 0.8, marginBottom: '20px' }}>
+                                Has forjado tu destino.
+                            </p>
+
+                            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                                <div style={{ background: '#1a1a1a', padding: '15px 25px', borderRadius: '15px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                                    <IonIcon icon={fitnessOutline} style={{ fontSize: '2rem', color: '#ef4444' }} />
+                                    <h3 style={{ margin: '5px 0 0 0', fontWeight: 'bold' }}>{routine.exercises.filter(e => e.isCompleted).length}</h3>
+                                    <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Ejercicios</span>
+                                </div>
+                                <div style={{ background: '#1a1a1a', padding: '15px 25px', borderRadius: '15px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                                    <div style={{ fontSize: '2rem' }}>🔥</div>
+                                    <h3 style={{ margin: '5px 0 0 0', fontWeight: 'bold' }}>{currentStreak}</h3>
+                                    <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Días Seguidos</span>
+                                </div>
+                            </div>
+
+                            <p style={{ fontWeight: 'bold', fontSize: '1.1rem', marginTop: '10px' }}>Zonas Trabajadas</p>
+                            <div className="static-map" style={{ width: '100%', height: '300px' }}>
+                                <MuscleMap muscleGroup={workedMuscles} />
+                            </div>
+
+                            <div style={{ marginTop: 'auto', width: '100%', marginBottom: '20px' }}>
+                                <IonButton expand="block" shape="round" color="light" onClick={() => setShowEpicSummary(false)}>
+                                    DESCANSAR
+                                </IonButton>
+                            </div>
+                        </div>
                     </IonContent>
                 </IonModal>
 

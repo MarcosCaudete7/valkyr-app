@@ -1,12 +1,12 @@
 import React from 'react';
 
 interface MuscleMapProps {
-    muscleGroup: string;
+    muscleGroup: string | string[];
 }
 
 const MuscleMap: React.FC<MuscleMapProps> = ({ muscleGroup }) => {
-    // Normalize muscle group to a key
-    const target = muscleGroup.toLowerCase();
+    // Normalize muscle group to a single lowercase string for easy matching
+    const target = Array.isArray(muscleGroup) ? muscleGroup.join(' ').toLowerCase() : muscleGroup.toLowerCase();
 
     const isChest = target.includes('pecho') || target.includes('chest');
     const isBack = target.includes('espalda') || target.includes('back');
