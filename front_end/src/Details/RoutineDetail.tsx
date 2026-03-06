@@ -372,7 +372,7 @@ const RoutineDetail: React.FC = () => {
                                 {/* Zona de Animación */}
                                 <div className="exercise-animation-placeholder" style={{ padding: 0 }}>
                                     <img
-                                        src={`/assets/exercises/${infoModalExercise.name.toLowerCase().replace(/ /g, '_')}.gif`}
+                                        src={`/assets/exercises/${encodeURIComponent(infoModalExercise.name.toLowerCase().replace(/ /g, '_'))}.gif`}
                                         alt={infoModalExercise.name}
                                         style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '16px' }}
                                         onError={(e) => {
