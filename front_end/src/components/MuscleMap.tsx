@@ -15,48 +15,72 @@ const MuscleMap: React.FC<MuscleMapProps> = ({ muscleGroup }) => {
     const isShoulder = target.includes('hombro') || target.includes('shoulder');
     const isAbs = target.includes('abs') || target.includes('abdominal');
 
-    const activeColor = 'rgba(239, 68, 68, 0.7)'; // Translucent Red
-    const inactiveColor = 'transparent'; // Let the real image show
+    const activeColor = 'rgba(239, 68, 68, 0.8)'; // Translucent Red targeting
+    const inactiveColor = '#e0e0e0'; // Light grey muscle base
+    const strokeColor = '#b0b0b0';   // Darker grey for muscle separation
 
     const getPathProps = (isActive: boolean) => ({
         fill: isActive ? activeColor : inactiveColor,
-        stroke: 'transparent',
+        stroke: strokeColor,
+        strokeWidth: 1.5,
+        strokeLinejoin: 'round' as const,
+        strokeLinecap: 'round' as const,
         className: isActive ? 'muscle-pulse' : '',
-        style: { transition: 'all 0.4s ease', mixBlendMode: 'overlay' as const }
+        style: { transition: 'all 0.5s ease-in-out' }
     });
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', justifyContent: 'center' }}>
-            <img
-                src="/assets/anatomical_muscle_base.png"
-                alt="Human Anatomy"
-                style={{ height: '100%', objectFit: 'contain', zIndex: 1 }}
-            />
-            {/* The SVG coordinates must be relative to a 512x512 grid based on the generated image aspect ratio. Assuming the image fits within a central column. */}
-            <svg viewBox="0 0 512 512" style={{ position: 'absolute', height: '100%', width: '100%', zIndex: 2 }} preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-                {/* Approximate Mapping Zones over the Base Image */}
+        <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <svg viewBox="0 0 200 400" style={{ height: '100%', maxHeight: '400px', width: 'auto', filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.5))' }} xmlns="http://www.w3.org/2000/svg">
 
-                {/* Shoulders */}
-                <path d="M 160,110 C 145,130 148,160 160,180 C 180,165 185,130 160,110 Z" {...getPathProps(isShoulder)} />
-                <path d="M 352,110 C 367,130 364,160 352,180 C 332,165 327,130 352,110 Z" {...getPathProps(isShoulder)} />
+                {/* Head & Neck */}
+                <path d="M 90,15 C 90,0 110,0 110,15 C 110,25 106,35 108,45 C 108,50 92,50 92,45 C 94,35 90,25 90,15 Z" fill={inactiveColor} stroke={strokeColor} strokeWidth={1} />
 
-                {/* Chest */}
-                <path d="M 190,120 C 256,120 256,165 256,165 C 256,165 256,120 322,120 C 340,140 330,175 256,185 C 182,175 172,140 190,120 Z" {...getPathProps(isChest)} />
+                {/* Trapezius */}
+                <path d="M 92,45 C 80,45 75,55 65,60 C 80,55 95,50 100,65 C 105,50 120,55 135,60 C 125,55 120,45 108,45 Z" fill={inactiveColor} stroke={strokeColor} strokeWidth={1} />
 
-                {/* Core / Abs */}
-                <path d="M 220,185 C 256,185 256,185 292,185 C 285,250 270,265 256,280 C 242,265 227,250 220,185 Z" {...getPathProps(isAbs || isBack)} />
+                {/* Deltoids (Shoulders) */}
+                <path d="M 65,60 C 50,65 45,75 48,95 C 55,95 62,85 68,75 C 65,70 65,65 65,60 Z" {...getPathProps(isShoulder)} />
+                <path d="M 135,60 C 150,65 155,75 152,95 C 145,95 138,85 132,75 C 135,70 135,65 135,60 Z" {...getPathProps(isShoulder)} />
 
-                {/* Arms (Biceps/Triceps/Forearms grouped as arm) */}
-                <path d="M 148,160 C 130,220 120,250 145,285 C 158,250 165,200 148,160 Z" {...getPathProps(isArms)} />
-                <path d="M 364,160 C 382,220 392,250 367,285 C 354,250 347,200 364,160 Z" {...getPathProps(isArms)} />
+                {/* Pectorals (Chest) */}
+                <path d="M 68,75 C 62,85 65,100 75,105 C 85,110 95,105 98,90 C 100,75 100,75 100,65 C 95,50 80,55 68,75 Z" {...getPathProps(isChest)} />
+                <path d="M 132,75 C 138,85 135,100 125,105 C 115,110 105,105 102,90 C 100,75 100,75 100,65 C 105,50 120,55 132,75 Z" {...getPathProps(isChest)} />
 
-                {/* Quads/Upper Legs */}
-                <path d="M 220,265 C 190,300 200,380 230,400 C 256,380 256,330 250,265 Z" {...getPathProps(isLegs)} />
-                <path d="M 292,265 C 322,300 312,380 282,400 C 256,380 256,330 262,265 Z" {...getPathProps(isLegs)} />
+                {/* Abdominals (Core) */}
+                <path d="M 75,105 C 85,110 95,105 98,90 C 100,105 100,135 98,150 C 85,145 78,130 75,105 Z" {...getPathProps(isAbs)} />
+                <path d="M 125,105 C 115,110 105,105 102,90 C 100,105 100,135 102,150 C 115,145 122,130 125,105 Z" {...getPathProps(isAbs)} />
+                <path d="M 78,130 C 85,145 98,150 100,175 C 90,170 82,155 78,130 Z" {...getPathProps(isAbs)} />
+                <path d="M 122,130 C 115,145 102,150 100,175 C 110,170 118,155 122,130 Z" {...getPathProps(isAbs)} />
 
-                {/* Calves */}
-                <path d="M 220,400 C 210,440 215,470 230,480 C 240,460 240,420 230,400 Z" {...getPathProps(isLegs)} />
-                <path d="M 292,400 C 302,440 297,470 282,480 C 272,460 272,420 282,400 Z" {...getPathProps(isLegs)} />
+                {/* Obliques / Lats (Back/Side Core) */}
+                <path d="M 65,100 C 60,120 65,140 78,130 C 75,105 68,105 65,100 Z" {...getPathProps(isBack || isAbs)} />
+                <path d="M 135,100 C 140,120 135,140 122,130 C 125,105 132,105 135,100 Z" {...getPathProps(isBack || isAbs)} />
+
+                {/* Biceps/Triceps (Upper Arms) */}
+                <path d="M 48,95 C 40,115 38,135 45,150 C 50,145 58,130 60,110 C 62,95 55,95 48,95 Z" {...getPathProps(isArms)} />
+                <path d="M 152,95 C 160,115 162,135 155,150 C 150,145 142,130 140,110 C 138,95 145,95 152,95 Z" {...getPathProps(isArms)} />
+
+                {/* Forearms */}
+                <path d="M 45,150 C 35,180 30,200 40,215 C 45,215 52,185 55,165 C 58,150 50,145 45,150 Z" {...getPathProps(isArms)} />
+                <path d="M 155,150 C 165,180 170,200 160,215 C 155,215 148,185 145,165 C 142,150 150,145 155,150 Z" {...getPathProps(isArms)} />
+
+                {/* Hands */}
+                <path d="M 40,215 C 35,230 40,240 45,240 C 50,240 50,225 45,215 Z" fill={inactiveColor} />
+                <path d="M 160,215 C 165,230 160,240 155,240 C 150,240 150,225 155,215 Z" fill={inactiveColor} />
+
+                {/* Quadriceps (Upper Legs) */}
+                <path d="M 82,155 C 65,175 60,230 70,270 C 80,280 95,270 98,250 C 100,210 100,175 82,155 Z" {...getPathProps(isLegs)} />
+                <path d="M 118,155 C 135,175 140,230 130,270 C 120,280 105,270 102,250 C 100,210 100,175 118,155 Z" {...getPathProps(isLegs)} />
+
+                {/* Calves (Lower Legs) */}
+                <path d="M 70,270 C 60,310 65,360 75,375 C 85,375 92,340 95,300 C 98,280 80,280 70,270 Z" {...getPathProps(isLegs)} />
+                <path d="M 130,270 C 140,310 135,360 125,375 C 115,375 108,340 105,300 C 102,280 120,280 130,270 Z" {...getPathProps(isLegs)} />
+
+                {/* Feet */}
+                <path d="M 75,375 C 65,385 70,395 85,395 C 95,395 95,385 85,375 Z" fill={inactiveColor} />
+                <path d="M 125,375 C 135,385 130,395 115,395 C 105,395 105,385 115,375 Z" fill={inactiveColor} />
+
             </svg>
         </div>
     );
