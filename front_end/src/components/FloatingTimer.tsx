@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { IonIcon, IonFab, IonFabButton, IonFabList } from '@ionic/react';
-import { playOutline, pauseOutline, refreshOutline, addOutline, removeOutline, timerOutline } from 'ionicons/icons';
+import { IonIcon, IonFabButton } from '@ionic/react';
+import { playOutline, pauseOutline, refreshOutline, addOutline, removeOutline, timerOutline, closeOutline } from 'ionicons/icons';
 import './FloatingTimer.css';
 
 interface FloatingTimerProps {
@@ -11,6 +11,7 @@ const FloatingTimer: React.FC<FloatingTimerProps> = ({ initialTime = 90 }) => {
     const [timeLeft, setTimeLeft] = useState(initialTime);
     const [isActive, setIsActive] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
@@ -55,29 +56,36 @@ const FloatingTimer: React.FC<FloatingTimerProps> = ({ initialTime = 90 }) => {
     if (!isVisible) return null;
 
     return (
-        <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ marginBottom: '60px', marginRight: '10px' }}>
-            <IonFabButton color={isActive ? "danger" : "primary"}>
-                <IonIcon icon={timerOutline} />
-            </IonFabButton>
-
-            <IonFabList side="top">
-                <div className="timer-display-bubble">
-                    {formatTime(timeLeft)}
+        <div style={{ position: 'fixed', bottom: '80px', right: '20px', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            {isOpen && (
+                <div style={{ background: 'var(--ion-color-dark)', padding: '10px 15px', borderRadius: '30px', marginBottom: '15px', display: 'flex', gap: '8px', alignItems: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--ion-color-primary)', marginRight: '10px' }}>
+                        {formatTime(timeLeft)}
+                    </div>
+                    <IonFabButton color="light" size="small" onClick={toggleTimer}>
+                        <IonIcon icon={isActive ? pauseOutline : playOutline} />
+                    </IonFabButton>
+                    <IonFabButton color="light" size="small" onClick={resetTimer}>
+                        <IonIcon icon={refreshOutline} />
+                    </IonFabButton>
+                    <IonFabButton color="light" size="small" onClick={() => addTime(30)}>
+                        <IonIcon icon={addOutline} />
+                    </IonFabButton>
+                    <IonFabButton color="light" size="small" onClick={() => addTime(-30)}>
+                        <IonIcon icon={removeOutline} />
+                    </IonFabButton>
+                    <div style={{ marginLeft: '10px', paddingLeft: '10px', borderLeft: '1px solid rgba(255,255,255,0.2)' }}>
+                        <IonIcon icon={closeOutline} style={{ fontSize: '1.5rem', cursor: 'pointer', color: '#888' }} onClick={() => setIsOpen(false)} />
+                    </div>
                 </div>
-                <IonFabButton color="light" onClick={toggleTimer}>
-                    <IonIcon icon={isActive ? pauseOutline : playOutline} />
+            )}
+
+            {!isOpen && (
+                <IonFabButton color={isActive ? "danger" : "primary"} onClick={() => setIsOpen(true)}>
+                    <IonIcon icon={timerOutline} />
                 </IonFabButton>
-                <IonFabButton color="light" onClick={resetTimer}>
-                    <IonIcon icon={refreshOutline} />
-                </IonFabButton>
-                <IonFabButton color="light" onClick={() => addTime(30)}>
-                    <IonIcon icon={addOutline} />
-                </IonFabButton>
-                <IonFabButton color="light" onClick={() => addTime(-30)}>
-                    <IonIcon icon={removeOutline} />
-                </IonFabButton>
-            </IonFabList>
-        </IonFab>
+            )}
+        </div>
     );
 };
 

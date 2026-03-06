@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonList, IonItem,
     IonLabel, IonCheckbox, IonBackButton, IonButtons, IonSpinner, IonBadge, IonIcon, IonNote, IonButton, IonInput, IonModal, IonSearchbar, IonToggle
@@ -14,6 +14,7 @@ import './RoutineDetail.css';
 
 const RoutineDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const history = useHistory();
     const [routine, setRoutine] = useState<Routine | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -368,24 +369,16 @@ const RoutineDetail: React.FC = () => {
                     <IonContent className="ion-padding">
                         {infoModalExercise && (
                             <div className="exercise-info-container">
-                                {/* Zona superior: Animación demostrativa (Placeholder) */}
+                                {/* Zona de Animación */}
                                 <div className="exercise-animation-placeholder" style={{ padding: 0 }}>
                                     <img
-                                        src={`/assets/exercises/${infoModalExercise.name.toLowerCase().replace(/ /g, '_')}.gif`}
+                                        src={`/assets/exercises/${encodeURIComponent(infoModalExercise.name.toLowerCase().replace(/ /g, '_'))}.gif`}
                                         alt={infoModalExercise.name}
                                         style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '16px' }}
                                         onError={(e) => {
                                             (e.currentTarget as HTMLImageElement).src = '/assets/exercises/default.gif';
                                         }}
                                     />
-                                </div>
-
-                                <div className="info-divider"></div>
-
-                                {/* Zona inferior: Mapa Muscular Estático */}
-                                <h3>Músculos Implicados: <span style={{ color: 'var(--ion-color-primary)', fontWeight: 'bold' }}>{infoModalExercise.muscleGroup}</span></h3>
-                                <div className="muscle-map-wrapper static-map">
-                                    <MuscleMap muscleGroup={infoModalExercise.muscleGroup} />
                                 </div>
                             </div>
                         )}
@@ -434,7 +427,7 @@ const RoutineDetail: React.FC = () => {
                 {!isEditing && routine.exercises.length > 0 && (
                     <div style={{ padding: '20px' }}>
                         <IonButton expand="block" size="large" onClick={handleFinishWorkout} style={{ '--background': 'linear-gradient(90deg, #ef4444, #b91c1c)', '--box-shadow': '0 4px 15px rgba(239, 68, 68, 0.4)' }}>
-                            FINALIZAR AL VALHALLA
+                            FINALIZAR RUTINA
                         </IonButton>
                     </div>
                 )}
@@ -467,8 +460,11 @@ const RoutineDetail: React.FC = () => {
                             </div>
 
                             <div style={{ marginTop: 'auto', width: '100%', marginBottom: '20px' }}>
-                                <IonButton expand="block" shape="round" color="light" onClick={() => setShowEpicSummary(false)}>
-                                    DESCANSAR
+                                <IonButton expand="block" shape="round" color="light" onClick={() => {
+                                    setShowEpicSummary(false);
+                                    history.replace('/routines');
+                                }}>
+                                    DESCANSAR Y VOLVER
                                 </IonButton>
                             </div>
                         </div>
