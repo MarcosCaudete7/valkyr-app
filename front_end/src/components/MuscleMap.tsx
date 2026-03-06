@@ -29,27 +29,35 @@ const MuscleMap: React.FC<MuscleMapProps> = ({ muscleGroup }) => {
     });
 
     return (
-        <svg viewBox="0 0 200 400" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            {/* Base body shape - Dark outline/base */}
-            <path d="M 100,20 C 110,20 115,28 115,35 C 115,45 105,50 100,50 C 95,50 85,45 85,35 C 85,28 90,20 100,20 Z" {...getPathProps(false)} /> {/* Head */}
+        <svg viewBox="0 0 200 400" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" strokeLinecap="round" strokeLinejoin="round">
+            {/* Head & Neck */}
+            <path d="M 100,10 C 112,10 118,20 118,30 C 118,45 108,55 100,55 C 92,55 82,45 82,30 C 82,20 88,10 100,10 Z M 90,52 C 90,65 85,72 75,75 M 110,52 C 110,65 115,72 125,75" {...getPathProps(false)} />
 
-            <path d="M 85,50 L 115,50 L 130,65 L 130,90 L 70,90 L 70,65 Z" {...getPathProps(isShoulder)} /> {/* Shoulders */}
+            {/* Shoulders (Deltoids) */}
+            <path d="M 75,75 C 60,78 50,88 50,105 C 50,115 55,125 65,120 C 70,110 75,95 85,90 Z" {...getPathProps(isShoulder)} />
+            <path d="M 125,75 C 140,78 150,88 150,105 C 150,115 145,125 135,120 C 130,110 125,95 115,90 Z" {...getPathProps(isShoulder)} />
 
-            <path d="M 75,90 L 125,90 L 120,130 L 80,130 Z" {...getPathProps(isChest)} /> {/* Chest */}
+            {/* Chest (Pectorals) */}
+            <path d="M 75,75 C 85,85 115,85 125,75 C 128,95 125,115 118,125 C 100,132 100,132 82,125 C 75,115 72,95 75,75 Z" {...getPathProps(isChest)} />
 
-            <path d="M 80,130 L 120,130 L 115,180 L 85,180 Z" {...getPathProps(isAbs || isBack)} /> {/* Abs/Lower Back */}
+            {/* Core / Abs / Lower Back (V-Taper) */}
+            <path d="M 82,125 C 100,132 100,132 118,125 C 112,150 115,180 120,195 C 100,205 100,205 80,195 C 85,180 88,150 82,125 Z" {...getPathProps(isAbs || isBack)} />
 
-            <path d="M 70,90 C 60,110 50,130 50,150 L 65,150 L 75,90 Z" {...getPathProps(isArms)} /> {/* Left Arm */}
-            <path d="M 130,90 C 140,110 150,130 150,150 L 135,150 L 125,90 Z" {...getPathProps(isArms)} /> {/* Right Arm */}
+            {/* Upper Arms (Biceps/Triceps) */}
+            <path d="M 50,105 C 40,120 40,140 45,155 C 55,160 62,150 65,140 C 65,125 65,120 65,120 Z" {...getPathProps(isArms)} />
+            <path d="M 150,105 C 160,120 160,140 155,155 C 145,160 138,150 135,140 C 135,125 135,120 135,120 Z" {...getPathProps(isArms)} />
 
-            <path d="M 50,150 L 40,200 L 55,200 L 65,150 Z" {...getPathProps(isArms)} /> {/* Left Forearm */}
-            <path d="M 150,150 L 160,200 L 145,200 L 135,150 Z" {...getPathProps(isArms)} /> {/* Right Forearm */}
+            {/* Forearms */}
+            <path d="M 45,155 C 38,175 35,195 40,210 C 50,210 52,190 60,170 C 62,155 60,150 65,140 Z" {...getPathProps(isArms)} />
+            <path d="M 155,155 C 162,175 165,195 160,210 C 150,210 148,190 140,170 C 138,155 140,150 135,140 Z" {...getPathProps(isArms)} />
 
-            <path d="M 85,180 C 70,200 70,260 75,280 L 95,280 L 100,180 Z" {...getPathProps(isLegs)} /> {/* Left Thigh */}
-            <path d="M 115,180 C 130,200 130,260 125,280 L 105,280 L 100,180 Z" {...getPathProps(isLegs)} /> {/* Right Thigh */}
+            {/* Upper Legs (Quads/Hamstrings/Glutes) */}
+            <path d="M 80,195 C 65,210 65,260 72,285 C 82,290 92,285 96,275 C 100,245 98,215 100,198 Z" {...getPathProps(isLegs)} />
+            <path d="M 120,195 C 135,210 135,260 128,285 C 118,290 108,285 104,275 C 100,245 102,215 100,198 Z" {...getPathProps(isLegs)} />
 
-            <path d="M 75,280 L 70,360 L 90,360 L 95,280 Z" {...getPathProps(isLegs)} /> {/* Left Calf */}
-            <path d="M 125,280 L 130,360 L 110,360 L 105,280 Z" {...getPathProps(isLegs)} /> {/* Right Calf */}
+            {/* Lower Legs (Calves) */}
+            <path d="M 72,285 C 65,310 65,340 70,365 C 80,365 85,340 90,320 C 95,300 96,285 96,275 Z" {...getPathProps(isLegs)} />
+            <path d="M 128,285 C 135,310 135,340 130,365 C 120,365 115,340 110,320 C 105,300 104,285 104,275 Z" {...getPathProps(isLegs)} />
         </svg>
     );
 };
