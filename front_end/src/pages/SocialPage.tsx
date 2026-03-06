@@ -44,21 +44,39 @@ const SocialPage: React.FC = () => {
             });
 
             const existingIds = new Set(chats.map((c: any) => c.friendId));
+            const missingIds = new Set<string>();
+            const missingMessages: any[] = [];
+
             messages.forEach((m: any) => {
                 const otherId = m.sender_id === userId ? m.receiver_id : m.sender_id;
-                if (!existingIds.has(otherId)) {
+                if (!existingIds.has(otherId) && !missingIds.has(otherId)) {
+                    missingIds.add(otherId);
+                    missingMessages.push({ otherId, m });
+                }
+            });
+
+            if (missingIds.size > 0) {
+                // Fetch usernames for missing IDs
+                const { data: profiles } = await supabase
+                    .from('users')
+                    .select('id, username')
+                    .in('id', Array.from(missingIds));
+
+                const profileMap = new Map(profiles?.map(p => [p.id, p.username]) || []);
+
+                missingMessages.forEach(({ otherId, m }) => {
                     existingIds.add(otherId);
                     chats.push({
                         friendId: otherId,
-                        friendName: 'Usuario',
-                        lastAccessed: new Date(0).toISOString(), // Force all missing logic to count as unread if never accessed
+                        friendName: profileMap.get(otherId) || 'Usuario',
+                        lastAccessed: new Date(0).toISOString(),
                         lastMessage: m.content,
                         lastMessageTime: m.created_at,
                         isUnread: m.sender_id === otherId,
-                        unreadCount: m.sender_id === otherId ? 1 : 0 // initial assumption
+                        unreadCount: m.sender_id === otherId ? 1 : 0
                     });
-                }
-            });
+                });
+            }
 
             chats.sort((a: any, b: any) => new Date(b.lastMessageTime || b.lastAccessed).getTime() - new Date(a.lastMessageTime || a.lastAccessed).getTime());
 
