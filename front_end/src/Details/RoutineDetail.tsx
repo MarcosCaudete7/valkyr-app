@@ -4,10 +4,12 @@ import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonList, IonItem,
     IonLabel, IonCheckbox, IonBackButton, IonButtons, IonSpinner, IonBadge, IonIcon, IonNote, IonButton, IonInput, IonModal, IonSearchbar, IonToggle
 } from '@ionic/react';
-import { clipboardOutline, fitnessOutline, trashOutline, addCircleOutline, closeOutline } from 'ionicons/icons';
+import { clipboardOutline, fitnessOutline, trashOutline, addCircleOutline, closeOutline, informationCircleOutline } from 'ionicons/icons';
 import { getRoutineById, updateExerciseStatus, updateRoutine } from '../services/routineService';
 import { Routine, ExerciseLine } from '../models/Routine';
 import { getAllExercises, Exercise } from '../services/exerciseService';
+import MuscleMap from '../components/MuscleMap';
+import './RoutineDetail.css';
 
 const RoutineDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -24,22 +26,26 @@ const RoutineDetail: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Modal de Información del Ejercicio
+    const [infoModalExercise, setInfoModalExercise] = useState<{ name: string, muscleGroup: string } | null>(null);
+
     useEffect(() => {
         const fetchRoutineAndCatalog = async () => {
             try {
                 const data = await getRoutineById(Number(id));
 
-                // Expiration logic
+                // Lógica de reseteo DIARIO (a las 00:00)
                 let hasChanges = false;
-                const now = Date.now();
-                const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+                const todayStr = new Date().toDateString();
 
                 for (let ex of data.exercises) {
                     if (ex.isCompleted) {
                         const savedTimeStr = localStorage.getItem(`ex_${ex.id}_completed_at`);
                         if (savedTimeStr) {
                             const savedTime = parseInt(savedTimeStr, 10);
-                            if (now - savedTime > TWELVE_HOURS) {
+                            const savedDateStr = new Date(savedTime).toDateString();
+
+                            if (savedDateStr !== todayStr) {
                                 ex.isCompleted = false;
                                 hasChanges = true;
                                 try {
@@ -66,6 +72,21 @@ const RoutineDetail: React.FC = () => {
         };
         fetchRoutineAndCatalog();
     }, [id]);
+
+    const openExerciseInfo = (exLine: ExerciseLine) => {
+        let targetMuscle = '';
+        const catInfo = catalog.find(c => c.name.toLowerCase() === exLine.name.toLowerCase());
+        if (catInfo) {
+            targetMuscle = catInfo.muscleGroup;
+        } else {
+            targetMuscle = exLine.name; // Fallback
+        }
+
+        setInfoModalExercise({
+            name: exLine.name,
+            muscleGroup: targetMuscle
+        });
+    };
 
     const handleToggle = async (exerciseId: number, currentStatus: boolean) => {
         if (!routine) return;
@@ -217,14 +238,25 @@ const RoutineDetail: React.FC = () => {
                 <IonList lines="full">
                     {(routine.exercises || []).map((ex, idx) => (
                         <IonItem key={idx}>
-                            <IonLabel>
-                                <h2 style={{
-                                    fontWeight: 'bold',
-                                    textDecoration: !isEditing && ex.isCompleted ? 'line-through' : 'none',
-                                    color: !isEditing && ex.isCompleted ? 'var(--ion-color-medium)' : 'var(--ion-color-dark)'
-                                }}>
-                                    {ex.name}
-                                </h2>
+                            <IonLabel style={{ overflow: 'visible' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <h2 style={{
+                                        fontWeight: 'bold',
+                                        textDecoration: !isEditing && ex.isCompleted ? 'line-through' : 'none',
+                                        color: !isEditing && ex.isCompleted ? 'var(--ion-color-medium)' : 'var(--ion-color-dark)',
+                                        margin: 0
+                                    }}>
+                                        {ex.name}
+                                    </h2>
+                                    {!isEditing && (
+                                        <IonIcon
+                                            icon={informationCircleOutline}
+                                            color="primary"
+                                            style={{ fontSize: '1.2rem', cursor: 'pointer' }}
+                                            onClick={(e) => { e.stopPropagation(); openExerciseInfo(ex); }}
+                                        />
+                                    )}
+                                </div>
                                 {isEditing ? (
                                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                                         <div style={{ flex: 1 }}>
@@ -258,6 +290,51 @@ const RoutineDetail: React.FC = () => {
                         </IonItem>
                     ))}
                 </IonList>
+
+                {/* Modal de Información del Ejercicio */}
+                <IonModal
+                    isOpen={!!infoModalExercise}
+                    onDidDismiss={() => setInfoModalExercise(null)}
+                    breakpoints={[0, 0.5, 0.85, 1]}
+                    initialBreakpoint={0.85}
+                    handleBehavior="cycle"
+                >
+                    <IonHeader className="ion-no-border">
+                        <IonToolbar>
+                            <IonTitle style={{ fontWeight: 'bold' }}>{infoModalExercise?.name}</IonTitle>
+                            <IonButtons slot="end">
+                                <IonButton onClick={() => setInfoModalExercise(null)}>
+                                    <IonIcon icon={closeOutline} />
+                                </IonButton>
+                            </IonButtons>
+                        </IonToolbar>
+                    </IonHeader>
+                    <IonContent className="ion-padding">
+                        {infoModalExercise && (
+                            <div className="exercise-info-container">
+                                {/* Zona superior: Animación demostrativa (Placeholder) */}
+                                <div className="exercise-animation-placeholder" style={{ padding: 0 }}>
+                                    <img
+                                        src={`/assets/exercises/${infoModalExercise.name.toLowerCase().replace(/ /g, '_')}.gif`}
+                                        alt={infoModalExercise.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '16px' }}
+                                        onError={(e) => {
+                                            (e.currentTarget as HTMLImageElement).src = '/assets/exercises/default.gif';
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="info-divider"></div>
+
+                                {/* Zona inferior: Mapa Muscular Estático */}
+                                <h3>Músculos Implicados: <span style={{ color: 'var(--ion-color-primary)', fontWeight: 'bold' }}>{infoModalExercise.muscleGroup}</span></h3>
+                                <div className="muscle-map-wrapper static-map">
+                                    <MuscleMap muscleGroup={infoModalExercise.muscleGroup} />
+                                </div>
+                            </div>
+                        )}
+                    </IonContent>
+                </IonModal>
 
                 <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
                     <IonHeader>
