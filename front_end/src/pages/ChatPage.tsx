@@ -122,13 +122,23 @@ const ChatPage: React.FC = () => {
                         friendPubKeyRef.current = key ? naclUtil.encodeBase64(key) : null;
                     }
 
+                    const isCipher = (t: string) => t && t.length > 40 && /^[A-Za-z0-9+/]+={0,2}$/.test(t.trim());
+
                     if (friendPubKeyRef.current) {
                         try {
                             const decrypted = cryptoService.decryptMessage(myId, friendPubKeyRef.current, msg.content);
-                            if (decrypted) msg.content = decrypted;
+                            if (decrypted) {
+                                msg.content = decrypted;
+                            } else if (isCipher(msg.content)) {
+                                msg.content = '🔒 Mensaje encriptado (llave antigua)';
+                            }
                         } catch (e) {
-                            // Leave as plaintext if decryption fails
+                            if (isCipher(msg.content)) {
+                                msg.content = '🔒 Mensaje encriptado (llave antigua)';
+                            }
                         }
+                    } else if (isCipher(msg.content)) {
+                        msg.content = '🔒 Mensaje encriptado (llave antigua)';
                     }
 
                     setMessages((prev) => [...prev, msg]);

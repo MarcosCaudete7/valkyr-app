@@ -44,6 +44,9 @@ export const chatService = {
 
         if (error) throw error;
 
+        // Helper para detectar si un string es probablemente un cifrado Base64 de tweetnacl
+        const isCipher = (t: string) => t && t.length > 40 && /^[A-Za-z0-9+/]+={0,2}$/.test(t.trim());
+
         // Intentar desencriptar los mensajes
         if (data && data.length > 0) {
             const friendPubKey = await cryptoService.getFriendPublicKey(friendId);
@@ -55,10 +58,16 @@ export const chatService = {
                         const decrypted = cryptoService.decryptMessage(myId, friendPubKeyBase64, msg.content);
                         if (decrypted) {
                             return { ...msg, content: decrypted };
+                        } else if (isCipher(msg.content)) {
+                            return { ...msg, content: '🔒 Mensaje encriptado (llave antigua)' };
                         }
                     } catch (e) {
-                        // Ignorar: probablemente era un mensaje antiguo en texto plano
+                         if (isCipher(msg.content)) {
+                             return { ...msg, content: '🔒 Mensaje encriptado (llave antigua)' };
+                         }
                     }
+                } else if (isCipher(msg.content)) {
+                    return { ...msg, content: '🔒 Mensaje encriptado (llave antigua)' };
                 }
                 return msg;
             });
@@ -100,6 +109,8 @@ export const chatService = {
             });
         }
 
+        const isCipher = (t: string) => t && t.length > 40 && /^[A-Za-z0-9+/]+={0,2}$/.test(t.trim());
+
         // Ya podemos mapear y desencriptar cada preview del inbox
         const processedMsg = data.map((msg: any) => {
             const friendId = msg.sender_id === myId ? msg.receiver_id : msg.sender_id;
@@ -108,10 +119,18 @@ export const chatService = {
             if (friendPubKeyBase64) {
                 try {
                     const decrypted = cryptoService.decryptMessage(myId, friendPubKeyBase64, msg.content);
-                    if (decrypted) return { ...msg, content: decrypted };
+                    if (decrypted) {
+                        return { ...msg, content: decrypted };
+                    } else if (isCipher(msg.content)) {
+                        return { ...msg, content: '🔒 Mensaje encriptado (llave antigua)' };
+                    }
                 } catch (e) {
-                    // Ignorar si no se puede desencriptar (mensajes viejos)
+                    if (isCipher(msg.content)) {
+                        return { ...msg, content: '🔒 Mensaje encriptado (llave antigua)' };
+                    }
                 }
+            } else if (isCipher(msg.content)) {
+                return { ...msg, content: '🔒 Mensaje encriptado (llave antigua)' };
             }
             return msg;
         });

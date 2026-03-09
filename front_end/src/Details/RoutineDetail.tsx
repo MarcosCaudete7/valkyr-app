@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonList, IonItem,
-    IonLabel, IonCheckbox, IonBackButton, IonButtons, IonSpinner, IonBadge, IonIcon, IonNote, IonButton, IonInput, IonModal, IonSearchbar, IonToggle
+    IonLabel, IonCheckbox, IonBackButton, IonButtons, IonSpinner, IonBadge, IonIcon, IonNote, IonButton, IonInput, IonModal, IonSearchbar, IonToggle, IonReorderGroup, IonReorder, IonProgressBar, ItemReorderEventDetail
 } from '@ionic/react';
 import { clipboardOutline, fitnessOutline, trashOutline, addCircleOutline, closeOutline, informationCircleOutline } from 'ionicons/icons';
 import { getRoutineById, updateExerciseStatus, updateRoutine } from '../services/routineService';
@@ -216,6 +216,15 @@ const RoutineDetail: React.FC = () => {
         setSearchTerm('');
     };
 
+    const handleReorder = (event: CustomEvent<ItemReorderEventDetail>) => {
+        if (!routine) return;
+        const newExercises = [...routine.exercises];
+        const itemMove = newExercises.splice(event.detail.from, 1)[0];
+        newExercises.splice(event.detail.to, 0, itemMove);
+        setRoutine({ ...routine, exercises: newExercises });
+        event.detail.complete();
+    };
+
     const filteredCatalog = catalog.filter(ex =>
         ex.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         ex.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
@@ -280,6 +289,23 @@ const RoutineDetail: React.FC = () => {
                     )}
                     <IonBadge color="secondary">{routine.exercises?.length || 0} Ejercicios</IonBadge>
                     {routine.isPublic && !isEditing && <IonBadge color="success" style={{ marginLeft: '10px' }}>Pública</IonBadge>}
+                    
+                    {/* BARRA DE PROGRESO */}
+                    {!isEditing && routine.exercises?.length > 0 && (
+                        <div style={{ marginTop: '20px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <span style={{ fontSize: '0.9em', color: 'var(--ion-color-medium)' }}>Progreso del Entrenamiento</span>
+                                <span style={{ fontSize: '0.9em', fontWeight: 'bold', color: 'var(--ion-color-primary)' }}>
+                                    {Math.round((routine.exercises.filter(ex => ex.isCompleted).length / routine.exercises.length) * 100)}%
+                                </span>
+                            </div>
+                            <IonProgressBar 
+                                value={routine.exercises.filter(ex => ex.isCompleted).length / routine.exercises.length} 
+                                color="primary" 
+                                style={{ height: '8px', borderRadius: '4px' }} 
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <div className="section-divider" style={{ marginTop: '20px' }}>
@@ -293,59 +319,62 @@ const RoutineDetail: React.FC = () => {
                 </div>
 
                 <IonList lines="full">
-                    {(routine.exercises || []).map((ex, idx) => (
-                        <IonItem key={idx}>
-                            <IonLabel style={{ overflow: 'visible' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <h2 style={{
-                                        fontWeight: 'bold',
-                                        textDecoration: !isEditing && ex.isCompleted ? 'line-through' : 'none',
-                                        color: !isEditing && ex.isCompleted ? 'var(--ion-color-medium)' : 'var(--ion-color-dark)',
-                                        margin: 0
-                                    }}>
-                                        {ex.name}
-                                    </h2>
-                                    {!isEditing && (
-                                        <IonIcon
-                                            icon={informationCircleOutline}
-                                            color="primary"
-                                            style={{ fontSize: '1.2rem', cursor: 'pointer' }}
-                                            onClick={(e) => { e.stopPropagation(); openExerciseInfo(ex); }}
-                                        />
-                                    )}
-                                </div>
-                                {isEditing ? (
-                                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: '0.8em', color: 'gray' }}>Series</label>
-                                            <IonInput type="number" value={ex.series} onIonChange={e => updateExerciseDetail(idx, 'series', parseInt(e.detail.value!))} />
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: '0.8em', color: 'gray' }}>Reps</label>
-                                            <IonInput type="number" value={ex.reps} onIonChange={e => updateExerciseDetail(idx, 'reps', parseInt(e.detail.value!))} />
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: '0.8em', color: 'gray' }}>Kg</label>
-                                            <IonInput type="number" value={ex.weight} onIonChange={e => updateExerciseDetail(idx, 'weight', parseFloat(e.detail.value!))} />
-                                        </div>
+                    <IonReorderGroup disabled={!isEditing} onIonItemReorder={handleReorder}>
+                        {(routine.exercises || []).map((ex, idx) => (
+                            <IonItem key={idx}>
+                                {isEditing && <IonReorder slot="start" />}
+                                <IonLabel style={{ overflow: 'visible' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <h2 style={{
+                                            fontWeight: 'bold',
+                                            textDecoration: !isEditing && ex.isCompleted ? 'line-through' : 'none',
+                                            color: !isEditing && ex.isCompleted ? 'var(--ion-color-medium)' : 'var(--ion-color-dark)',
+                                            margin: 0
+                                        }}>
+                                            {ex.name}
+                                        </h2>
+                                        {!isEditing && (
+                                            <IonIcon
+                                                icon={informationCircleOutline}
+                                                color="primary"
+                                                style={{ fontSize: '1.2rem', cursor: 'pointer' }}
+                                                onClick={(e) => { e.stopPropagation(); openExerciseInfo(ex); }}
+                                            />
+                                        )}
                                     </div>
+                                    {isEditing ? (
+                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                            <div style={{ flex: 1 }}>
+                                                <label style={{ fontSize: '0.8em', color: 'gray' }}>Series</label>
+                                                <IonInput type="number" value={ex.series} onIonChange={e => updateExerciseDetail(idx, 'series', parseInt(e.detail.value!))} />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <label style={{ fontSize: '0.8em', color: 'gray' }}>Reps</label>
+                                                <IonInput type="number" value={ex.reps} onIonChange={e => updateExerciseDetail(idx, 'reps', parseInt(e.detail.value!))} />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <label style={{ fontSize: '0.8em', color: 'gray' }}>Kg</label>
+                                                <IonInput type="number" value={ex.weight} onIonChange={e => updateExerciseDetail(idx, 'weight', parseFloat(e.detail.value!))} />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p>{ex.series} series x {ex.reps} reps • {ex.weight}kg</p>
+                                    )}
+                                </IonLabel>
+                                {isEditing ? (
+                                    <IonButton fill="clear" color="danger" slot="end" onClick={() => removeExercise(idx)}>
+                                        <IonIcon icon={trashOutline} />
+                                    </IonButton>
                                 ) : (
-                                    <p>{ex.series} series x {ex.reps} reps • {ex.weight}kg</p>
+                                    <IonCheckbox
+                                        slot="end"
+                                        checked={ex.isCompleted}
+                                        onIonChange={() => handleToggle(ex.id, ex.isCompleted)}
+                                    />
                                 )}
-                            </IonLabel>
-                            {isEditing ? (
-                                <IonButton fill="clear" color="danger" slot="end" onClick={() => removeExercise(idx)}>
-                                    <IonIcon icon={trashOutline} />
-                                </IonButton>
-                            ) : (
-                                <IonCheckbox
-                                    slot="end"
-                                    checked={ex.isCompleted}
-                                    onIonChange={() => handleToggle(ex.id, ex.isCompleted)}
-                                />
-                            )}
-                        </IonItem>
-                    ))}
+                            </IonItem>
+                        ))}
+                    </IonReorderGroup>
                 </IonList>
 
                 {/* Modal de Información del Ejercicio */}
