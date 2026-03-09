@@ -9,6 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
 import org.valkyrapp.api.routine.Exercise; // Asegúrate de importar tu modelo
 import org.valkyrapp.api.routine.ExerciseRepository;
+import org.springframework.ai.content.Media;
+import org.springframework.util.MimeTypeUtils;
+import java.util.Base64;
+import java.util.Collections;
 
 import java.util.List;
 import java.util.Objects;
@@ -90,6 +94,52 @@ public class GroqAIServiceImpl implements GroqAIService {
         String instruction = buildSystemPrompt("Bodybuilding",
                 "Tu objetivo es la hipertrofia. Foco en volumen y aislamiento.");
         return callAi(instruction, ejercicio);
+    }
+
+    @Override
+    public String analyzeFood(String base64Image) {
+        try {
+            // Eliminar el prefijo data:image/jpeg;base64, si existe
+            String cleanBase64 = base64Image;
+            if (base64Image.contains(",")) {
+                cleanBase64 = base64Image.split(",")[1];
+            }
+
+            byte[] imageData = Base64.getDecoder().decode(cleanBase64);
+            Media media = new Media(MimeTypeUtils.IMAGE_JPEG, new org.springframework.core.io.ByteArrayResource(imageData));
+            
+            String promptText = """
+                    Analiza esta imagen y estima las calorías y macronutrientes.
+                    Responde ÚNICAMENTE con un JSON válido usando el siguiente formato exacto sin markdown:
+                    {
+                      "foodName": "Nombre del plato/alimento",
+                      "calories": 500,
+                      "protein": 30,
+                      "carbs": 40,
+                      "fat": 20
+                    }
+                    """;
+
+            java.lang.reflect.Constructor<UserMessage> constructor = UserMessage.class.getDeclaredConstructor(String.class, java.util.Collection.class, java.util.Map.class);
+            constructor.setAccessible(true);
+            UserMessage userMessage = constructor.newInstance(promptText, java.util.List.of(media), java.util.Collections.emptyMap());
+            
+            OpenAiChatOptions visionOptions = OpenAiChatOptions.builder()
+                    .model("llama-3.2-90b-vision-preview")
+                    .temperature(0.3)
+                    .build();
+
+            Prompt prompt = new Prompt(Collections.singletonList(userMessage), visionOptions);
+            
+            log.info("Llamando a Groq API Vision con modelo: llama-3.2-90b-vision-preview");
+            String rawResponse = Objects.requireNonNull(chatModel.call(prompt).getResult()).getOutput().getText();
+            log.info("Respuesta de Groq Vision recibida");
+            return cleanJson(rawResponse);
+            
+        } catch (Exception e) {
+            log.error("Error analizando imagen de comida: ", e);
+            throw new RuntimeException("Error en análisis visual", e);
+        }
     }
 
     private String callAi(String systemPrompt, String userExercise) {

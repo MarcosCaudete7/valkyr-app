@@ -17,3 +17,12 @@ export const getAiRoutine = async (ejercicio: string, tipo: string): Promise<str
     });
     return response.data;
 };
+
+export const analyzeFoodImage = async (base64Image: string): Promise<any> => {
+    const response = await axios.post(`${API_BASE_URL}/v1/analyze/food`, {
+        image: base64Image
+    }, getAuthHeader());
+    
+    // El backend devuelve un String JSON que Axios debería parsear, pero por si acaso
+    return typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+};

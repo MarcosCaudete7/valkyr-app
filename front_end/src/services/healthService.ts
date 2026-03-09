@@ -22,18 +22,18 @@ export const healthService = {
                 return this.getSimulatedData();
             }
 
-            // Pedir permisos si es necesario
+            // Pedir permisos. Según la API del plugin, RecordType solo acepta 'Steps' entre otros básicos para "read".
             const permissions = await HealthConnect.requestPermissions({
-                read: ['Steps', 'TotalCaloriesBurned', 'Distance'] as any[], // Explicit cast to avoid type errors on newer/older union mismatch
+                read: ['Steps'], 
                 write: []
             });
 
-            if (!permissions.read.includes('Steps' as any)) {
+            if (!permissions.read.includes('Steps')) {
                 console.warn("Permisos denegados para leer pasos");
                 return this.getSimulatedData();
             }
 
-            // Obtener pasos, calorías y distancia de HOY mediante agregación
+            // Obtener pasos de HOY mediante agregación
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const endTime = new Date(); // Ahora mismo
@@ -48,33 +48,19 @@ export const healthService = {
                 groupBy: 'day'
             });
 
-            const caloriesData = await HealthConnect.aggregateRecords({
-                start: startStr,
-                end: endStr,
-                type: 'TotalCaloriesBurned',
-                groupBy: 'day'
-            });
-
-            const distanceData = await HealthConnect.aggregateRecords({
-                start: startStr,
-                end: endStr,
-                type: 'Distance',
-                groupBy: 'day'
-            });
-
             let totalSteps = 0;
-            stepsData.aggregates.forEach((r: any) => totalSteps += r.value);
+            if (stepsData && stepsData.aggregates) {
+                stepsData.aggregates.forEach((r: any) => totalSteps += r.value);
+            }
 
-            let totalCalories = 0;
-            caloriesData.aggregates.forEach((r: any) => totalCalories += r.value);
-
-            let totalDistance = 0; // en metros o unidad nativa
-            distanceData.aggregates.forEach((r: any) => totalDistance += r.value);
+            // Calculamos calorías y distancia base a los pasos reales de Android
+            const totalCalories = totalSteps * 0.04;
+            const totalDistanceMetros = totalSteps * 0.8;
 
             return {
                 steps: totalSteps,
                 calories: Math.round(totalCalories),
-                distance: parseFloat((totalDistance / 1000).toFixed(2)) // asumiendo metros
+                distance: parseFloat((totalDistanceMetros / 1000).toFixed(2)) // en Km
             };
 
         } catch (error) {

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSearchbar, IonList, IonItem, IonLabel, IonAvatar, IonListHeader, useIonViewWillEnter, IonIcon, IonBadge } from '@ionic/react';
-import { chatbubbleEllipsesOutline } from 'ionicons/icons';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSearchbar, IonList, IonItem, IonLabel, IonAvatar, IonListHeader, useIonViewWillEnter, IonIcon, IonBadge, IonSegment, IonSegmentButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, useIonAlert, IonButton } from '@ionic/react';
+import { chatbubbleEllipsesOutline, shieldOutline, trophyOutline, addCircleOutline, exitOutline } from 'ionicons/icons';
 import './SocialPage.css';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import { chatService } from '../services/chatService';
 import { socialService, UserProfile } from '../services/socialService';
+import { guildService, Guild } from '../services/guildService';
 import { API_BASE_URL } from '../services/api';
 import { supabase } from '../supabaseClient';
 
@@ -13,6 +14,10 @@ const SocialPage: React.FC = () => {
     const [users, setUsers] = useState<any[]>([]);
     const [recentChats, setRecentChats] = useState<any[]>([]);
     const [myId, setMyId] = useState<string | null>(null);
+    const [segment, setSegment] = useState<'chats' | 'clanes'>('chats');
+    const [myGuild, setMyGuild] = useState<Guild | null>(null);
+    const [rankings, setRankings] = useState<Guild[]>([]);
+    const [presentAlert] = useIonAlert();
     const history = useHistory();
 
     const loadChatsAndPreviews = async (userId: string) => {
@@ -94,9 +99,66 @@ const SocialPage: React.FC = () => {
             setMyId(userId);
             if (userId) {
                 loadChatsAndPreviews(userId);
+                loadGuildInfo(userId);
             }
         }
     });
+
+    const loadGuildInfo = async (userId: string) => {
+        const g = await guildService.getMyGuild(userId);
+        setMyGuild(g);
+        const rks = await guildService.getGlobalRankings();
+        setRankings(rks);
+    };
+
+    const handleCreateGuild = () => {
+        presentAlert({
+            header: 'Crear Nuevo Clan',
+            inputs: [
+                { name: 'name', type: 'text', placeholder: 'Nombre del Clan (Único)' },
+                { name: 'description', type: 'textarea', placeholder: 'Descripción (Opcional)' }
+            ],
+            buttons: [
+                { text: 'Cancelar', role: 'cancel' },
+                {
+                    text: 'Crear',
+                    handler: async (data) => {
+                        if (!data.name) return false;
+                        if (myId) {
+                            try {
+                                const newG = await guildService.createGuild(myId, data.name, data.description);
+                                setMyGuild(newG);
+                                loadGuildInfo(myId);
+                            } catch (e: any) {
+                                presentAlert({ header: 'Error', message: e.message, buttons: ['OK'] });
+                            }
+                        }
+                    }
+                }
+            ]
+        });
+    };
+
+    const handleJoinGuild = async (guildId: string) => {
+        if (!myId) return;
+        try {
+            await guildService.joinGuild(myId, guildId);
+            loadGuildInfo(myId);
+        } catch (e: any) {
+            presentAlert({ header: 'Error', message: e.message, buttons: ['OK'] });
+        }
+    };
+
+    const handleLeaveGuild = async () => {
+        if (!myId) return;
+        try {
+            await guildService.leaveGuild(myId);
+            setMyGuild(null);
+            loadGuildInfo(myId);
+        } catch(e: any) {
+            presentAlert({ header: 'Error', message: e.message, buttons: ['OK'] });
+        }
+    };
 
     useEffect(() => {
         if (!myId) return;
@@ -137,13 +199,26 @@ const SocialPage: React.FC = () => {
 
     return (
         <IonPage>
-            <IonHeader>
-                <IonToolbar>
-                    <IonTitle>Comunidad Valkyr</IonTitle>
+            <IonHeader className="ion-no-border">
+                <IonToolbar color="primary">
+                    <IonTitle>Social & Clanes</IonTitle>
+                </IonToolbar>
+                <IonToolbar style={{ '--background': 'var(--ion-color-light)' }}>
+                    <IonSegment value={segment} onIonChange={e => setSegment(e.detail.value as any)}>
+                        <IonSegmentButton value="chats">
+                            <IonLabel>Chats</IonLabel>
+                        </IonSegmentButton>
+                        <IonSegmentButton value="clanes">
+                            <IonLabel>Ranking Clanes</IonLabel>
+                        </IonSegmentButton>
+                    </IonSegment>
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding-bottom">
-                <IonSearchbar
+                
+                {segment === 'chats' && (
+                    <>
+                        <IonSearchbar
                     className="social-searchbar"
                     placeholder="Buscar amigos por nombre..."
                     onIonInput={(e) => handleSearch(e.detail.value!)}
@@ -196,11 +271,75 @@ const SocialPage: React.FC = () => {
                     </IonList>
                 )}
 
-                {users.length === 0 && recentChats.length === 0 && (
-                    <div className="social-empty-state">
-                        <IonIcon icon={chatbubbleEllipsesOutline} className="social-empty-state-icon" />
-                        <h2>Busca amigos para chatear</h2>
-                        <p>Escribe su nombre en la barra superior y comienza a interactuar.</p>
+                        {users.length === 0 && recentChats.length === 0 && (
+                            <div className="social-empty-state">
+                                <IonIcon icon={chatbubbleEllipsesOutline} className="social-empty-state-icon" />
+                                <h2>Busca amigos para chatear</h2>
+                                <p>Escribe su nombre en la barra superior y comienza a interactuar.</p>
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {segment === 'clanes' && (
+                    <div className="guilds-section" style={{ padding: '15px' }}>
+                        {myGuild ? (
+                            <IonCard className="my-guild-card">
+                                <IonCardHeader>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <IonIcon icon={shieldOutline} style={{ fontSize: '24px', color: 'var(--ion-color-primary)' }} />
+                                        <IonCardTitle>{myGuild.name}</IonCardTitle>
+                                    </div>
+                                    <IonLabel color="medium">Tu Clan Actual</IonLabel>
+                                </IonCardHeader>
+                                <IonCardContent>
+                                    <p>{myGuild.description || 'Sin descripción'}</p>
+                                    <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'flex-end' }}>
+                                        <IonButton fill="clear" color="danger" onClick={handleLeaveGuild}>
+                                            <IonIcon slot="start" icon={exitOutline} /> Abandonar Clan
+                                        </IonButton>
+                                    </div>
+                                </IonCardContent>
+                            </IonCard>
+                        ) : (
+                            <IonCard className="no-guild-card">
+                                <IonCardContent style={{ textAlign: 'center', padding: '30px 15px' }}>
+                                    <IonIcon icon={shieldOutline} style={{ fontSize: '48px', color: 'var(--ion-color-medium)', marginBottom: '15px' }} />
+                                    <h2>No perteneces a ningún Clan</h2>
+                                    <p style={{ color: 'var(--ion-color-medium)' }}>Únete a uno de la lista inferior o crea el tuyo propio para competir en el Ránking Global.</p>
+                                    <IonButton expand="block" shape="round" style={{ marginTop: '20px' }} onClick={handleCreateGuild}>
+                                        <IonIcon slot="start" icon={addCircleOutline} /> Crear Nuevo Clan
+                                    </IonButton>
+                                </IonCardContent>
+                            </IonCard>
+                        )}
+
+                        <IonListHeader className="social-list-header" style={{ marginTop: '20px' }}>
+                            <IonIcon icon={trophyOutline} style={{ marginRight: '8px', color: 'gold' }} />
+                            <IonLabel>Ránking Global (Media Kg)</IonLabel>
+                        </IonListHeader>
+
+                        <IonList lines="full" style={{ background: 'transparent' }}>
+                            {rankings.map((guild, index) => (
+                                <IonItem key={guild.id} style={{ '--background': index < 3 ? 'rgba(var(--ion-color-warning-rgb), 0.05)' : 'transparent' }}>
+                                    <div slot="start" style={{ width: '30px', textAlign: 'center', fontWeight: 'bold', color: index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? '#cd7f32' : 'var(--ion-color-medium)' }}>
+                                        {index + 1}°
+                                    </div>
+                                    <IonLabel>
+                                        <h2 style={{ fontWeight: '600' }}>{guild.name}</h2>
+                                        <p>{guild.description || 'Sin descripción'}</p>
+                                    </IonLabel>
+                                    <div slot="end" style={{ textAlign: 'right' }}>
+                                        <IonBadge color="primary">{guild.averageKg} kg/entreno</IonBadge>
+                                        {!myGuild && (
+                                            <div style={{ marginTop: '5px' }}>
+                                                <IonButton size="small" fill="outline" onClick={() => handleJoinGuild(guild.id)}>Unirme</IonButton>
+                                            </div>
+                                        )}
+                                    </div>
+                                </IonItem>
+                            ))}
+                        </IonList>
                     </div>
                 )}
             </IonContent>

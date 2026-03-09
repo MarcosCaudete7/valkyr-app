@@ -5,4 +5,6 @@ public interface GroqAIService {
     public String getRuntinaPower(String ejercicio);
 
     public String getRuntinaBodyBuilding(String ejercicio);
+
+    public String analyzeFood(String base64Image);
 }

@@ -56,22 +56,25 @@ const Login: React.FC = () => {
                     }
                 }
 
+                setLoading(false);
                 console.log('Redirigiendo a /tabs/myroutines');
                 history.push('/tabs/myroutines');
             } else {
+                setLoading(false);
                 console.error('No se encontró token en la respuesta');
                 setErrorMsg('Error: No se recibió el token de acceso');
             }
         } catch (error: any) {
+            setLoading(false);
             console.error("Fallo de login:", error);
             if (error.response?.data?.message === 'ACCOUNT_NOT_VERIFIED') {
-                setEmailToVerify(error.response.data.email || '');
-                setShowOtpModal(true);
+                setTimeout(() => {
+                    setEmailToVerify(error.response.data.email || credentials.username);
+                    setShowOtpModal(true);
+                }, 300); // Darle tiempo a Ionic para limpiar el IonLoading sin llevarse el IonModal por delante en Android
             } else {
                 setErrorMsg(error.response?.data?.message || 'Error de conexión con el servidor');
             }
-        } finally {
-            setLoading(false);
         }
     };
 

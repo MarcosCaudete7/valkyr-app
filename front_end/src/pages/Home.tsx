@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
     IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
     IonGrid, IonRow, IonCol, IonCard, IonIcon, IonText, IonRefresher, IonRefresherContent,
-    IonButton, IonCardHeader, IonCardTitle, IonCardContent, IonInput
+    IonButton, IonCardHeader, IonCardTitle, IonCardContent, IonInput, IonFab, IonFabButton, IonSpinner, useIonAlert
 } from '@ionic/react';
 import { Capacitor } from '@capacitor/core';
-import { walkOutline, flameOutline, mapOutline, timeOutline, informationCircleOutline, barbellOutline, downloadOutline, logInOutline } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { walkOutline, flameOutline, mapOutline, timeOutline, informationCircleOutline, barbellOutline, downloadOutline, logInOutline, cameraOutline } from 'ionicons/icons';
 import { healthService, HealthData } from '../services/healthService';
+import { analyzeFoodImage } from '../services/aiService';
 import './Home.css';
 
 const Home: React.FC = () => {
@@ -15,6 +17,9 @@ const Home: React.FC = () => {
     const [weight, setWeight] = useState<string>('');
     const [reps, setReps] = useState<string>('5');
     const [oneRM, setOneRM] = useState<number | null>(null);
+
+    const [isAnalyzingFood, setIsAnalyzingFood] = useState(false);
+    const [presentAlert] = useIonAlert();
 
     const loadData = async (event?: CustomEvent) => {
         // 1. Cargar Usuario
@@ -54,6 +59,34 @@ const Home: React.FC = () => {
     useEffect(() => {
         calculate1RM();
     }, [weight, reps]);
+
+    const takeFoodPhoto = async () => {
+        try {
+            const image = await Camera.getPhoto({
+                quality: 60,
+                allowEditing: false,
+                resultType: CameraResultType.Base64,
+                source: CameraSource.Prompt
+            });
+
+            if (image.base64String) {
+                setIsAnalyzingFood(true);
+                const result = await analyzeFoodImage(image.base64String);
+
+                // Asumimos que la IA responde con { "foodName": "...", "calories": ..., "protein": ... }
+                presentAlert({
+                    header: 'Análisis Nutricional',
+                    subHeader: result.foodName || 'Alimento detectado',
+                    message: `Estimación (por ración):<br><br><b>Calorías:</b> ${result.calories} kcal<br><b>Proteína:</b> ${result.protein}g<br><b>Carbos:</b> ${result.carbs}g<br><b>Grasas:</b> ${result.fat}g`,
+                    buttons: ['Cerrar']
+                });
+            }
+        } catch (error) {
+            console.error("No se tomó foto o hubo fallo:", error);
+        } finally {
+            setIsAnalyzingFood(false);
+        }
+    };
 
     return (
         <IonPage className="home-page">
@@ -201,6 +234,12 @@ const Home: React.FC = () => {
                             </IonGrid>
                         </IonCardContent>
                     </IonCard>
+                </div>
+
+                <div style={{ position: 'fixed', bottom: '80px', right: '20px', zIndex: 1000}}>
+                    <IonFabButton color="success" onClick={takeFoodPhoto} disabled={isAnalyzingFood}>
+                        {isAnalyzingFood ? <IonSpinner name="crescent" color="light" /> : <IonIcon icon={cameraOutline} />}
+                    </IonFabButton>
                 </div>
             </IonContent>
         </IonPage>
