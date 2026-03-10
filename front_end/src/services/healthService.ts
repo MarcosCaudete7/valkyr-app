@@ -41,16 +41,21 @@ export const healthService = {
             const startStr = today.toISOString();
             const endStr = endTime.toISOString();
 
-            const stepsData = await HealthConnect.aggregateRecords({
+            const stepsData = await HealthConnect.readRecords({
                 start: startStr,
                 end: endStr,
                 type: 'Steps',
-                groupBy: 'day'
+                // Fetch up to 1000 records of steps generated today
+                pageSize: 1000
             });
 
             let totalSteps = 0;
-            if (stepsData && stepsData.aggregates) {
-                stepsData.aggregates.forEach((r: any) => totalSteps += r.value);
+            if (stepsData && stepsData.records) {
+                // plugin typically returns 'count' property for Steps
+                stepsData.records.forEach((r: any) => {
+                    const stepsToAdd = r.count || r.value || 0;
+                    totalSteps += stepsToAdd;
+                });
             }
 
             // Calculamos calorías y distancia base a los pasos reales de Android

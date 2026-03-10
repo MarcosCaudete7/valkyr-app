@@ -35,6 +35,7 @@ const RoutineDetail: React.FC = () => {
     const [showEpicSummary, setShowEpicSummary] = useState(false);
     const [workedMuscles, setWorkedMuscles] = useState<string[]>([]);
     const [currentStreak, setCurrentStreak] = useState(0);
+    const [totalWeightLifted, setTotalWeightLifted] = useState(0);
 
     // Timestamp para saber cuándo empezó
     const startTimeRef = React.useRef(Date.now());
@@ -133,12 +134,15 @@ const RoutineDetail: React.FC = () => {
             return;
         }
 
-        // Obtener músculos trabajados mirando el catálogo base
+        // Obtener músculos trabajados mirando el catálogo base y calcular volumen total
+        let volume = 0;
         const muscles = completed.map(ex => {
             const catInfo = catalog.find(c => c.name.toLowerCase() === ex.name.toLowerCase());
+            volume += (ex.series || 0) * (ex.reps || 0) * (ex.weight || 0);
             return catInfo ? catInfo.muscleGroup : ex.name;
         });
         setWorkedMuscles(muscles);
+        setTotalWeightLifted(volume);
 
         // Lógica de Rachas (Streaks) Valhalla
         const todayStr = new Date().toDateString();
@@ -318,18 +322,27 @@ const RoutineDetail: React.FC = () => {
                     )}
                 </div>
 
-                <IonList lines="full">
+                <IonList lines="none" style={{ background: 'transparent' }}>
                     <IonReorderGroup disabled={!isEditing} onIonItemReorder={handleReorder}>
                         {(routine.exercises || []).map((ex, idx) => (
-                            <IonItem key={idx}>
-                                {isEditing && <IonReorder slot="start" />}
-                                <IonLabel style={{ overflow: 'visible' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div key={idx} style={{ 
+                                margin: '0 0 15px 0', 
+                                background: 'var(--ion-color-light)', 
+                                padding: '15px', 
+                                borderRadius: '12px',
+                                boxShadow: !isEditing && ex.isCompleted ? 'none' : '0 4px 6px rgba(0,0,0,0.1)',
+                                opacity: !isEditing && ex.isCompleted ? 0.6 : 1,
+                                transition: 'all 0.3s ease'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                                        {isEditing && <IonReorder slot="start" style={{ marginRight: '10px' }} />}
                                         <h2 style={{
                                             fontWeight: 'bold',
                                             textDecoration: !isEditing && ex.isCompleted ? 'line-through' : 'none',
                                             color: !isEditing && ex.isCompleted ? 'var(--ion-color-medium)' : 'var(--ion-color-dark)',
-                                            margin: 0
+                                            margin: 0,
+                                            fontSize: '1.1rem'
                                         }}>
                                             {ex.name}
                                         </h2>
@@ -337,42 +350,49 @@ const RoutineDetail: React.FC = () => {
                                             <IonIcon
                                                 icon={informationCircleOutline}
                                                 color="primary"
-                                                style={{ fontSize: '1.2rem', cursor: 'pointer' }}
+                                                style={{ fontSize: '1.4rem', cursor: 'pointer' }}
                                                 onClick={(e) => { e.stopPropagation(); openExerciseInfo(ex); }}
                                             />
                                         )}
                                     </div>
-                                    {isEditing ? (
-                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                            <div style={{ flex: 1 }}>
-                                                <label style={{ fontSize: '0.8em', color: 'gray' }}>Series</label>
-                                                <IonInput type="number" value={ex.series} onIonChange={e => updateExerciseDetail(idx, 'series', parseInt(e.detail.value!))} />
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <label style={{ fontSize: '0.8em', color: 'gray' }}>Reps</label>
-                                                <IonInput type="number" value={ex.reps} onIonChange={e => updateExerciseDetail(idx, 'reps', parseInt(e.detail.value!))} />
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <label style={{ fontSize: '0.8em', color: 'gray' }}>Kg</label>
-                                                <IonInput type="number" value={ex.weight} onIonChange={e => updateExerciseDetail(idx, 'weight', parseFloat(e.detail.value!))} />
-                                            </div>
+
+                                    {!isEditing && (
+                                        <div style={{ transform: 'scale(1.2)' }}>
+                                            <IonCheckbox
+                                                checked={ex.isCompleted}
+                                                onIonChange={() => handleToggle(ex.id, ex.isCompleted)}
+                                                color="success"
+                                            />
                                         </div>
-                                    ) : (
-                                        <p>{ex.series} series x {ex.reps} reps • {ex.weight}kg</p>
                                     )}
-                                </IonLabel>
+                                </div>
+
                                 {isEditing ? (
-                                    <IonButton fill="clear" color="danger" slot="end" onClick={() => removeExercise(idx)}>
-                                        <IonIcon icon={trashOutline} />
-                                    </IonButton>
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '15px', alignItems: 'flex-end' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '0.85em', color: 'gray', fontWeight: 'bold' }}>Series</label>
+                                            <IonInput type="number" value={ex.series} onIonChange={e => updateExerciseDetail(idx, 'series', parseInt(e.detail.value!))} style={{ background: 'rgba(0,0,0,0.05)', borderRadius: '8px', paddingLeft: '8px', marginTop: '5px' }} />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '0.85em', color: 'gray', fontWeight: 'bold' }}>Reps</label>
+                                            <IonInput type="number" value={ex.reps} onIonChange={e => updateExerciseDetail(idx, 'reps', parseInt(e.detail.value!))} style={{ background: 'rgba(0,0,0,0.05)', borderRadius: '8px', paddingLeft: '8px', marginTop: '5px' }} />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '0.85em', color: 'gray', fontWeight: 'bold' }}>Kilos</label>
+                                            <IonInput type="number" value={ex.weight} onIonChange={e => updateExerciseDetail(idx, 'weight', parseFloat(e.detail.value!))} style={{ background: 'rgba(0,0,0,0.05)', borderRadius: '8px', paddingLeft: '8px', marginTop: '5px' }} />
+                                        </div>
+                                        <IonButton fill="clear" color="danger" onClick={() => removeExercise(idx)} style={{ margin: 0 }}>
+                                            <IonIcon icon={trashOutline} />
+                                        </IonButton>
+                                    </div>
                                 ) : (
-                                    <IonCheckbox
-                                        slot="end"
-                                        checked={ex.isCompleted}
-                                        onIonChange={() => handleToggle(ex.id, ex.isCompleted)}
-                                    />
+                                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                                        <IonBadge color="medium" style={{ fontSize: '0.9rem', padding: '6px 10px' }}>{ex.series} Sets</IonBadge>
+                                        <IonBadge color="medium" style={{ fontSize: '0.9rem', padding: '6px 10px' }}>{ex.reps} Reps</IonBadge>
+                                        <IonBadge color="primary" style={{ fontSize: '0.9rem', padding: '6px 10px' }}>{ex.weight} kg</IonBadge>
+                                    </div>
                                 )}
-                            </IonItem>
+                            </div>
                         ))}
                     </IonReorderGroup>
                 </IonList>
@@ -470,16 +490,21 @@ const RoutineDetail: React.FC = () => {
                                 Has forjado tu destino.
                             </p>
 
-                            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
-                                <div style={{ background: '#1a1a1a', padding: '15px 25px', borderRadius: '15px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '20px' }}>
+                                <div style={{ background: '#1a1a1a', padding: '15px', borderRadius: '15px', border: '1px solid rgba(239, 68, 68, 0.3)', minWidth: '100px' }}>
                                     <IonIcon icon={fitnessOutline} style={{ fontSize: '2rem', color: '#ef4444' }} />
                                     <h3 style={{ margin: '5px 0 0 0', fontWeight: 'bold' }}>{routine.exercises.filter(e => e.isCompleted).length}</h3>
                                     <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Ejercicios</span>
                                 </div>
-                                <div style={{ background: '#1a1a1a', padding: '15px 25px', borderRadius: '15px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                                <div style={{ background: '#1a1a1a', padding: '15px', borderRadius: '15px', border: '1px solid rgba(239, 68, 68, 0.3)', minWidth: '100px' }}>
                                     <div style={{ fontSize: '2rem' }}>🔥</div>
                                     <h3 style={{ margin: '5px 0 0 0', fontWeight: 'bold' }}>{currentStreak}</h3>
                                     <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Días Seguidos</span>
+                                </div>
+                                <div style={{ background: '#1a1a1a', padding: '15px', borderRadius: '15px', border: '1px solid rgba(239, 68, 68, 0.3)', minWidth: '100px' }}>
+                                    <div style={{ fontSize: '2rem' }}>🏋️</div>
+                                    <h3 style={{ margin: '5px 0 0 0', fontWeight: 'bold', color: 'gold' }}>{totalWeightLifted}</h3>
+                                    <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Kilos (Volumen)</span>
                                 </div>
                             </div>
 

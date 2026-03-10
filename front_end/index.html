@@ -16,7 +16,8 @@
     
     <link rel="manifest" href="/manifest.json" />
     
-    <link rel="shortcut icon" type="image/png" href="/favicon.png" />
+    <link rel="stylesheet" href="/assets/splash.css" />
+    <link rel="shortcut icon" type="image/png" href="/valkyr_logo_square.png" />
     
     <!-- add to homescreen for ios -->
     <meta name="mobile-web-app-capable" content="yes" />
@@ -24,6 +25,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   </head>
   <body>
+    <!-- SPLASH SCREEN ANIMADO PARA WEB Y NATIVO (PRE-REACT) -->
+    <div id="splash-screen">
+      <div class="splash-logo-container">
+        <img src="/valkyr_logo_full_dark.png" alt="Valkyr App" />
+      </div>
+    </div>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
