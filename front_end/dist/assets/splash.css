@@ -20,27 +20,34 @@
 }
 
 .splash-logo-container {
-  width: 400px;
+  width: 80%;
+  max-width: 450px;
   height: auto;
-  animation: pulse-logo 2s infinite ease-in-out;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: splash-entry 0.8s ease-out forwards, pulse-glow 2.5s infinite alternate ease-in-out 0.8s;
 }
 
 .splash-logo-container img {
   width: 100%;
   height: auto;
+  filter: drop-shadow(0 0 15px rgba(0, 200, 255, 0.4));
 }
 
-@keyframes pulse-logo {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.05);
+@keyframes splash-entry {
+  to {
     opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-glow {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px rgba(0, 200, 255, 0.3));
   }
   100% {
-    transform: scale(0.95);
-    opacity: 0.8;
+    transform: scale(1.03);
+    filter: drop-shadow(0 0 25px rgba(0, 200, 255, 0.7)) drop-shadow(0 0 40px rgba(255, 215, 0, 0.2));
   }
 }
