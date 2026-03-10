@@ -208,7 +208,7 @@ const RoutineDetail: React.FC = () => {
     const selectExercise = (exercise: Exercise) => {
         if (!routine) return;
         const newExercise: ExerciseLine = {
-            id: Date.now(), // Uso temporal de id para front
+            id: Date.now() + Math.floor(Math.random() * 10000), // Unique ID to allow duplicate exercises in the same routine
             name: exercise.name,
             series: 4,
             reps: 10,
@@ -325,7 +325,7 @@ const RoutineDetail: React.FC = () => {
                 <IonList lines="none" style={{ background: 'transparent' }}>
                     <IonReorderGroup disabled={!isEditing} onIonItemReorder={handleReorder}>
                         {(routine.exercises || []).map((ex, idx) => (
-                            <div key={idx} style={{ 
+                            <div key={ex.id || idx} style={{ 
                                 margin: '0 0 15px 0', 
                                 background: 'var(--ion-color-light)', 
                                 padding: '15px', 
