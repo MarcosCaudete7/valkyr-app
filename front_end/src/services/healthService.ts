@@ -40,6 +40,7 @@ export const healthService = {
 
             const startStr = today.toISOString();
             const endStr = endTime.toISOString();
+            const todayStartMs = today.getTime();
 
             const stepsData = await HealthConnect.readRecords({
                 start: startStr,
@@ -53,8 +54,15 @@ export const healthService = {
             if (stepsData && stepsData.records) {
                 // plugin typically returns 'count' property for Steps
                 stepsData.records.forEach((r: any) => {
-                    const stepsToAdd = r.count || r.value || 0;
-                    totalSteps += stepsToAdd;
+                    // Extract record timestamps
+                    const recTimeStr = r.endTime || r.startTime || r.date || '';
+                    const recTimeMs = recTimeStr ? new Date(recTimeStr).getTime() : Date.now();
+                    
+                    // Doble validación en frontend: solo sumamos si ocurrió HOY
+                    if (recTimeMs >= todayStartMs) {
+                        const stepsToAdd = r.count || r.value || r.steps || 0;
+                        totalSteps += stepsToAdd;
+                    }
                 });
             }
 
