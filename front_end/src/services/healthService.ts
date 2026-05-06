@@ -33,42 +33,24 @@ export const healthService = {
                 return this.getSimulatedData();
             }
 
-            // Obtener pasos de HOY mediante agregación
+            // Obtener pasos de HOY mediante agregación (más preciso y evita duplicados)
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const endTime = new Date(); // Ahora mismo
+            const endTime = new Date();
 
-            const startStr = today.toISOString();
-            const endStr = endTime.toISOString();
-            const todayStartMs = today.getTime();
-
-            const stepsData = await HealthConnect.readRecords({
-                start: startStr,
-                end: endStr,
-                type: 'Steps',
-                // Fetch up to 1000 records of steps generated today
-                pageSize: 1000
+            // Usamos aggregateRecords para que Health Connect sume y deduplique automáticamente
+            const aggregated = await HealthConnect.aggregateRecords({
+                start: today.toISOString(),
+                end: endTime.toISOString(),
+                type: 'Steps'
             });
 
-            let totalSteps = 0;
-            if (stepsData && stepsData.records) {
-                // plugin typically returns 'count' property for Steps
-                stepsData.records.forEach((r: any) => {
-                    // Extract record timestamps
-                    const recTimeStr = r.endTime || r.startTime || r.date || '';
-                    const recTimeMs = recTimeStr ? new Date(recTimeStr).getTime() : Date.now();
-                    
-                    // Doble validación en frontend: solo sumamos si ocurrió HOY
-                    if (recTimeMs >= todayStartMs) {
-                        const stepsToAdd = r.count || r.value || r.steps || 0;
-                        totalSteps += stepsToAdd;
-                    }
-                });
-            }
+            // El plugin suele devolver el resultado en una propiedad 'value' o dentro de un objeto de resultados
+            const totalSteps = (aggregated as any).total || (aggregated as any).count || (aggregated as any).value || 0;
 
-            // Calculamos calorías y distancia base a los pasos reales de Android
+            // Calculamos calorías (activas) y distancia (basada en zancada media de 0.7m)
             const totalCalories = totalSteps * 0.04;
-            const totalDistanceMetros = totalSteps * 0.8;
+            const totalDistanceMetros = totalSteps * 0.7;
 
             return {
                 steps: totalSteps,
