@@ -7,6 +7,15 @@ export interface HealthData {
     distance: number;
 }
 
+/**
+ * Suma todos los valores de un array de AggregateData devuelto por aggregateRecords.
+ * La API devuelve: { aggregates: [{ startTime, endTime, value, unit }] }
+ */
+function sumAggregates(result: any): number {
+    if (!result || !Array.isArray(result.aggregates)) return 0;
+    return result.aggregates.reduce((acc: number, item: any) => acc + (item.value || 0), 0);
+}
+
 export const healthService = {
     async getHealthData(): Promise<HealthData> {
         if (!Capacitor.isNativePlatform()) {
@@ -14,65 +23,97 @@ export const healthService = {
         }
 
         try {
-            // Android Health Connect Logic
+            // 1. Comprobar disponibilidad de Health Connect
             const isAvailable = await HealthConnect.checkAvailability();
-
             if (isAvailable.availability !== 'Available') {
-                console.warn("Health Connect no está disponible en este dispositivo.");
+                console.warn('Health Connect no está disponible en este dispositivo.');
                 return this.getSimulatedData();
             }
 
-            // Pedir permisos. Según la API del plugin, RecordType solo acepta 'Steps' entre otros básicos para "read".
+            // 2. Pedir todos los permisos necesarios (pasos, distancia y calorías activas)
             const permissions = await HealthConnect.requestPermissions({
-                read: ['Steps'], 
+                read: ['Steps', 'ActivitySession'],
                 write: []
             });
 
             if (!permissions.read.includes('Steps')) {
-                console.warn("Permisos denegados para leer pasos");
+                console.warn('Permiso de pasos denegado.');
                 return this.getSimulatedData();
             }
 
-            // Obtener pasos de HOY mediante agregación (más preciso y evita duplicados)
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const endTime = new Date();
+            // 3. Definir rango de tiempo: desde las 00:00:00 del día actual hasta ahora
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            const now = new Date();
 
-            // Usamos aggregateRecords para que Health Connect sume y deduplique automáticamente
-            const aggregated = await HealthConnect.aggregateRecords({
-                start: today.toISOString(),
-                end: endTime.toISOString(),
-                type: 'Steps'
+            const start = todayStart.toISOString();
+            const end = now.toISOString();
+
+            // 4. Obtener pasos agregados del día (Health Connect deduplica automáticamente)
+            const stepsResult = await HealthConnect.aggregateRecords({
+                start,
+                end,
+                type: 'Steps',
+                groupBy: 'day'
             });
+            const totalSteps = sumAggregates(stepsResult);
 
-            // El plugin suele devolver el resultado en una propiedad 'value' o dentro de un objeto de resultados
-            const totalSteps = (aggregated as any).total || (aggregated as any).count || (aggregated as any).value || 0;
+            // 5. Intentar obtener distancia real del día en metros
+            let totalDistanceKm = parseFloat(((totalSteps * 0.7) / 1000).toFixed(2)); // fallback
+            try {
+                const distanceResult = await HealthConnect.aggregateRecords({
+                    start,
+                    end,
+                    type: 'Distance',
+                    groupBy: 'day'
+                });
+                const rawDistance = sumAggregates(distanceResult); // en metros
+                if (rawDistance > 0) {
+                    totalDistanceKm = parseFloat((rawDistance / 1000).toFixed(2));
+                }
+            } catch {
+                // Si falla, usamos el fallback calculado por pasos
+            }
 
-            // Calculamos calorías (activas) y distancia (basada en zancada media de 0.7m)
-            const totalCalories = totalSteps * 0.04;
-            const totalDistanceMetros = totalSteps * 0.7;
+            // 6. Intentar obtener calorías activas reales del día
+            let totalCalories = Math.round(totalSteps * 0.04); // fallback
+            try {
+                const caloriesResult = await HealthConnect.aggregateRecords({
+                    start,
+                    end,
+                    type: 'ActiveCaloriesBurned',
+                    groupBy: 'day'
+                });
+                const rawCalories = sumAggregates(caloriesResult); // en kcal
+                if (rawCalories > 0) {
+                    totalCalories = Math.round(rawCalories);
+                }
+            } catch {
+                // Si falla, usamos el fallback calculado por pasos
+            }
+
+            console.log(`[HealthService] Pasos: ${totalSteps}, Distancia: ${totalDistanceKm}km, Calorías: ${totalCalories}kcal`);
 
             return {
                 steps: totalSteps,
-                calories: Math.round(totalCalories),
-                distance: parseFloat((totalDistanceMetros / 1000).toFixed(2)) // en Km
+                calories: totalCalories,
+                distance: totalDistanceKm,
             };
 
         } catch (error) {
-            console.error("Error leyendo Health Connect:", error);
+            console.error('Error leyendo Health Connect:', error);
             return this.getSimulatedData();
         }
     },
 
     getSimulatedData(): HealthData {
-        // Datos falsos para el entorno Web/PC
-        // Generamos un número que varíe un poco cada vez pero en base a la hora
+        // Datos simulados para entorno Web/PC basados en la hora del día
         const hour = new Date().getHours();
-        const baseSteps = hour * 400; // Ej: A las 12:00 = 4800 pasos
+        const baseSteps = hour * 400; // A las 12:00 → ~4800 pasos
         return {
-            steps: baseSteps + Math.floor(Math.random() * 500),
-            calories: Math.floor(baseSteps * 0.04), // 40 kcal por 1000 pasos
-            distance: parseFloat((baseSteps * 0.0008).toFixed(2)) // 800m por 1000 pasos
+            steps: baseSteps + Math.floor(Math.random() * 300),
+            calories: Math.floor(baseSteps * 0.04),
+            distance: parseFloat(((baseSteps * 0.7) / 1000).toFixed(2)),
         };
     }
 };
