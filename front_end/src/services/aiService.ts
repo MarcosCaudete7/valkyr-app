@@ -26,3 +26,10 @@ export const analyzeFoodImage = async (base64Image: string): Promise<any> => {
     // El backend devuelve un String JSON que Axios debería parsear, pero por si acaso
     return typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
 };
+
+export const analyzePantryForMeals = async (ingredients: string): Promise<string> => {
+    const response = await axios.post(`${API_BASE_URL}/v1/analyze/pantry`, {
+        ingredients
+    }, getAuthHeader());
+    return typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+};

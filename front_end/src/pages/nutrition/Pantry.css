@@ -1,0 +1,45 @@
+.pantry-page .nutrition-toolbar {
+    --background: linear-gradient(135deg, #1a2a1a 0%, #0d1117 100%);
+}
+.loading-center { display: flex; justify-content: center; align-items: center; height: 60vh; }
+.pantry-header { padding: 20px 20px 8px; }
+.pantry-title {
+    font-size: 1.6rem; font-weight: 700; margin: 0 0 4px;
+    background: linear-gradient(135deg, #4caf50, #81c784);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.pantry-subtitle { font-size: 0.85rem; color: var(--ion-color-medium); margin: 0; }
+
+.ai-btn-row { padding: 8px 16px; }
+.ai-suggest-btn { --border-radius: 14px; font-weight: 600; }
+
+.ai-suggestion-card {
+    margin: 0 16px 16px;
+    background: linear-gradient(135deg, rgba(103, 58, 183, 0.2), rgba(63, 81, 181, 0.15));
+    border: 1px solid rgba(103, 58, 183, 0.4);
+    border-radius: 16px;
+    padding: 16px;
+}
+.ai-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 600; font-size: 0.9rem; }
+.ai-close { background: none; border: none; color: var(--ion-color-medium); cursor: pointer; font-size: 1rem; }
+.ai-text { font-size: 0.88rem; line-height: 1.6; color: rgba(255,255,255,0.85); white-space: pre-wrap; margin: 0; }
+
+.pantry-empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 60px 20px; gap: 8px; color: var(--ion-color-medium);
+}
+.pantry-empty span { font-size: 3rem; }
+.pantry-empty p { font-size: 1rem; font-weight: 600; margin: 0; }
+.pantry-empty-sub { font-size: 0.8rem; text-align: center; }
+
+.pantry-list { padding: 0 16px 100px; display: flex; flex-direction: column; gap: 8px; }
+.pantry-item {
+    display: flex; align-items: center;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px; padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.07);
+}
+.pi-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.pi-name { font-size: 0.95rem; font-weight: 500; }
+.pi-qty { font-size: 0.75rem; color: var(--ion-color-medium); }
+.pi-delete { background: none; border: none; color: var(--ion-color-medium); cursor: pointer; font-size: 1.1rem; padding: 4px; }

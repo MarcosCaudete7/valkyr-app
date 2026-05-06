@@ -1,0 +1,261 @@
+.nutrition-dashboard {
+    --bg: #0d1117;
+}
+
+.nutrition-toolbar {
+    --background: linear-gradient(135deg, #1a2a1a 0%, #0d1117 100%);
+}
+
+.loading-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+}
+
+/* Header */
+.nd-header {
+    padding: 20px 20px 8px;
+}
+.nd-date {
+    color: var(--ion-color-medium);
+    font-size: 0.8rem;
+    text-transform: capitalize;
+    margin: 0 0 4px;
+}
+.nd-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, #4caf50, #81c784);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Calorie Ring */
+.calorie-ring-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 20px;
+}
+.calorie-ring {
+    position: relative;
+    width: 180px;
+    height: 180px;
+}
+.ring-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+.ring-bg {
+    fill: none;
+    stroke: rgba(255,255,255,0.08);
+    stroke-width: 10;
+}
+.ring-fill {
+    fill: none;
+    stroke: url(#calGradient);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.6s ease;
+    stroke: #4caf50;
+}
+.ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.ring-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #4caf50;
+    line-height: 1;
+}
+.ring-label {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+    font-weight: 600;
+}
+.ring-remaining {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+}
+
+/* Calorie meta */
+.calorie-meta {
+    display: flex;
+    gap: 0;
+    margin-top: 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 12px 20px;
+    width: 100%;
+    max-width: 340px;
+    justify-content: space-around;
+    align-items: center;
+}
+.cal-meta-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+.cal-meta-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+.cal-meta-value.consumed { color: #4caf50; }
+.cal-meta-value.remaining { color: #64b5f6; }
+.cal-meta-value.burned { color: #ff7043; }
+.cal-meta-label {
+    font-size: 0.7rem;
+    color: var(--ion-color-medium);
+}
+.cal-meta-divider {
+    width: 1px;
+    height: 30px;
+    background: rgba(255,255,255,0.1);
+}
+
+/* Macros */
+.macros-section {
+    padding: 0 20px;
+}
+.section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.8);
+    margin: 0 20px 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+.macro-bars {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.macro-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+.macro-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+}
+.macro-val {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+}
+.macro-track {
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+}
+.macro-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+.macro-fill.protein { background: linear-gradient(90deg, #42a5f5, #1976d2); }
+.macro-fill.carbs { background: linear-gradient(90deg, #ffca28, #f57f17); }
+.macro-fill.fat { background: linear-gradient(90deg, #ef5350, #b71c1c); }
+
+/* Activity widgets */
+.activity-grid {
+    padding: 0 20px 20px;
+}
+.activity-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 16px 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.activity-widget ion-icon {
+    font-size: 1.4rem;
+}
+.activity-widget.steps ion-icon { color: #42a5f5; }
+.activity-widget.calories ion-icon { color: #ff7043; }
+.activity-widget.distance ion-icon { color: #66bb6a; }
+.aw-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+}
+.aw-label {
+    font-size: 0.7rem;
+    color: var(--ion-color-medium);
+}
+
+/* Water */
+.water-section {
+    margin: 0 20px 30px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+}
+.water-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.water-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.water-icon {
+    color: #42a5f5;
+    font-size: 1.2rem;
+}
+.water-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+}
+.water-count {
+    font-size: 0.85rem;
+    color: #42a5f5;
+    font-weight: 600;
+}
+.water-glasses-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+.water-glass {
+    width: 28px;
+    height: 36px;
+    border-radius: 4px 4px 8px 8px;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(66, 165, 245, 0.3);
+    transition: all 0.2s;
+}
+.water-glass.filled {
+    background: linear-gradient(180deg, #64b5f6, #1976d2);
+    border-color: #42a5f5;
+    box-shadow: 0 0 8px rgba(66, 165, 245, 0.4);
+}
+.water-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}

@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import MainTabs from './MainTabs';
+import NutritionTabs from './NutritionTabs';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
 import { cryptoService } from './services/cryptoService';
@@ -56,7 +57,6 @@ const App: React.FC = () => {
             PushNotifications.addListener('registration', async (token) => {
               console.log('Push registration success, token: ' + token.value);
               if (user.id) {
-                // Guardar el device_token en Supabase
                 await supabase.from('profiles').upsert({ id: user.id, push_token: token.value });
               }
             });
@@ -93,12 +93,17 @@ const App: React.FC = () => {
 
           <Route path="/tabs" render={() => {
             const hasToken = localStorage.getItem('token');
-            return hasToken ? <MainTabs /> : <Redirect to="/login" />
+            return hasToken ? <MainTabs /> : <Redirect to="/login" />;
+          }} />
+
+          <Route path="/nutrition" render={() => {
+            const hasToken = localStorage.getItem('token');
+            return hasToken ? <NutritionTabs /> : <Redirect to="/login" />;
           }} />
 
           <Route exact path="/" render={() => {
             const hasToken = localStorage.getItem('token');
-            return hasToken ? <Redirect to="/tabs/myroutines" /> : <Redirect to="/login" />
+            return hasToken ? <Redirect to="/tabs/myroutines" /> : <Redirect to="/login" />;
           }} />
 
         </IonRouterOutlet>

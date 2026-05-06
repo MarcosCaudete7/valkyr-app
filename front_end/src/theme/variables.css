@@ -55,3 +55,13 @@ body {
   background-color: var(--ion-background-color);
   color: var(--ion-text-color);
 }
+
+/* ── Mode Switcher Global Toolbar ─────────────────────────── */
+.mode-header .mode-toolbar {
+  --background: linear-gradient(135deg, #1a1f2e 0%, #0f172a 100%);
+  --border-width: 0;
+  --padding-top: 4px;
+  --padding-bottom: 4px;
+  display: flex;
+  justify-content: center;
+}

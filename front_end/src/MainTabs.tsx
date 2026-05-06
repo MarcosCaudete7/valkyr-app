@@ -1,7 +1,7 @@
 import React from 'react';
-import { IonTabBar, IonTabButton, IonTabs, IonRouterOutlet, IonIcon, IonLabel } from "@ionic/react";
+import { IonTabBar, IonTabButton, IonTabs, IonRouterOutlet, IonIcon, IonLabel, IonHeader, IonToolbar } from "@ionic/react";
 import { Route, Redirect } from "react-router-dom";
-import { settingsOutline, addOutline, barbellOutline, peopleOutline, personOutline, homeOutline } from "ionicons/icons";
+import { barbellOutline, peopleOutline, personOutline, homeOutline } from "ionicons/icons";
 import MyRoutines from "./pages/Routines";
 import CreateRoutine from "./pages/CreateRoutine";
 import RoutineDetail from "./Details/RoutineDetail";
@@ -10,45 +10,53 @@ import Profile from './pages/Profile';
 import ChatPage from './pages/ChatPage';
 import SocialPage from './pages/SocialPage';
 import Home from './pages/Home';
+import ModeSwitcher from './components/ModeSwitcher';
 
 const MainTabs: React.FC = () => (
-    <IonTabs>
-        <IonRouterOutlet>
-            <Route exact path="/tabs/home" component={Home} />
-            <Route exact path="/tabs/myroutines" component={MyRoutines} />
-            <Route exact path="/tabs/settings" component={Settings} />
-            <Route exact path="/tabs/profile" component={Profile} />
-            <Route exact path="/tabs/profile/:targetId" component={Profile} />
-            <Route exact path="/tabs/routine/:id" component={RoutineDetail} />
-            <Route exact path="/tabs/social" component={SocialPage} />
-            <Route exact path="/tabs/chat/:friendId/:friendName" component={ChatPage} />
-            <Route exact path="/tabs">
-                <Redirect to="/tabs/home" />
-            </Route>
-        </IonRouterOutlet>
+    <>
+        <IonHeader className="ion-no-border mode-header">
+            <IonToolbar className="mode-toolbar">
+                <ModeSwitcher />
+            </IonToolbar>
+        </IonHeader>
+        <IonTabs>
+            <IonRouterOutlet>
+                <Route exact path="/tabs/home" component={Home} />
+                <Route exact path="/tabs/myroutines" component={MyRoutines} />
+                <Route exact path="/tabs/settings" component={Settings} />
+                <Route exact path="/tabs/profile" component={Profile} />
+                <Route exact path="/tabs/profile/:targetId" component={Profile} />
+                <Route exact path="/tabs/routine/:id" component={RoutineDetail} />
+                <Route exact path="/tabs/social" component={SocialPage} />
+                <Route exact path="/tabs/chat/:friendId/:friendName" component={ChatPage} />
+                <Route exact path="/tabs">
+                    <Redirect to="/tabs/home" />
+                </Route>
+            </IonRouterOutlet>
 
-        <IonTabBar slot="bottom">
-            <IonTabButton tab="home" href="/tabs/home">
-                <IonIcon icon={homeOutline} />
-                <IonLabel>Inicio</IonLabel>
-            </IonTabButton>
+            <IonTabBar slot="bottom">
+                <IonTabButton tab="home" href="/tabs/home">
+                    <IonIcon icon={homeOutline} />
+                    <IonLabel>Inicio</IonLabel>
+                </IonTabButton>
 
-            <IonTabButton tab="myroutines" href="/tabs/myroutines">
-                <IonIcon icon={barbellOutline} />
-                <IonLabel>Rutinas</IonLabel>
-            </IonTabButton>
+                <IonTabButton tab="myroutines" href="/tabs/myroutines">
+                    <IonIcon icon={barbellOutline} />
+                    <IonLabel>Rutinas</IonLabel>
+                </IonTabButton>
 
-            <IonTabButton tab="social" href="/tabs/social">
-                <IonIcon icon={peopleOutline} />
-                <IonLabel>Comunidad</IonLabel>
-            </IonTabButton>
+                <IonTabButton tab="social" href="/tabs/social">
+                    <IonIcon icon={peopleOutline} />
+                    <IonLabel>Comunidad</IonLabel>
+                </IonTabButton>
 
-            <IonTabButton tab="profile" href="/tabs/profile">
-                <IonIcon icon={personOutline} />
-                <IonLabel>Perfil</IonLabel>
-            </IonTabButton>
-        </IonTabBar>
-    </IonTabs>
+                <IonTabButton tab="profile" href="/tabs/profile">
+                    <IonIcon icon={personOutline} />
+                    <IonLabel>Perfil</IonLabel>
+                </IonTabButton>
+            </IonTabBar>
+        </IonTabs>
+    </>
 );
 
 export default MainTabs;

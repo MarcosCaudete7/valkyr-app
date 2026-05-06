@@ -1,0 +1,202 @@
+import React, { useState, useEffect } from 'react';
+import {
+    IonContent, IonHeader, IonPage, IonToolbar, IonFab, IonFabButton, IonIcon,
+    IonModal, IonButton, IonInput, IonSearchbar, IonList, IonItem, IonLabel,
+    IonSpinner, IonAlert, IonRefresher, IonRefresherContent, useIonToast,
+    IonChip, IonTextarea
+} from '@ionic/react';
+import { addOutline, trashOutline, closeOutline, bulbOutline } from 'ionicons/icons';
+import { nutritionService, FoodItem } from '../../services/nutritionService';
+import { analyzePantryForMeals } from '../../services/aiService';
+import ModeSwitcher from '../../components/ModeSwitcher';
+import './Pantry.css';
+
+const Pantry: React.FC = () => {
+    const [pantryItems, setPantryItems] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
+    const [searching, setSearching] = useState(false);
+    const [aiSuggestion, setAiSuggestion] = useState('');
+    const [loadingAI, setLoadingAI] = useState(false);
+    const [showDeleteAlert, setShowDeleteAlert] = useState<string | null>(null);
+    const [presentToast] = useIonToast();
+
+    const loadPantry = async (event?: CustomEvent) => {
+        setLoading(true);
+        try {
+            const items = await nutritionService.getPantry();
+            setPantryItems(items);
+        } finally {
+            setLoading(false);
+            if (event) event.detail.complete();
+        }
+    };
+    useEffect(() => { loadPantry(); }, []);
+
+    const handleSearch = async (q: string) => {
+        setSearchQuery(q);
+        if (!q.trim()) { setSearchResults([]); return; }
+        setSearching(true);
+        try {
+            const results = await nutritionService.searchFoods(q);
+            setSearchResults(results);
+        } finally { setSearching(false); }
+    };
+
+    const addToPantry = async (food: FoodItem) => {
+        await nutritionService.addToPantry(food);
+        await loadPantry();
+        setShowAddModal(false);
+        setSearchQuery('');
+        setSearchResults([]);
+        presentToast({ message: `✅ ${food.name} añadido a la despensa`, duration: 1500, color: 'success' });
+    };
+
+    const removeFromPantry = async (id: string) => {
+        await nutritionService.removeFromPantry(id);
+        setPantryItems(items => items.filter(i => i.id !== id));
+    };
+
+    const getAISuggestion = async () => {
+        if (pantryItems.length === 0) {
+            presentToast({ message: 'Añade productos a tu despensa primero', duration: 2000, color: 'warning' });
+            return;
+        }
+        setLoadingAI(true);
+        try {
+            const names = pantryItems.map(i => i.food_name).join(', ');
+            const suggestion = await analyzePantryForMeals(names);
+            setAiSuggestion(suggestion);
+        } catch {
+            presentToast({ message: 'Error generando sugerencia', duration: 2000, color: 'danger' });
+        } finally {
+            setLoadingAI(false);
+        }
+    };
+
+    return (
+        <IonPage className="pantry-page">
+            <IonHeader className="ion-no-border">
+                <IonToolbar className="nutrition-toolbar">
+                    <ModeSwitcher />
+                </IonToolbar>
+            </IonHeader>
+
+            <IonContent fullscreen>
+                <IonRefresher slot="fixed" onIonRefresh={loadPantry}>
+                    <IonRefresherContent />
+                </IonRefresher>
+
+                <div className="pantry-header">
+                    <h1 className="pantry-title">Mi Despensa</h1>
+                    <p className="pantry-subtitle">{pantryItems.length} productos almacenados</p>
+                </div>
+
+                {/* Botón sugerencia IA */}
+                <div className="ai-btn-row">
+                    <IonButton
+                        expand="block"
+                        color="tertiary"
+                        className="ai-suggest-btn"
+                        onClick={getAISuggestion}
+                        disabled={loadingAI}
+                    >
+                        {loadingAI
+                            ? <><IonSpinner name="dots" />&nbsp;Analizando despensa...</>
+                            : <><IonIcon slot="start" icon={bulbOutline} />🤖 ¿Qué puedo cocinar hoy?</>
+                        }
+                    </IonButton>
+                </div>
+
+                {aiSuggestion && (
+                    <div className="ai-suggestion-card">
+                        <div className="ai-card-header">
+                            <span>🤖 Sugerencia de la IA</span>
+                            <button className="ai-close" onClick={() => setAiSuggestion('')}>✕</button>
+                        </div>
+                        <p className="ai-text">{aiSuggestion}</p>
+                    </div>
+                )}
+
+                {loading ? (
+                    <div className="loading-center"><IonSpinner name="crescent" color="success" /></div>
+                ) : pantryItems.length === 0 ? (
+                    <div className="pantry-empty">
+                        <span>🏪</span>
+                        <p>Tu despensa está vacía</p>
+                        <p className="pantry-empty-sub">Añade productos para que la IA te sugiera comidas</p>
+                    </div>
+                ) : (
+                    <div className="pantry-list">
+                        {pantryItems.map(item => (
+                            <div key={item.id} className="pantry-item">
+                                <div className="pi-info">
+                                    <span className="pi-name">{item.food_name}</span>
+                                    {item.quantity_g && <span className="pi-qty">{item.quantity_g}g</span>}
+                                </div>
+                                <button className="pi-delete" onClick={() => setShowDeleteAlert(item.id)}>
+                                    <IonIcon icon={trashOutline} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <IonFab vertical="bottom" horizontal="end" slot="fixed">
+                    <IonFabButton color="success" onClick={() => setShowAddModal(true)}>
+                        <IonIcon icon={addOutline} />
+                    </IonFabButton>
+                </IonFab>
+
+                {/* Modal añadir a despensa */}
+                <IonModal isOpen={showAddModal} onDidDismiss={() => setShowAddModal(false)}>
+                    <IonHeader className="ion-no-border">
+                        <IonToolbar>
+                            <h2 style={{ margin: '0 16px', fontSize: '1.1rem' }}>Añadir a despensa</h2>
+                            <IonButton slot="end" fill="clear" onClick={() => setShowAddModal(false)}>
+                                <IonIcon icon={closeOutline} />
+                            </IonButton>
+                        </IonToolbar>
+                    </IonHeader>
+                    <IonContent style={{ '--background': '#0d1117' }}>
+                        <IonSearchbar
+                            value={searchQuery}
+                            onIonInput={e => handleSearch(e.detail.value || '')}
+                            placeholder="Buscar producto..."
+                            debounce={400}
+                        />
+                        {searching && <div className="loading-center"><IonSpinner name="dots" color="success" /></div>}
+                        {searchResults.length > 0 && (
+                            <IonList>
+                                {searchResults.map((food, i) => (
+                                    <IonItem key={i} button onClick={() => addToPantry(food)}>
+                                        <IonLabel>
+                                            <h3>{food.name}</h3>
+                                            <p>{food.brand || 'Sin marca'} · {Math.round(food.calories_per_100g)} kcal/100g</p>
+                                        </IonLabel>
+                                        <IonChip slot="end" color="success">Añadir</IonChip>
+                                    </IonItem>
+                                ))}
+                            </IonList>
+                        )}
+                    </IonContent>
+                </IonModal>
+
+                <IonAlert
+                    isOpen={!!showDeleteAlert}
+                    header="Eliminar producto"
+                    message="¿Eliminar de tu despensa?"
+                    buttons={[
+                        { text: 'Cancelar', role: 'cancel', handler: () => setShowDeleteAlert(null) },
+                        { text: 'Eliminar', role: 'destructive', handler: () => { if (showDeleteAlert) removeFromPantry(showDeleteAlert); setShowDeleteAlert(null); } }
+                    ]}
+                    onDidDismiss={() => setShowDeleteAlert(null)}
+                />
+            </IonContent>
+        </IonPage>
+    );
+};
+
+export default Pantry;

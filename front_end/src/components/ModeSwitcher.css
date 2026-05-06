@@ -1,0 +1,38 @@
+.mode-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    padding: 3px;
+    margin: 6px auto;
+    width: fit-content;
+    gap: 2px;
+    backdrop-filter: blur(10px);
+}
+
+.mode-btn {
+    padding: 7px 18px;
+    border-radius: 19px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+}
+
+.mode-btn.active {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1a1a2e;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    transform: scale(1.02);
+}
+
+.mode-btn:not(.active):hover {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.08);
+}

@@ -1,0 +1,99 @@
+.food-diary .nutrition-toolbar {
+    --background: linear-gradient(135deg, #1a2a1a 0%, #0d1117 100%);
+}
+.loading-center {
+    display: flex; justify-content: center; align-items: center; height: 60vh;
+}
+.diary-header {
+    padding: 16px 20px 8px;
+}
+.diary-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 12px;
+    background: linear-gradient(135deg, #4caf50, #81c784);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.diary-summary {
+    display: flex;
+    gap: 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 14px;
+    padding: 12px 16px;
+    justify-content: space-around;
+}
+.ds-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ds-val { font-size: 1rem; font-weight: 700; }
+.ds-val.green { color: #4caf50; }
+.ds-val.blue { color: #42a5f5; }
+.ds-val.yellow { color: #ffca28; }
+.ds-val.red { color: #ef5350; }
+.ds-lbl { font-size: 0.65rem; color: var(--ion-color-medium); }
+
+/* Meal sections */
+.meal-section {
+    margin: 12px 16px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.meal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+}
+.meal-label { font-size: 0.95rem; font-weight: 600; }
+.meal-cals { font-size: 0.8rem; color: var(--ion-color-medium); }
+.meal-empty {
+    text-align: center;
+    padding: 12px;
+    color: var(--ion-color-medium);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+.meal-entries { padding: 4px 0; }
+.diary-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.diary-entry:last-child { border-bottom: none; }
+.entry-info { flex: 1; display: flex; flex-direction: column; }
+.entry-name { font-size: 0.9rem; font-weight: 500; }
+.entry-qty { font-size: 0.75rem; color: var(--ion-color-medium); }
+.entry-macros { display: flex; gap: 4px; }
+.chip-cal { --background: rgba(76,175,80,0.15); --color: #4caf50; font-size: 0.7rem; height: 22px; }
+.chip-prot { --background: rgba(66,165,245,0.15); --color: #42a5f5; font-size: 0.7rem; height: 22px; }
+.entry-delete { background: none; border: none; color: var(--ion-color-medium); cursor: pointer; padding: 4px; }
+
+/* Modal */
+.add-food-modal .ion-page { --background: #0d1117; }
+.add-food-content { --background: #0d1117; }
+.food-searchbar { --background: rgba(255,255,255,0.06); --border-radius: 12px; }
+.search-results-list { margin: 0 16px; background: rgba(255,255,255,0.04); border-radius: 12px; overflow: hidden; }
+.search-result-item { --background: transparent; --border-color: rgba(255,255,255,0.05); }
+
+.selected-food-card {
+    margin: 16px;
+    background: rgba(76,175,80,0.1);
+    border: 1px solid rgba(76,175,80,0.3);
+    border-radius: 16px;
+    padding: 16px;
+}
+.sf-name { font-size: 1rem; font-weight: 700; margin: 0 0 4px; }
+.sf-brand { font-size: 0.8rem; color: var(--ion-color-medium); margin: 0 0 12px; }
+.sf-macros { display: flex; gap: 8px; flex-wrap: wrap; }
+.sf-macros span { font-size: 0.8rem; background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 8px; }
+
+.selected-food-form { padding: 0 16px 120px; }
+.form-row { display: flex; gap: 12px; margin-bottom: 16px; }
+.form-field { flex: 1; }
+.form-field label { display: block; font-size: 0.8rem; color: var(--ion-color-medium); margin-bottom: 6px; }
+.qty-input { --background: rgba(255,255,255,0.06); --border-radius: 10px; }
+.add-btn { margin-top: 16px; --border-radius: 12px; }
