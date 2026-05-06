@@ -116,7 +116,7 @@ export const nutritionService = {
         return merged;
     },
 
-    async searchByBarcode,
+    searchByBarcode,
 
     /** Añadir alimento a la comunidad */
     async addFoodToCommunity(food: FoodItem): Promise<void> {
