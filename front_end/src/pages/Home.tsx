@@ -1,64 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import {
-    IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
+    IonContent, IonHeader, IonPage, IonToolbar,
     IonGrid, IonRow, IonCol, IonCard, IonIcon, IonText, IonRefresher, IonRefresherContent,
-    IonButton, IonCardHeader, IonCardTitle, IonCardContent, IonInput, IonFab, IonFabButton, IonSpinner, useIonAlert
+    IonButton, IonCardContent, IonInput, IonSpinner, useIonAlert
 } from '@ionic/react';
 import { Capacitor } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { walkOutline, flameOutline, mapOutline, timeOutline, informationCircleOutline, barbellOutline, downloadOutline, logInOutline, cameraOutline } from 'ionicons/icons';
-import { healthService, HealthData } from '../services/healthService';
+import {
+    barbellOutline, trophyOutline, arrowForwardOutline,
+    cameraOutline, flashOutline, clipboardOutline
+} from 'ionicons/icons';
 import { analyzeFoodImage } from '../services/aiService';
+import { getMyRoutines } from '../services/routineService';
+import { Routine } from '../models/Routine';
+import ModeSwitcher from '../components/ModeSwitcher';
+import { useHistory } from 'react-router-dom';
 import './Home.css';
 
 const Home: React.FC = () => {
     const [user, setUser] = useState<any>(null);
-    const [healthData, setHealthData] = useState<HealthData | null>(null);
+    const [routines, setRoutines] = useState<Routine[]>([]);
     const [weight, setWeight] = useState<string>('');
     const [reps, setReps] = useState<string>('5');
     const [oneRM, setOneRM] = useState<number | null>(null);
-
     const [isAnalyzingFood, setIsAnalyzingFood] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [presentAlert] = useIonAlert();
+    const history = useHistory();
 
     const loadData = async (event?: CustomEvent) => {
-        // 1. Cargar Usuario
         const rawUserData = localStorage.getItem('user');
-        if (rawUserData) {
-            setUser(JSON.parse(rawUserData));
+        if (rawUserData) setUser(JSON.parse(rawUserData));
+        try {
+            const data = await getMyRoutines();
+            setRoutines(data.slice(0, 3)); // últimas 3 rutinas
+        } catch {
+            // ignore
+        } finally {
+            setLoading(false);
+            if (event) event.detail.complete();
         }
-
-        // 2. Cargar Health Data (Google Fit / Health Connect)
-        const data = await healthService.getHealthData();
-        setHealthData(data);
-
-        if (event) event.detail.complete();
     };
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    // Extra tool: Format number with dots (6500 -> 6.500)
-    const formatNumber = (num: number) => {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    };
+    useEffect(() => { loadData(); }, []);
 
     const calculate1RM = () => {
         const w = parseFloat(weight);
         const r = parseInt(reps);
         if (w > 0 && r > 0) {
-            // Formula de Epley: 1RM = Weight * (1 + Reps/30)
-            const result = w * (1 + r / 30);
-            setOneRM(Math.round(result));
+            setOneRM(Math.round(w * (1 + r / 30)));
         } else {
             setOneRM(null);
         }
     };
 
-    useEffect(() => {
-        calculate1RM();
-    }, [weight, reps]);
+    useEffect(() => { calculate1RM(); }, [weight, reps]);
 
     const takeFoodPhoto = async () => {
         try {
@@ -68,12 +64,9 @@ const Home: React.FC = () => {
                 resultType: CameraResultType.Base64,
                 source: CameraSource.Prompt
             });
-
             if (image.base64String) {
                 setIsAnalyzingFood(true);
                 const result = await analyzeFoodImage(image.base64String);
-
-                // Asumimos que la IA responde con { "foodName": "...", "calories": ..., "protein": ... }
                 presentAlert({
                     header: 'Análisis Nutricional',
                     subHeader: result.foodName || 'Alimento detectado',
@@ -88,11 +81,18 @@ const Home: React.FC = () => {
         }
     };
 
+    const greeting = () => {
+        const h = new Date().getHours();
+        if (h < 12) return '🌅 Buenos días';
+        if (h < 19) return '☀️ Buenas tardes';
+        return '🌙 Buenas noches';
+    };
+
     return (
         <IonPage className="home-page">
             <IonHeader className="ion-no-border">
-                <IonToolbar color="primary" className="home-toolbar">
-                    <IonTitle>Valkyr</IonTitle>
+                <IonToolbar className="home-toolbar">
+                    <ModeSwitcher />
                 </IonToolbar>
             </IonHeader>
 
@@ -101,100 +101,72 @@ const Home: React.FC = () => {
                     <IonRefresherContent />
                 </IonRefresher>
 
-                <div className="home-header-bg"></div>
-
+                {/* Welcome */}
                 <div className="home-welcome-section">
+                    <p className="home-greeting">{greeting()}</p>
                     <h1 className="welcome-title">
-                        ¡Hola, {user?.fullName?.split(' ')?.[0] || user?.username || 'Atleta'}! 👋
+                        {user?.fullName?.split(' ')?.[0] || user?.username || 'Atleta'}
                     </h1>
-                    <p className="welcome-subtitle">Tu resumen de hoy</p>
+                    <p className="welcome-subtitle">¿Listo para entrenar hoy?</p>
+                </div>
 
-                    {!Capacitor.isNativePlatform() && (
-                        <div style={{ marginTop: '15px' }}>
-                            <IonButton shape="round" color="secondary" className="download-btn">
-                                <IonIcon slot="start" icon={downloadOutline} />
-                                Descargar App Nátiva
+                {/* Quick actions */}
+                <div className="quick-actions">
+                    <button className="qa-btn primary" onClick={() => history.push('/tabs/myroutines')}>
+                        <IonIcon icon={barbellOutline} />
+                        <span>Mis Rutinas</span>
+                    </button>
+                    <button className="qa-btn secondary" onClick={() => history.push('/tabs/social')}>
+                        <IonIcon icon={trophyOutline} />
+                        <span>Clanes</span>
+                    </button>
+                    <button className="qa-btn tertiary" onClick={() => history.push('/nutrition/dashboard')}>
+                        <IonIcon icon={flashOutline} />
+                        <span>Nutrición</span>
+                    </button>
+                </div>
+
+                {/* Rutinas recientes */}
+                <div className="section-block">
+                    <div className="section-header">
+                        <h2 className="section-title">Rutinas recientes</h2>
+                        <button className="see-all" onClick={() => history.push('/tabs/myroutines')}>
+                            Ver todas <IonIcon icon={arrowForwardOutline} />
+                        </button>
+                    </div>
+
+                    {loading ? (
+                        <div className="loading-center"><IonSpinner name="dots" color="primary" /></div>
+                    ) : routines.length === 0 ? (
+                        <div className="empty-state">
+                            <IonIcon icon={clipboardOutline} />
+                            <p>No tienes rutinas aún</p>
+                            <IonButton size="small" onClick={() => history.push('/tabs/myroutines')}>
+                                Crear primera rutina
                             </IonButton>
                         </div>
+                    ) : (
+                        routines.map(r => (
+                            <div key={r.id} className="routine-preview-card" onClick={() => history.push(`/tabs/routine/${r.id}`)}>
+                                <div className="rpc-icon">
+                                    <IonIcon icon={barbellOutline} />
+                                </div>
+                                <div className="rpc-info">
+                                    <span className="rpc-name">{r.name}</span>
+                                    <span className="rpc-meta">{r.exercises?.length || 0} ejercicios</span>
+                                </div>
+                                <IonIcon icon={arrowForwardOutline} className="rpc-arrow" />
+                            </div>
+                        ))
                     )}
                 </div>
 
-                <div className="widgets-container">
-                    {!Capacitor.isNativePlatform() && (
-                        <div style={{ textAlign: 'center', marginBottom: '15px', color: 'var(--ion-color-medium)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                            <IonIcon icon={informationCircleOutline} />
-                            <span>Datos simulados (Modo Web). Conecta la App Android para ver pasos reales.</span>
-                        </div>
-                    )}
-                    <IonGrid>
-                        <IonRow>
-                            {/* Pasos */}
-                            <IonCol size="6">
-                                <IonCard className="widget-card steps-widget">
-                                    <div className="widget-icon">
-                                        <IonIcon icon={walkOutline} />
-                                    </div>
-                                    <div className="widget-data">
-                                        <h2>{healthData ? formatNumber(healthData.steps) : '---'}</h2>
-                                        <p>Pasos</p>
-                                    </div>
-                                    <div className="widget-progress">
-                                        <div className="progress-bar" style={{ width: `${Math.min(100, (healthData?.steps || 0) / 10000 * 100)}%` }}></div>
-                                    </div>
-                                </IonCard>
-                            </IonCol>
-
-                            {/* Calorías */}
-                            <IonCol size="6">
-                                <IonCard className="widget-card calories-widget">
-                                    <div className="widget-icon">
-                                        <IonIcon icon={flameOutline} />
-                                    </div>
-                                    <div className="widget-data">
-                                        <h2>{healthData ? formatNumber(healthData.calories) : '---'}</h2>
-                                        <p>Kcal quemadas</p>
-                                    </div>
-                                </IonCard>
-                            </IonCol>
-
-                            {/* Distancia */}
-                            <IonCol size="6">
-                                <IonCard className="widget-card distance-widget">
-                                    <div className="widget-icon">
-                                        <IonIcon icon={mapOutline} />
-                                    </div>
-                                    <div className="widget-data">
-                                        <h2>{healthData ? healthData.distance.toFixed(2).replace('.', ',') : '---'}</h2>
-                                        <p>Km recorridos</p>
-                                    </div>
-                                </IonCard>
-                            </IonCol>
-
-                            {/* Tiempo Activo (Aprox basado en distancia) */}
-                            <IonCol size="6">
-                                <IonCard className="widget-card time-widget">
-                                    <div className="widget-icon">
-                                        <IonIcon icon={timeOutline} />
-                                    </div>
-                                    <div className="widget-data">
-                                        <h2>{healthData ? Math.floor(healthData.steps / 100) : '---'}</h2>
-                                        <p>Minutos activos</p>
-                                    </div>
-                                </IonCard>
-                            </IonCol>
-                        </IonRow>
-                    </IonGrid>
-
-                    {/* Calculadora 1RM */}
+                {/* Calculadora 1RM */}
+                <div className="section-block">
+                    <h2 className="section-title">Calculadora 1RM</h2>
                     <IonCard className="calculator-widget">
-                        <IonCardHeader style={{ paddingBottom: '0' }}>
-                            <IonCardTitle style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <IonIcon icon={barbellOutline} color="primary" />
-                                Calculadora 1RM (Fórmula Epley)
-                            </IonCardTitle>
-                        </IonCardHeader>
                         <IonCardContent>
-                            <IonGrid className="ion-no-padding" style={{ marginTop: '10px' }}>
+                            <IonGrid className="ion-no-padding">
                                 <IonRow className="ion-align-items-center">
                                     <IonCol size="4">
                                         <IonInput
@@ -236,11 +208,22 @@ const Home: React.FC = () => {
                     </IonCard>
                 </div>
 
-                <div style={{ position: 'fixed', bottom: '80px', right: '20px', zIndex: 1000}}>
-                    <IonFabButton color="success" onClick={takeFoodPhoto} disabled={isAnalyzingFood}>
-                        {isAnalyzingFood ? <IonSpinner name="crescent" color="light" /> : <IonIcon icon={cameraOutline} />}
-                    </IonFabButton>
-                </div>
+                {/* Analizador foto comida - solo si es nativo */}
+                {Capacitor.isNativePlatform() && (
+                    <div className="section-block">
+                        <h2 className="section-title">Análisis de comida con IA</h2>
+                        <div className="food-analyzer-card" onClick={takeFoodPhoto}>
+                            <IonIcon icon={cameraOutline} className="fa-icon" />
+                            <div>
+                                <p className="fa-title">Fotografía tu comida</p>
+                                <p className="fa-sub">La IA calculará calorías y macros</p>
+                            </div>
+                            {isAnalyzingFood && <IonSpinner name="crescent" />}
+                        </div>
+                    </div>
+                )}
+
+                <div style={{ height: '100px' }} />
             </IonContent>
         </IonPage>
     );

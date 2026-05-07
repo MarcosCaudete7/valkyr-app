@@ -9,6 +9,7 @@ import { socialService, UserProfile } from '../services/socialService';
 import { guildService, Guild } from '../services/guildService';
 import { API_BASE_URL } from '../services/api';
 import { supabase } from '../supabaseClient';
+import ModeSwitcher from '../components/ModeSwitcher';
 
 const SocialPage: React.FC = () => {
     const [users, setUsers] = useState<any[]>([]);
@@ -200,6 +201,9 @@ const SocialPage: React.FC = () => {
     return (
         <IonPage>
             <IonHeader className="ion-no-border">
+                <IonToolbar>
+                    <ModeSwitcher />
+                </IonToolbar>
                 <IonToolbar color="primary">
                     <IonTitle>Social & Clanes</IonTitle>
                 </IonToolbar>

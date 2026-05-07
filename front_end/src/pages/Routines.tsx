@@ -9,7 +9,8 @@ import {
 import { refreshOutline, fitnessOutline, calendarOutline, clipboardOutline, addOutline, listOutline } from 'ionicons/icons';
 import { getMyRoutines, updateExerciseStatus } from '../services/routineService';
 import { Routine } from '../models/Routine';
-import CreateRoutine from './CreateRoutine'; // Added import for CreateRoutine
+import CreateRoutine from './CreateRoutine';
+import ModeSwitcher from '../components/ModeSwitcher';
 import './Routines.css';
 
 const Routines: React.FC = () => {
@@ -77,6 +78,9 @@ const Routines: React.FC = () => {
   return (
     <IonPage id="routines-page">
       <IonHeader className="ion-no-border">
+        <IonToolbar>
+          <ModeSwitcher />
+        </IonToolbar>
         <IonToolbar color="primary">
           <IonTitle className="main-title">Mis Entrenamientos</IonTitle>
           <IonButton slot="end" fill="clear" onClick={() => loadRoutines()}>

@@ -11,13 +11,13 @@ const ModeSwitcher: React.FC = () => {
         <div className="mode-switcher">
             <button
                 className={`mode-btn ${!isNutrition ? 'active' : ''}`}
-                onClick={() => !isNutrition || history.push('/tabs/home')}
+                onClick={() => { if (isNutrition) history.push('/tabs/myroutines'); }}
             >
                 💪 Entrenamiento
             </button>
             <button
                 className={`mode-btn ${isNutrition ? 'active' : ''}`}
-                onClick={() => isNutrition || history.push('/nutrition/dashboard')}
+                onClick={() => { if (!isNutrition) history.push('/nutrition/dashboard'); }}
             >
                 🥗 Nutrición
             </button>

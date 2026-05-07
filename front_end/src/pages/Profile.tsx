@@ -12,6 +12,7 @@ import { API_BASE_URL } from '../services/api';
 import { socialService, UserProfile, Post } from '../services/socialService';
 import { getMyRoutines, getPublicRoutinesByUserId } from '../services/routineService';
 import { Routine } from '../models/Routine';
+import ModeSwitcher from '../components/ModeSwitcher';
 import './Profile.css';
 
 const Profile: React.FC = () => {
@@ -189,6 +190,11 @@ const Profile: React.FC = () => {
     return (
         <IonPage>
             <IonHeader>
+                {isOwnProfile && (
+                    <IonToolbar>
+                        <ModeSwitcher />
+                    </IonToolbar>
+                )}
                 <IonToolbar>
                     {!isOwnProfile && (
                         <IonButtons slot="start">

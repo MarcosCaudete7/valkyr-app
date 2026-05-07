@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
     IonContent, IonHeader, IonPage, IonToolbar, IonFab, IonFabButton, IonIcon,
-    IonModal, IonButton, IonInput, IonSearchbar, IonList, IonItem, IonLabel,
+    IonModal, IonButton, IonSearchbar, IonList, IonItem, IonLabel,
     IonSpinner, IonAlert, IonRefresher, IonRefresherContent, useIonToast,
-    IonChip, IonTextarea
+    IonChip
 } from '@ionic/react';
 import { addOutline, trashOutline, closeOutline, bulbOutline } from 'ionicons/icons';
 import { nutritionService, FoodItem } from '../../services/nutritionService';
