@@ -33,3 +33,10 @@ export const analyzePantryForMeals = async (ingredients: string): Promise<string
     }, getAuthHeader());
     return typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
 };
+
+export const analyzeShoppingList = async (base64Image: string): Promise<{items: string[]}> => {
+    const response = await axios.post(`${API_BASE_URL}/v1/analyze/shopping-list`, {
+        image: base64Image
+    }, getAuthHeader());
+    return typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+};

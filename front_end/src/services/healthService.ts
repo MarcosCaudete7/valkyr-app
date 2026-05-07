@@ -5,6 +5,7 @@ export interface HealthData {
     steps: number;
     calories: number;
     distance: number;
+    
 }
 
 /**
@@ -38,18 +39,20 @@ export const healthService = {
                 return this.getFallbackZero();
             }
 
-            // 2. Pedir permisos — SOLO tipos soportados por RecordType del plugin
-            //    ('ActivitySession' causaba error, plugin solo acepta: Steps, Weight, ActivitySession, SleepSession, RestingHeartRate)
-            const permissions = await HealthConnect.requestPermissions({
-                read: ['Steps', 'ActivitySession'],
-                write: []
-            });
+            // 2. Pedir permisos
+            let permissions;
+            try {
+                permissions = await HealthConnect.requestPermissions({
+                    read: ['Steps', 'Distance', 'ActiveCaloriesBurned', 'ActivitySession'] as any,
+                    write: []
+                });
+            } catch (err) {
+                console.error('[HealthService] Error pidiendo permisos extendidos:', err);
+                permissions = await HealthConnect.requestPermissions({ read: ['Steps'], write: [] });
+            }
 
-            console.log('[HealthService] Permisos obtenidos:', JSON.stringify(permissions));
-
-            if (!permissions.read.includes('Steps')) {
-                console.warn('[HealthService] Permiso de pasos denegado.');
-                return this.getFallbackZero();
+            if (!permissions || !permissions.read || !permissions.read.includes('Steps')) {
+                console.warn('[HealthService] Permiso de pasos no concedido.');
             }
 
             // 3. Rango de tiempo: desde las 00:00:00 hoy hasta ahora

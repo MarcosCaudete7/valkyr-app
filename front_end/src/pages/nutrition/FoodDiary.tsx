@@ -30,6 +30,17 @@ const FoodDiary: React.FC = () => {
     const [mealType, setMealType] = useState<DiaryEntry['meal_type']>('breakfast');
     const [quantity, setQuantity] = useState('100');
     const [showDeleteAlert, setShowDeleteAlert] = useState<string | null>(null);
+    const [isScanning, setIsScanning] = useState(false);
+    const [barcodeQuery, setBarcodeQuery] = useState('');
+    const [showCommunityForm, setShowCommunityForm] = useState(false);
+    const [communityFood, setCommunityFood] = useState<FoodItem>({
+        name: '',
+        brand: '',
+        calories_per_100g: 0,
+        protein_per_100g: 0,
+        carbs_per_100g: 0,
+        fat_per_100g: 0
+    });
     const [presentToast] = useIonToast();
     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -54,10 +65,48 @@ const FoodDiary: React.FC = () => {
             try {
                 const results = await nutritionService.searchFoods(q);
                 setSearchResults(results);
+                if (results.length === 0) setShowCommunityForm(true);
+                else setShowCommunityForm(false);
             } finally {
                 setSearching(false);
             }
         }, 500);
+    };
+
+    const handleBarcodeSearch = async () => {
+        if (!barcodeQuery.trim()) return;
+        setIsScanning(true);
+        try {
+            const food = await nutritionService.searchByBarcode(barcodeQuery);
+            if (food) {
+                selectFood(food);
+                setBarcodeQuery('');
+                setIsScanning(false);
+            } else {
+                presentToast({ message: 'Producto no encontrado por código de barras', duration: 2000, color: 'warning' });
+                setCommunityFood({ ...communityFood, barcode: barcodeQuery });
+                setShowCommunityForm(true);
+            }
+        } catch {
+            presentToast({ message: 'Error buscando por código', duration: 2000, color: 'danger' });
+        } finally {
+            setIsScanning(false);
+        }
+    };
+
+    const saveToCommunity = async () => {
+        if (!communityFood.name || communityFood.calories_per_100g <= 0) {
+            presentToast({ message: 'Nombre y calorías son obligatorios', duration: 2000, color: 'warning' });
+            return;
+        }
+        try {
+            await nutritionService.addFoodToCommunity(communityFood);
+            presentToast({ message: '✅ Añadido a la comunidad', duration: 1500, color: 'success' });
+            selectFood(communityFood);
+            setShowCommunityForm(false);
+        } catch {
+            presentToast({ message: 'Error al guardar en la comunidad', duration: 2000, color: 'danger' });
+        }
     };
 
     const selectFood = (food: FoodItem) => {
@@ -186,14 +235,28 @@ const FoodDiary: React.FC = () => {
                     </IonHeader>
                     <IonContent className="add-food-content">
                         {/* Búsqueda */}
-                        <IonSearchbar
-                            value={searchQuery}
-                            onIonInput={e => handleSearch(e.detail.value || '')}
-                            placeholder="Buscar alimento..."
-                            debounce={0}
-                            className="food-searchbar"
-                        />
+                        <div className="search-box">
+                            <IonSearchbar
+                                value={searchQuery}
+                                onIonInput={e => handleSearch(e.detail.value || '')}
+                                placeholder="Buscar alimento..."
+                                debounce={0}
+                                className="food-searchbar"
+                            />
+                            <div className="barcode-row">
+                                <IonInput
+                                    placeholder="O introduce código de barras..."
+                                    value={barcodeQuery}
+                                    onIonInput={e => setBarcodeQuery(e.detail.value || '')}
+                                    className="barcode-input"
+                                />
+                                <IonButton fill="clear" onClick={handleBarcodeSearch} disabled={isScanning}>
+                                    {isScanning ? <IonSpinner name="dots" /> : <IonIcon icon={barcodeOutline} />}
+                                </IonButton>
+                            </div>
+                        </div>
                         {searching && <div className="loading-center"><IonSpinner name="dots" color="success" /></div>}
+                        
                         {searchResults.length > 0 && (
                             <IonList className="search-results-list">
                                 {searchResults.map((food, i) => (
@@ -206,6 +269,44 @@ const FoodDiary: React.FC = () => {
                                     </IonItem>
                                 ))}
                             </IonList>
+                        )}
+
+                        {showCommunityForm && !selectedFood && (
+                            <div className="community-form">
+                                <div className="cf-header">
+                                    <h3>No lo encontramos 🕵️‍♂️</h3>
+                                    <p>Añádelo tú mismo a la comunidad:</p>
+                                </div>
+                                <IonItem className="cf-input">
+                                    <IonLabel position="stacked">Nombre del producto</IonLabel>
+                                    <IonInput value={communityFood.name} onIonInput={e => setCommunityFood({...communityFood, name: e.detail.value || ''})} />
+                                </IonItem>
+                                <IonItem className="cf-input">
+                                    <IonLabel position="stacked">Marca (opcional)</IonLabel>
+                                    <IonInput value={communityFood.brand} onIonInput={e => setCommunityFood({...communityFood, brand: e.detail.value || ''})} />
+                                </IonItem>
+                                <div className="cf-grid">
+                                    <IonItem className="cf-input">
+                                        <IonLabel position="stacked">Kcal / 100g</IonLabel>
+                                        <IonInput type="number" value={communityFood.calories_per_100g} onIonInput={e => setCommunityFood({...communityFood, calories_per_100g: parseFloat(e.detail.value!) || 0})} />
+                                    </IonItem>
+                                    <IonItem className="cf-input">
+                                        <IonLabel position="stacked">Prot (g)</IonLabel>
+                                        <IonInput type="number" value={communityFood.protein_per_100g} onIonInput={e => setCommunityFood({...communityFood, protein_per_100g: parseFloat(e.detail.value!) || 0})} />
+                                    </IonItem>
+                                    <IonItem className="cf-input">
+                                        <IonLabel position="stacked">Carbs (g)</IonLabel>
+                                        <IonInput type="number" value={communityFood.carbs_per_100g} onIonInput={e => setCommunityFood({...communityFood, carbs_per_100g: parseFloat(e.detail.value!) || 0})} />
+                                    </IonItem>
+                                    <IonItem className="cf-input">
+                                        <IonLabel position="stacked">Grasas (g)</IonLabel>
+                                        <IonInput type="number" value={communityFood.fat_per_100g} onIonInput={e => setCommunityFood({...communityFood, fat_per_100g: parseFloat(e.detail.value!) || 0})} />
+                                    </IonItem>
+                                </div>
+                                <IonButton expand="block" fill="outline" color="success" onClick={saveToCommunity} className="cf-save">
+                                    Guardar y seleccionar
+                                </IonButton>
+                            </div>
                         )}
 
                         {selectedFood && (

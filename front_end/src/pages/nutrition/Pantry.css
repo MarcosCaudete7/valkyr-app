@@ -10,8 +10,13 @@
 }
 .pantry-subtitle { font-size: 0.85rem; color: var(--ion-color-medium); margin: 0; }
 
-.ai-btn-row { padding: 8px 16px; }
-.ai-suggest-btn { --border-radius: 14px; font-weight: 600; }
+.ai-btn-row { 
+    padding: 8px 16px; 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 12px; 
+}
+.ai-suggest-btn, .ai-scan-btn { --border-radius: 14px; font-weight: 600; margin: 0; }
 
 .ai-suggestion-card {
     margin: 0 16px 16px;

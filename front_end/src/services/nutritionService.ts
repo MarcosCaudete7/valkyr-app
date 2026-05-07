@@ -16,15 +16,26 @@ export interface FoodItem {
 
 export interface DiaryEntry {
     id?: string;
+    user_id?: string;
     food_id?: string;
     food_name: string;
     meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
     quantity_g: number;
-    date?: string;
+    date: string;
     calories: number;
     protein_g: number;
     carbs_g: number;
     fat_g: number;
+}
+
+export interface PantryItem {
+    id: string;
+    user_id: string;
+    food_id?: string;
+    food_name: string;
+    quantity_g: number;
+    unit?: string;
+    added_at?: string;
 }
 
 export interface BodyMeasure {
@@ -147,8 +158,9 @@ export const nutritionService = {
     },
 
     // ─── Despensa ────────────────────────────────────────────────
-    async getPantry(): Promise<FoodItem[]> {
+    async getPantry(): Promise<PantryItem[]> {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id) return [];
         const { data, error } = await supabase
             .from('pantry')
             .select('*')
@@ -226,6 +238,27 @@ export const nutritionService = {
         }, { onConflict: 'user_id,date' });
     },
 
+    // ─── Objetivos Nutricionales ──────────────────────────────
+    async getNutritionGoals(): Promise<any> {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('target_calories, target_protein_g, target_carbs_g, target_fat_g, height_cm, goal, activity_level')
+            .eq('id', user.id)
+            .single();
+        if (error) throw error;
+        return data;
+    },
+
+    async updateNutritionGoals(goals: any): Promise<void> {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const { error } = await supabase
+            .from('profiles')
+            .update(goals)
+            .eq('id', user.id);
+        if (error) throw error;
+    },
+
     // ─── Cálculo de objetivos (TDEE con Mifflin-St Jeor) ────────
     calculateTDEE(params: {
         weightKg: number;
@@ -241,7 +274,7 @@ export const nutritionService = {
             ? 10 * weightKg + 6.25 * heightCm - 5 * ageYears + 5
             : 10 * weightKg + 6.25 * heightCm - 5 * ageYears - 161;
         // TDEE
-        const activityMultipliers = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9 };
+        const activityMultipliers: Record<string, number> = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9 };
         let tdee = bmr * activityMultipliers[activityLevel];
         // Goal adjustment
         if (goal === 'lose') tdee -= 500;

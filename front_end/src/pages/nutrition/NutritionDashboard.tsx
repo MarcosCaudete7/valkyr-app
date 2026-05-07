@@ -16,23 +16,24 @@ const NutritionDashboard: React.FC = () => {
     const [todayProtein, setTodayProtein] = useState(0);
     const [todayCarbs, setTodayCarbs] = useState(0);
     const [todayFat, setTodayFat] = useState(0);
+    const [targets, setTargets] = useState({
+        calories: 2200,
+        protein: 165,
+        carbs: 220,
+        fat: 73,
+        water: 8
+    });
     const [loading, setLoading] = useState(true);
-
-    // Objetivos por defecto (después se calculan del perfil)
-    const targetCalories = 2200;
-    const targetProtein = 165;
-    const targetCarbs = 220;
-    const targetFat = 73;
-    const waterGoal = 8;
 
     const loadData = async (event?: CustomEvent) => {
         setLoading(true);
         try {
             const today = new Date().toISOString().split('T')[0];
-            const [healthData, diary, glasses] = await Promise.allSettled([
+            const [healthData, diary, glasses, goals] = await Promise.allSettled([
                 healthService.getHealthData(),
                 nutritionService.getDiaryForDate(today),
                 nutritionService.getWaterToday(),
+                nutritionService.getNutritionGoals(),
             ]);
 
             if (healthData.status === 'fulfilled') setHealth(healthData.value);
@@ -44,6 +45,16 @@ const NutritionDashboard: React.FC = () => {
                 setTodayCarbs(Math.round(entries.reduce((s, e) => s + e.carbs_g, 0)));
                 setTodayFat(Math.round(entries.reduce((s, e) => s + e.fat_g, 0)));
             }
+            if (goals.status === 'fulfilled' && goals.value) {
+                const g = goals.value;
+                setTargets({
+                    calories: g.target_calories || 2200,
+                    protein: g.target_protein_g || 165,
+                    carbs: g.target_carbs_g || 220,
+                    fat: g.target_fat_g || 73,
+                    water: 8 // default for now
+                });
+            }
         } finally {
             setLoading(false);
             if (event) event.detail.complete();
@@ -52,9 +63,17 @@ const NutritionDashboard: React.FC = () => {
 
     useEffect(() => { loadData(); }, []);
 
-    const pct = (val: number, target: number) => Math.min(100, Math.round((val / target) * 100));
-    const calPct = pct(todayCalories, targetCalories);
-    const caloriesRemaining = Math.max(0, targetCalories - todayCalories);
+    const pct = (val: number, target: number) => {
+        if (!target || target <= 0) return 0;
+        return Math.min(100, Math.round((val / target) * 100));
+    };
+
+    const burned = health?.calories || 0;
+    const caloriesRemaining = Math.max(0, (targets.calories + burned) - todayCalories);
+    const calPct = pct(todayCalories, targets.calories + burned);
+    const proteinPct = pct(todayProtein, targets.protein);
+    const carbsPct = pct(todayCarbs, targets.carbs);
+    const fatPct = pct(todayFat, targets.fat);
 
     const addWater = async () => {
         await nutritionService.addWaterGlass();
@@ -79,48 +98,51 @@ const NutritionDashboard: React.FC = () => {
                     <IonRefresherContent />
                 </IonRefresher>
 
+                <div className="nd-header">
+                    <p className="nd-date">{new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                    <h1 className="nd-title">Resumen Nutricional</h1>
+                </div>
+
                 {loading ? (
                     <div className="loading-center">
                         <IonSpinner name="crescent" color="success" />
                     </div>
                 ) : (
                     <>
-                        {/* Header con fecha */}
-                        <div className="nd-header">
-                            <p className="nd-date">{new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-                            <h1 className="nd-title">Tu día en números</h1>
-                        </div>
-
-                        {/* Anillo de calorías */}
+                        {/* Anillo de Calorías */}
                         <div className="calorie-ring-wrapper">
                             <div className="calorie-ring">
-                                <svg viewBox="0 0 100 100" className="ring-svg">
-                                    <circle cx="50" cy="50" r="42" className="ring-bg" />
-                                    <circle cx="50" cy="50" r="42" className="ring-fill"
-                                        strokeDasharray={`${calPct * 2.639} ${263.9}`}
-                                        strokeDashoffset="65.975"
+                                <svg className="ring-svg" viewBox="0 0 100 100">
+                                    <circle className="ring-bg" cx="50" cy="50" r="45" />
+                                    <circle
+                                        className="ring-fill"
+                                        cx="50"
+                                        cy="50"
+                                        r="45"
+                                        strokeDasharray={`${(calPct * 283) / 100} 283`}
                                     />
                                 </svg>
                                 <div className="ring-center">
-                                    <span className="ring-value">{todayCalories}</span>
-                                    <span className="ring-label">kcal</span>
-                                    <span className="ring-remaining">/{targetCalories}</span>
+                                    <span className="ring-value">{Math.round(todayCalories)}</span>
+                                    <span className="ring-label">Kcal</span>
+                                    <span className="ring-remaining">Faltan {caloriesRemaining}</span>
                                 </div>
                             </div>
+
                             <div className="calorie-meta">
                                 <div className="cal-meta-item">
-                                    <span className="cal-meta-value consumed">{todayCalories}</span>
+                                    <span className="cal-meta-value consumed">{Math.round(todayCalories)}</span>
                                     <span className="cal-meta-label">Consumidas</span>
+                                </div>
+                                <div className="cal-meta-divider" />
+                                <div className="cal-meta-item">
+                                    <span className="cal-meta-value burned">{burned}</span>
+                                    <span className="cal-meta-label">Quemadas</span>
                                 </div>
                                 <div className="cal-meta-divider" />
                                 <div className="cal-meta-item">
                                     <span className="cal-meta-value remaining">{caloriesRemaining}</span>
                                     <span className="cal-meta-label">Restantes</span>
-                                </div>
-                                <div className="cal-meta-divider" />
-                                <div className="cal-meta-item">
-                                    <span className="cal-meta-value burned">{health?.calories || 0}</span>
-                                    <span className="cal-meta-label">Quemadas</span>
                                 </div>
                             </div>
                         </div>
@@ -132,28 +154,28 @@ const NutritionDashboard: React.FC = () => {
                                 <div className="macro-item">
                                     <div className="macro-header">
                                         <span className="macro-name">Proteína</span>
-                                        <span className="macro-val">{todayProtein}g / {targetProtein}g</span>
+                                        <span className="macro-val">{todayProtein}g / {targets.protein}g</span>
                                     </div>
                                     <div className="macro-track">
-                                        <div className="macro-fill protein" style={{ width: `${pct(todayProtein, targetProtein)}%` }} />
+                                        <div className="macro-fill protein" style={{ width: `${pct(todayProtein, targets.protein)}%` }} />
                                     </div>
                                 </div>
                                 <div className="macro-item">
                                     <div className="macro-header">
                                         <span className="macro-name">Carbohidratos</span>
-                                        <span className="macro-val">{todayCarbs}g / {targetCarbs}g</span>
+                                        <span className="macro-val">{todayCarbs}g / {targets.carbs}g</span>
                                     </div>
                                     <div className="macro-track">
-                                        <div className="macro-fill carbs" style={{ width: `${pct(todayCarbs, targetCarbs)}%` }} />
+                                        <div className="macro-fill carbs" style={{ width: `${pct(todayCarbs, targets.carbs)}%` }} />
                                     </div>
                                 </div>
                                 <div className="macro-item">
                                     <div className="macro-header">
                                         <span className="macro-name">Grasas</span>
-                                        <span className="macro-val">{todayFat}g / {targetFat}g</span>
+                                        <span className="macro-val">{todayFat}g / {targets.fat}g</span>
                                     </div>
                                     <div className="macro-track">
-                                        <div className="macro-fill fat" style={{ width: `${pct(todayFat, targetFat)}%` }} />
+                                        <div className="macro-fill fat" style={{ width: `${pct(todayFat, targets.fat)}%` }} />
                                     </div>
                                 </div>
                             </div>
@@ -194,10 +216,10 @@ const NutritionDashboard: React.FC = () => {
                                     <IonIcon icon={waterOutline} className="water-icon" />
                                     <span className="water-title">Agua bebida</span>
                                 </div>
-                                <span className="water-count">{waterGlasses} / {waterGoal} vasos</span>
+                                <span className="water-count">{waterGlasses} / {targets.water} vasos</span>
                             </div>
                             <div className="water-glasses-row">
-                                {Array.from({ length: waterGoal }).map((_, i) => (
+                                {Array.from({ length: targets.water }).map((_, i) => (
                                     <div key={i} className={`water-glass ${i < waterGlasses ? 'filled' : ''}`} />
                                 ))}
                             </div>

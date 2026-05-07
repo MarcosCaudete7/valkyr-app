@@ -142,6 +142,55 @@ public class GroqAIServiceImpl implements GroqAIService {
         }
     }
 
+    @Override
+    public String analyzePantry(String ingredients) {
+        String promptText = String.format(
+                """
+                        Tengo estos ingredientes en mi despensa: %s.
+                        Sugiere 3 comidas saludables que pueda cocinar con ellos.
+                        Si faltan ingredientes básicos para completar una receta, menciónalo.
+                        Fomenta el uso de los macros correctos.
+                        Responde de forma breve y motivadora en español.
+                        """,
+                ingredients);
+        return callAi("Eres un nutricionista y chef experto.", promptText);
+    }
+
+    @Override
+    public String analyzeShoppingList(String base64Image) {
+        try {
+            String cleanBase64 = base64Image.contains(",") ? base64Image.split(",")[1] : base64Image;
+            byte[] imageData = Base64.getDecoder().decode(cleanBase64);
+            Media media = new Media(MimeTypeUtils.IMAGE_JPEG, new org.springframework.core.io.ByteArrayResource(imageData));
+
+            String promptText = """
+                    Analiza esta imagen de una lista de la compra o ticket de supermercado.
+                    Extrae los nombres de los alimentos y productos comestibles que aparecen.
+                    Responde ÚNICAMENTE con un JSON válido usando el siguiente formato exacto sin markdown:
+                    {
+                      "items": ["Producto 1", "Producto 2", "Producto 3"]
+                    }
+                    Si no hay productos comestibles claros, devuelve una lista vacía.
+                    """;
+
+            java.lang.reflect.Constructor<UserMessage> constructor = UserMessage.class.getDeclaredConstructor(String.class, java.util.Collection.class, java.util.Map.class);
+            constructor.setAccessible(true);
+            UserMessage userMessage = constructor.newInstance(promptText, java.util.List.of(media), java.util.Collections.emptyMap());
+
+            OpenAiChatOptions visionOptions = OpenAiChatOptions.builder()
+                    .model("llama-3.2-90b-vision-preview")
+                    .temperature(0.2)
+                    .build();
+
+            Prompt prompt = new Prompt(Collections.singletonList(userMessage), visionOptions);
+            String rawResponse = Objects.requireNonNull(chatModel.call(prompt).getResult()).getOutput().getText();
+            return cleanJson(rawResponse);
+        } catch (Exception e) {
+            log.error("Error analizando lista de la compra: ", e);
+            throw new RuntimeException("Error en análisis visual de lista", e);
+        }
+    }
+
     private String callAi(String systemPrompt, String userExercise) {
         SystemMessage systemMessage = new SystemMessage(systemPrompt);
         UserMessage userMessage = new UserMessage("Genera rutina para: " + userExercise);

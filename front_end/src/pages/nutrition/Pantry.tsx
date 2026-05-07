@@ -5,14 +5,15 @@ import {
     IonSpinner, IonAlert, IonRefresher, IonRefresherContent, useIonToast,
     IonChip
 } from '@ionic/react';
-import { addOutline, trashOutline, closeOutline, bulbOutline } from 'ionicons/icons';
-import { nutritionService, FoodItem } from '../../services/nutritionService';
-import { analyzePantryForMeals } from '../../services/aiService';
+import { addOutline, trashOutline, closeOutline, bulbOutline, cameraOutline } from 'ionicons/icons';
+import { nutritionService, FoodItem, PantryItem } from '../../services/nutritionService';
+import { analyzePantryForMeals, analyzeShoppingList } from '../../services/aiService';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import ModeSwitcher from '../../components/ModeSwitcher';
 import './Pantry.css';
 
 const Pantry: React.FC = () => {
-    const [pantryItems, setPantryItems] = useState<any[]>([]);
+    const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -20,6 +21,7 @@ const Pantry: React.FC = () => {
     const [searching, setSearching] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState('');
     const [loadingAI, setLoadingAI] = useState(false);
+    const [isScanningList, setIsScanningList] = useState(false);
     const [showDeleteAlert, setShowDeleteAlert] = useState<string | null>(null);
     const [presentToast] = useIonToast();
 
@@ -76,6 +78,44 @@ const Pantry: React.FC = () => {
         }
     };
 
+    const scanShoppingList = async () => {
+        try {
+            const image = await Camera.getPhoto({
+                quality: 60,
+                allowEditing: false,
+                resultType: CameraResultType.Base64,
+                source: CameraSource.Prompt
+            });
+
+            if (image.base64String) {
+                setIsScanningList(true);
+                const result = await analyzeShoppingList(image.base64String);
+                if (result.items && result.items.length > 0) {
+                    for (const itemName of result.items) {
+                        const searchResults = await nutritionService.searchFoods(itemName);
+                        const foodToAdd: FoodItem = searchResults.length > 0 ? searchResults[0] : {
+                            name: itemName,
+                            calories_per_100g: 0,
+                            protein_per_100g: 0,
+                            carbs_per_100g: 0,
+                            fat_per_100g: 0
+                        };
+                        await nutritionService.addToPantry(foodToAdd);
+                    }
+                    await loadPantry();
+                    presentToast({ message: `✅ ${result.items.length} productos añadidos`, duration: 2000, color: 'success' });
+                } else {
+                    presentToast({ message: 'No se detectaron productos en la imagen', duration: 2000, color: 'warning' });
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            presentToast({ message: 'Error al escanear lista', duration: 2000, color: 'danger' });
+        } finally {
+            setIsScanningList(false);
+        }
+    };
+
     return (
         <IonPage className="pantry-page">
             <IonHeader className="ion-no-border">
@@ -104,8 +144,20 @@ const Pantry: React.FC = () => {
                         disabled={loadingAI}
                     >
                         {loadingAI
-                            ? <><IonSpinner name="dots" />&nbsp;Analizando despensa...</>
-                            : <><IonIcon slot="start" icon={bulbOutline} />🤖 ¿Qué puedo cocinar hoy?</>
+                            ? <><IonSpinner name="dots" />&nbsp;Analizando...</>
+                            : <><IonIcon slot="start" icon={bulbOutline} />🤖 Sugerir comidas</>
+                        }
+                    </IonButton>
+                    <IonButton
+                        expand="block"
+                        color="secondary"
+                        className="ai-scan-btn"
+                        onClick={scanShoppingList}
+                        disabled={isScanningList}
+                    >
+                        {isScanningList
+                            ? <><IonSpinner name="dots" />&nbsp;Escaneando...</>
+                            : <><IonIcon slot="start" icon={cameraOutline} />📸 Escanear compra</>
                         }
                     </IonButton>
                 </div>

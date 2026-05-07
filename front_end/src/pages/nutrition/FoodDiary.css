@@ -97,3 +97,35 @@
 .form-field label { display: block; font-size: 0.8rem; color: var(--ion-color-medium); margin-bottom: 6px; }
 .qty-input { --background: rgba(255,255,255,0.06); --border-radius: 10px; }
 .add-btn { margin-top: 16px; --border-radius: 12px; }
+
+/* Barcode search */
+.search-box { padding: 16px; }
+.barcode-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    background: rgba(255,255,255,0.06); 
+    border-radius: 12px; 
+    margin-top: 8px;
+    padding-right: 8px;
+}
+.barcode-input { --padding-start: 12px; font-size: 0.9rem; }
+
+/* Community form */
+.community-form {
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    margin: 16px;
+    border-radius: 16px;
+    border: 1px dashed rgba(255,255,255,0.15);
+}
+.cf-header h3 { font-size: 1rem; margin: 0 0 4px; }
+.cf-header p { font-size: 0.8rem; color: var(--ion-color-medium); margin: 0 0 16px; }
+.cf-input { --background: transparent; --padding-start: 0; margin-bottom: 8px; }
+.cf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+}
+.cf-save { margin-top: 20px; --border-radius: 12px; }

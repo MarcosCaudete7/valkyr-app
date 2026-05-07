@@ -46,4 +46,24 @@ public class GroqAIController {
             return ResponseEntity.internalServerError().body("Error al analizar comida: " + e.getMessage());
         }
     }
+
+    @PostMapping("/analyze/pantry")
+    public ResponseEntity<String> analyzePantry(@RequestBody Map<String, String> payload) {
+        try {
+            String ingredients = payload.get("ingredients");
+            return ResponseEntity.ok(groqAIService.analyzePantry(ingredients));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al analizar despensa: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/analyze/shopping-list")
+    public ResponseEntity<String> analyzeShoppingList(@RequestBody Map<String, String> payload) {
+        try {
+            String base64Image = payload.get("image");
+            return ResponseEntity.ok(groqAIService.analyzeShoppingList(base64Image));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al analizar lista: " + e.getMessage());
+        }
+    }
 }
