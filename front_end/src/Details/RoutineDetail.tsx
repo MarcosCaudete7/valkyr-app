@@ -6,6 +6,7 @@ import {
 } from '@ionic/react';
 import { clipboardOutline, fitnessOutline, trashOutline, addCircleOutline, closeOutline, informationCircleOutline } from 'ionicons/icons';
 import { getRoutineById, updateExerciseStatus, updateRoutine } from '../services/routineService';
+import { workoutHistoryService } from '../services/workoutHistoryService';
 import { Routine, ExerciseLine } from '../models/Routine';
 import { getAllExercises, Exercise } from '../services/exerciseService';
 import MuscleMap from '../components/MuscleMap';
@@ -125,7 +126,7 @@ const RoutineDetail: React.FC = () => {
         }
     };
 
-    const handleFinishWorkout = () => {
+    const handleFinishWorkout = async () => {
         if (!routine) return;
         const completed = routine.exercises.filter(ex => ex.isCompleted);
 
@@ -143,6 +144,20 @@ const RoutineDetail: React.FC = () => {
         });
         setWorkedMuscles(muscles);
         setTotalWeightLifted(volume);
+
+        // Calculate duration based on when the component mounted
+        const durationMinutes = Math.floor((Date.now() - startTimeRef.current) / 60000);
+
+        try {
+            await workoutHistoryService.saveWorkout({
+                routine_id: routine.id,
+                routine_name: routine.name,
+                total_volume_kg: volume,
+                duration_minutes: durationMinutes
+            });
+        } catch (error) {
+            console.error("No se pudo guardar el historial de entrenamiento", error);
+        }
 
         // Lógica de Rachas (Streaks) Valhalla
         const todayStr = new Date().toDateString();

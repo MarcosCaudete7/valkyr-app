@@ -112,13 +112,34 @@ export const guildService = {
 
             if (error) throw error;
 
-            // 2. Simulamos el ranking de "Kilos / Entrenamiento" si no hay backend aún
-            // Se le asigna un valor random determinístico basado en su nombre
+            // 2. Obtener miembros y sumatorio de historial real
+            const { data: members } = await supabase.from('guild_members').select('user_id, guild_id');
+            const { data: workouts } = await supabase.from('workout_history').select('user_id, total_volume_kg');
+
+            // 3. Calcular volumen real por clan
+            const guildStats: Record<string, { totalKg: number, count: number }> = {};
+            
+            if (members && workouts) {
+                // Mapear user -> guild
+                const userToGuild = new Map<string, string>();
+                members.forEach(m => userToGuild.set(m.user_id, m.guild_id));
+
+                workouts.forEach(w => {
+                    const guildId = userToGuild.get(w.user_id);
+                    if (guildId) {
+                        if (!guildStats[guildId]) guildStats[guildId] = { totalKg: 0, count: 0 };
+                        guildStats[guildId].totalKg += Number(w.total_volume_kg || 0);
+                        guildStats[guildId].count += 1;
+                    }
+                });
+            }
+
             const rankedGuilds = (guilds as Guild[]).map(g => {
-                const pseudoRandom = g.name.length * (new Date(g.created_at).getTime() % 100);
+                const stats = guildStats[g.id];
+                const avg = stats && stats.count > 0 ? Math.round(stats.totalKg / stats.count) : 0;
                 return {
                     ...g,
-                    averageKg: 200 + pseudoRandom // simulación entre 200 y ~2000 kg
+                    averageKg: avg
                 };
             }).sort((a, b) => (b.averageKg || 0) - (a.averageKg || 0));
 

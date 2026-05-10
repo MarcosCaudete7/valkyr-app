@@ -26,14 +26,19 @@ CREATE TABLE IF NOT EXISTS public.guild_members (
 
 -- 3. RLS Guilds
 ALTER TABLE public.guilds ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Guilds are viewable by everyone" ON public.guilds FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "Users can create guilds" ON public.guilds FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+DROP POLICY IF EXISTS "Guilds are viewable by everyone" ON public.guilds;
+CREATE POLICY "Guilds are viewable by everyone" ON public.guilds FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can create guilds" ON public.guilds;
+CREATE POLICY "Users can create guilds" ON public.guilds FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- 4. RLS Guild Members
 ALTER TABLE public.guild_members ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Guild members are viewable by everyone" ON public.guild_members FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "Users can join a guild" ON public.guild_members FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "Users can leave a guild" ON public.guild_members FOR DELETE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Guild members are viewable by everyone" ON public.guild_members;
+CREATE POLICY "Guild members are viewable by everyone" ON public.guild_members FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can join a guild" ON public.guild_members;
+CREATE POLICY "Users can join a guild" ON public.guild_members FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can leave a guild" ON public.guild_members;
+CREATE POLICY "Users can leave a guild" ON public.guild_members FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================
 -- MÓDULO NUTRICIÓN — Nuevas tablas
@@ -58,8 +63,10 @@ CREATE TABLE IF NOT EXISTS public.foods (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE public.foods ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Foods viewable by everyone" ON public.foods FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "Authenticated users can add foods" ON public.foods FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+DROP POLICY IF EXISTS "Foods viewable by everyone" ON public.foods;
+CREATE POLICY "Foods viewable by everyone" ON public.foods FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Authenticated users can add foods" ON public.foods;
+CREATE POLICY "Authenticated users can add foods" ON public.foods FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- 6. Diario de comidas diario
 CREATE TABLE IF NOT EXISTS public.food_diary (
@@ -77,9 +84,12 @@ CREATE TABLE IF NOT EXISTS public.food_diary (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE public.food_diary ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Users see own diary" ON public.food_diary FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "Users insert own diary" ON public.food_diary FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "Users delete own diary" ON public.food_diary FOR DELETE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users see own diary" ON public.food_diary;
+CREATE POLICY "Users see own diary" ON public.food_diary FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users insert own diary" ON public.food_diary;
+CREATE POLICY "Users insert own diary" ON public.food_diary FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users delete own diary" ON public.food_diary;
+CREATE POLICY "Users delete own diary" ON public.food_diary FOR DELETE USING (auth.uid() = user_id);
 
 -- 7. Despensa personal
 CREATE TABLE IF NOT EXISTS public.pantry (
@@ -92,8 +102,10 @@ CREATE TABLE IF NOT EXISTS public.pantry (
     added_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE public.pantry ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Users see own pantry" ON public.pantry FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "Users manage own pantry" ON public.pantry FOR ALL USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users see own pantry" ON public.pantry;
+CREATE POLICY "Users see own pantry" ON public.pantry FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users manage own pantry" ON public.pantry;
+CREATE POLICY "Users manage own pantry" ON public.pantry FOR ALL USING (auth.uid() = user_id);
 
 -- 8. Registro de agua diario
 CREATE TABLE IF NOT EXISTS public.water_log (
@@ -104,8 +116,10 @@ CREATE TABLE IF NOT EXISTS public.water_log (
     logged_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE public.water_log ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Users see own water log" ON public.water_log FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "Users manage own water log" ON public.water_log FOR ALL USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users see own water log" ON public.water_log;
+CREATE POLICY "Users see own water log" ON public.water_log FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users manage own water log" ON public.water_log;
+CREATE POLICY "Users manage own water log" ON public.water_log FOR ALL USING (auth.uid() = user_id);
 
 -- 9. Medidas y peso corporal
 CREATE TABLE IF NOT EXISTS public.body_measures (
@@ -121,8 +135,10 @@ CREATE TABLE IF NOT EXISTS public.body_measures (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE public.body_measures ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Users see own measures" ON public.body_measures FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "Users manage own measures" ON public.body_measures FOR ALL USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users see own measures" ON public.body_measures;
+CREATE POLICY "Users see own measures" ON public.body_measures FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users manage own measures" ON public.body_measures;
+CREATE POLICY "Users manage own measures" ON public.body_measures FOR ALL USING (auth.uid() = user_id);
 
 -- 10. Objetivos nutricionales en profiles
 ALTER TABLE public.profiles
@@ -133,3 +149,19 @@ ALTER TABLE public.profiles
     ADD COLUMN IF NOT EXISTS target_protein_g INT,
     ADD COLUMN IF NOT EXISTS target_carbs_g INT,
     ADD COLUMN IF NOT EXISTS target_fat_g INT;
+
+-- 11. Historial de entrenamientos
+CREATE TABLE IF NOT EXISTS public.workout_history (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    routine_id INT, -- ID de la rutina en MySQL
+    routine_name TEXT NOT NULL,
+    total_volume_kg NUMERIC DEFAULT 0,
+    duration_minutes INT DEFAULT 0,
+    completed_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE public.workout_history ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users see own workout history" ON public.workout_history;
+CREATE POLICY "Users see own workout history" ON public.workout_history FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users manage own workout history" ON public.workout_history;
+CREATE POLICY "Users manage own workout history" ON public.workout_history FOR ALL USING (auth.uid() = user_id);

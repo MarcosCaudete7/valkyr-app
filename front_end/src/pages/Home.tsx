@@ -12,6 +12,7 @@ import {
 } from 'ionicons/icons';
 import { analyzeFoodImage } from '../services/aiService';
 import { getMyRoutines } from '../services/routineService';
+import { workoutHistoryService, WorkoutHistoryEntry } from '../services/workoutHistoryService';
 import { Routine } from '../models/Routine';
 import ModeSwitcher from '../components/ModeSwitcher';
 import { useHistory } from 'react-router-dom';
@@ -23,7 +24,7 @@ const Home: React.FC = () => {
     const [weight, setWeight] = useState<string>('');
     const [reps, setReps] = useState<string>('5');
     const [oneRM, setOneRM] = useState<number | null>(null);
-    const [isAnalyzingFood, setIsAnalyzingFood] = useState(false);
+    const [historyLogs, setHistoryLogs] = useState<WorkoutHistoryEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [presentAlert] = useIonAlert();
     const history = useHistory();
@@ -34,6 +35,9 @@ const Home: React.FC = () => {
         try {
             const data = await getMyRoutines();
             setRoutines(data.slice(0, 3)); // últimas 3 rutinas
+
+            const logs = await workoutHistoryService.getHistory(3);
+            setHistoryLogs(logs);
         } catch {
             // ignore
         } finally {
@@ -55,31 +59,6 @@ const Home: React.FC = () => {
     };
 
     useEffect(() => { calculate1RM(); }, [weight, reps]);
-
-    const takeFoodPhoto = async () => {
-        try {
-            const image = await Camera.getPhoto({
-                quality: 60,
-                allowEditing: false,
-                resultType: CameraResultType.Base64,
-                source: CameraSource.Prompt
-            });
-            if (image.base64String) {
-                setIsAnalyzingFood(true);
-                const result = await analyzeFoodImage(image.base64String);
-                presentAlert({
-                    header: 'Análisis Nutricional',
-                    subHeader: result.foodName || 'Alimento detectado',
-                    message: `Estimación (por ración):<br><br><b>Calorías:</b> ${result.calories} kcal<br><b>Proteína:</b> ${result.protein}g<br><b>Carbos:</b> ${result.carbs}g<br><b>Grasas:</b> ${result.fat}g`,
-                    buttons: ['Cerrar']
-                });
-            }
-        } catch (error) {
-            console.error("No se tomó foto o hubo fallo:", error);
-        } finally {
-            setIsAnalyzingFood(false);
-        }
-    };
 
     const greeting = () => {
         const h = new Date().getHours();
@@ -208,20 +187,58 @@ const Home: React.FC = () => {
                     </IonCard>
                 </div>
 
-                {/* Analizador foto comida - solo si es nativo */}
-                {Capacitor.isNativePlatform() && (
+                {/* Gráfica de Volumen */}
+                {historyLogs.length > 1 && (
                     <div className="section-block">
-                        <h2 className="section-title">Análisis de comida con IA</h2>
-                        <div className="food-analyzer-card" onClick={takeFoodPhoto}>
-                            <IonIcon icon={cameraOutline} className="fa-icon" />
-                            <div>
-                                <p className="fa-title">Fotografía tu comida</p>
-                                <p className="fa-sub">La IA calculará calorías y macros</p>
+                        <h2 className="section-title">Evolución de Volumen (kg)</h2>
+                        <div className="volume-chart">
+                            <div className="sparkline" style={{ display: 'flex', alignItems: 'flex-end', height: '100px', gap: '8px', padding: '10px 0' }}>
+                                {historyLogs.slice().reverse().map((log, i) => {
+                                    const maxVol = Math.max(...historyLogs.map(l => l.total_volume_kg));
+                                    const heightPct = maxVol > 0 ? (log.total_volume_kg / maxVol) * 100 : 0;
+                                    return (
+                                        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%' }}>
+                                            <div style={{ width: '100%', height: `${heightPct}%`, background: 'var(--ion-color-primary)', borderRadius: '4px 4px 0 0', opacity: i === historyLogs.length - 1 ? 1 : 0.6 }} />
+                                            <span style={{ fontSize: '0.7rem', color: 'var(--ion-color-medium)', marginTop: '4px' }}>{log.total_volume_kg}</span>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                            {isAnalyzingFood && <IonSpinner name="crescent" />}
                         </div>
                     </div>
                 )}
+
+                {/* Historial de Entrenamientos */}
+                <div className="section-block">
+                    <div className="section-header">
+                        <h2 className="section-title">Últimos entrenamientos</h2>
+                    </div>
+                    {loading ? (
+                        <div className="loading-center"><IonSpinner name="dots" color="primary" /></div>
+                    ) : historyLogs.length === 0 ? (
+                        <div className="empty-state">
+                            <IonIcon icon={clipboardOutline} />
+                            <p>Aún no has completado entrenamientos</p>
+                        </div>
+                    ) : (
+                        historyLogs.map(log => (
+                            <div key={log.id} className="routine-preview-card" style={{ background: 'var(--ion-color-light)' }}>
+                                <div className="rpc-icon" style={{ background: 'var(--ion-color-success-tint)', color: 'var(--ion-color-success)' }}>
+                                    <IonIcon icon={trophyOutline} />
+                                </div>
+                                <div className="rpc-info">
+                                    <span className="rpc-name">{log.routine_name}</span>
+                                    <span className="rpc-meta">
+                                        {log.duration_minutes} min • {log.total_volume_kg} kg levantados
+                                    </span>
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--ion-color-medium)' }}>
+                                    {new Date(log.completed_at!).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
 
                 <div style={{ height: '100px' }} />
             </IonContent>
