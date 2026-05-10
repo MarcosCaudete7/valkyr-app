@@ -48,12 +48,17 @@ const Pantry: React.FC = () => {
     };
 
     const addToPantry = async (food: FoodItem) => {
-        await nutritionService.addToPantry(food);
-        await loadPantry();
-        setShowAddModal(false);
-        setSearchQuery('');
-        setSearchResults([]);
-        presentToast({ message: `✅ ${food.name} añadido a la despensa`, duration: 1500, color: 'success' });
+        try {
+            await nutritionService.addToPantry(food);
+            await loadPantry();
+            setShowAddModal(false);
+            setSearchQuery('');
+            setSearchResults([]);
+            presentToast({ message: `✅ ${food.name} añadido a la despensa`, duration: 1500, color: 'success' });
+        } catch (error: any) {
+            console.error("Pantry Add Error:", error);
+            presentToast({ message: `Error al guardar: ${error.message || JSON.stringify(error)}`, duration: 4000, color: 'danger' });
+        }
     };
 
     const removeFromPantry = async (id: string) => {
@@ -108,9 +113,9 @@ const Pantry: React.FC = () => {
                     presentToast({ message: 'No se detectaron productos en la imagen', duration: 2000, color: 'warning' });
                 }
             }
-        } catch (e) {
-            console.error(e);
-            presentToast({ message: 'Error al escanear lista', duration: 2000, color: 'danger' });
+        } catch (error: any) {
+            console.error("Pantry Scan/Add Error:", error);
+            presentToast({ message: `Error al procesar: ${error.message || JSON.stringify(error)}`, duration: 4000, color: 'danger' });
         } finally {
             setIsScanningList(false);
         }

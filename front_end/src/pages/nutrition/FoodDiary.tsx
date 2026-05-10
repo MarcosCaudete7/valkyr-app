@@ -140,8 +140,9 @@ const FoodDiary: React.FC = () => {
             setSelectedFood(null);
             setSearchQuery('');
             presentToast({ message: `✅ ${selectedFood.name} añadido`, duration: 1500, color: 'success' });
-        } catch {
-            presentToast({ message: 'Error al guardar', duration: 2000, color: 'danger' });
+        } catch (error: any) {
+            console.error("FoodDiary Add Error:", error);
+            presentToast({ message: `Error al guardar: ${error.message || JSON.stringify(error)}`, duration: 4000, color: 'danger' });
         }
     };
 
