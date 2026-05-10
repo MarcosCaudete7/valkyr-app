@@ -17,7 +17,7 @@ export const workoutHistoryService = {
         const { data, error } = await supabase
             .from('workout_history')
             .insert({
-                user_id: user.id,
+                user_id: String(user.id),
                 routine_id: entry.routine_id,
                 routine_name: entry.routine_name,
                 total_volume_kg: entry.total_volume_kg,
@@ -37,7 +37,7 @@ export const workoutHistoryService = {
         const { data, error } = await supabase
             .from('workout_history')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', String(user.id))
             .order('completed_at', { ascending: false })
             .limit(limit);
 

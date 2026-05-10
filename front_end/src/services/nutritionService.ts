@@ -141,7 +141,7 @@ export const nutritionService = {
         const { data, error } = await supabase
             .from('food_diary')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', String(user.id))
             .eq('date', date)
             .order('created_at');
         if (error) throw error;
@@ -150,11 +150,16 @@ export const nutritionService = {
 
     async addDiaryEntry(entry: DiaryEntry): Promise<void> {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        await supabase.from('food_diary').insert({ ...entry, user_id: user.id });
+        const { error } = await supabase.from('food_diary').insert({ ...entry, user_id: String(user.id) });
+        if (error) {
+            console.error("Supabase insert error (addDiaryEntry):", error);
+            throw error;
+        }
     },
 
     async deleteDiaryEntry(id: string): Promise<void> {
-        await supabase.from('food_diary').delete().eq('id', id);
+        const { error } = await supabase.from('food_diary').delete().eq('id', id);
+        if (error) throw error;
     },
 
     // ─── Despensa ────────────────────────────────────────────────
@@ -164,7 +169,7 @@ export const nutritionService = {
         const { data, error } = await supabase
             .from('pantry')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', String(user.id))
             .order('added_at', { ascending: false });
         if (error) throw error;
         return data || [];
@@ -172,16 +177,21 @@ export const nutritionService = {
 
     async addToPantry(food: FoodItem, quantityG = 100): Promise<void> {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        await supabase.from('pantry').insert({
-            user_id: user.id,
+        const { error } = await supabase.from('pantry').insert({
+            user_id: String(user.id),
             food_id: food.id,
             food_name: food.name,
             quantity_g: quantityG,
         });
+        if (error) {
+            console.error("Supabase insert error (addToPantry):", error);
+            throw error;
+        }
     },
 
     async removeFromPantry(id: string): Promise<void> {
-        await supabase.from('pantry').delete().eq('id', id);
+        const { error } = await supabase.from('pantry').delete().eq('id', id);
+        if (error) throw error;
     },
 
     // ─── Agua ────────────────────────────────────────────────────
@@ -191,7 +201,7 @@ export const nutritionService = {
         const { data } = await supabase
             .from('water_log')
             .select('glasses')
-            .eq('user_id', user.id)
+            .eq('user_id', String(user.id))
             .eq('date', today);
         return (data || []).reduce((acc, r) => acc + (r.glasses || 0), 0);
     },
@@ -208,7 +218,7 @@ export const nutritionService = {
         const { data } = await supabase
             .from('water_log')
             .select('id, glasses')
-            .eq('user_id', user.id)
+            .eq('user_id', String(user.id))
             .eq('date', today)
             .order('logged_at', { ascending: false })
             .limit(1);
@@ -223,7 +233,7 @@ export const nutritionService = {
         const { data, error } = await supabase
             .from('body_measures')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', String(user.id))
             .order('date', { ascending: false })
             .limit(90);
         if (error) throw error;
